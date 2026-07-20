@@ -5,6 +5,8 @@
    ========================================================================= */
 
 import { calculate } from './calculator.js';
+import { canInstall, installHint, promptInstall } from './install.js';
+import { isDesktopRuntime, isStandaloneRuntime } from './keys.js';
 import { ensureElementVisible } from './scroll.js';
 
 /* ---- Gateway hub: highlighted-letter menu navigation -------------------- */
@@ -400,10 +402,77 @@ function zbPeriod() {
     };
 }
 
+/* ---- Shortcut help (F1) -------------------------------------------------
+ * Tally's help screen: every shortcut live right now, grouped, with the
+ * platform's own modifier symbols, plus the handful of keys the browser keeps
+ * for itself and what to press instead. Reachable from anywhere.
+ *
+ * It reads the engine's own registry rather than a hand-kept list, so a
+ * shortcut can never be added to the app and forgotten here.
+ */
+function zbHelp() {
+    return {
+        installable: false,
+        installed: false,
+        init() {
+            this._onOpen = () => this.open();
+            window.addEventListener('zb:open-help', this._onOpen);
+            this._onInstallable = () => {
+                this.installable = true;
+            };
+            this._onInstalled = () => {
+                this.installable = false;
+                this.installed = true;
+            };
+            window.addEventListener('zb:installable', this._onInstallable);
+            window.addEventListener('zb:installed', this._onInstalled);
+            this.installable = canInstall();
+            this.installed = isStandaloneRuntime() || isDesktopRuntime();
+        },
+        destroy() {
+            window.removeEventListener('zb:open-help', this._onOpen);
+            window.removeEventListener('zb:installable', this._onInstallable);
+            window.removeEventListener('zb:installed', this._onInstalled);
+        },
+        /** Manual recipe for browsers that offer no programmatic prompt. */
+        get installHintText() {
+            return installHint();
+        },
+        async install() {
+            await promptInstall();
+        },
+        get groups() {
+            return this.$store.zb.helpGroups();
+        },
+        get fallbacks() {
+            return this.$store.zb.fallbacks || [];
+        },
+        open() {
+            if (this.$store.zb.help.open) return;
+            this.$store.zb.help.open = true;
+            this.$store.zb.rev++;
+            this.$store.zb.pushContext({
+                name: 'help',
+                label: 'Keyboard Help',
+                focusEl: '#zb-help-panel',
+                actions: [],
+                onPop: () => {
+                    this.$store.zb.help.open = false;
+                    this.$store.zb.rev++;
+                },
+            });
+        },
+        close() {
+            if (this.$store.zb.activeName() === 'help') this.$store.zb.popContext();
+        },
+    };
+}
+
 export function registerComponents(Alpine) {
     Alpine.data('zbGateway', zbGateway);
     Alpine.data('zbCalc', zbCalc);
     Alpine.data('zbGoto', zbGoto);
     Alpine.data('zbCompanyPicker', zbCompanyPicker);
     Alpine.data('zbPeriod', zbPeriod);
+    Alpine.data('zbHelp', zbHelp);
 }

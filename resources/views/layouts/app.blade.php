@@ -6,6 +6,24 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'ZeroBook')</title>
 
+    {{-- Installable app. Standalone display is what reclaims the Tally keys a
+         browser tab keeps for itself (F11, F12, Ctrl+T, Alt+D) — shortcut doc §F.1.
+
+         Linked from the TENANT layout only, and with root-relative URLs. ZeroBook
+         is multi-tenant by subdomain, and a manifest's scope and start_url are
+         origin-bound: relative URLs make each tenant install as its own app on its
+         own subdomain. Linking it on the central marketing/signup pages would let
+         someone install the landing site instead of their books. --}}
+    <link rel="manifest" href="/manifest.webmanifest">
+    <meta name="theme-color" content="#0B6E4F">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="ZeroBook">
+    <link rel="icon" href="/favicon.ico" sizes="any">
+    <link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32.png">
+    <link rel="apple-touch-icon" href="/icons/favicon-180.png">
+
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @livewireStyles
 
@@ -142,6 +160,7 @@
         @include('partials.company-picker') {{-- Phase 12A — F3 --}}
         @include('partials.period')
         @include('partials.config')
+        @include('partials.help') {{-- F1 — shortcut reference --}}
         @include('partials.accept')
     </div>
 

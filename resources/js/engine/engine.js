@@ -44,6 +44,7 @@ export function zbStore() {
         rev: 0, // reactivity nonce; bump to recompute derived UI
         calc: { open: false, expr: '', result: '', error: '', tape: [] },
         goto: { open: false },
+        help: { open: false }, // F1 — Tally-style shortcut reference
         period: { open: false },
         companyPicker: { open: false }, // Phase 12A — F1 Select Company
         // Tally's "Accept? Yes or No" gate. One overlay for the whole app,
@@ -741,6 +742,41 @@ export function zbStore() {
             }
             return groups;
         },
+        /**
+         * Every shortcut currently live, grouped for the F1 help screen.
+         *
+         * Differs from barGroups() in one way that matters: it KEEPS the hidden
+         * actions. Enter, Backspace, Esc and Ctrl+A are hidden from the button
+         * bar because the status strip already shows them, but they are exactly
+         * what someone opening a shortcut reference needs to see.
+         */
+        helpGroups() {
+            void this.rev; // touch nonce for reactivity
+            const groups = [];
+            const active = this.peek();
+            if (active && active.list.length) {
+                groups.push({ label: 'This screen — ' + active.label, items: active.list });
+            }
+            const g = this.registry.global;
+            if (g) {
+                const byGroup = {};
+                const order = [];
+                g.list.forEach((a) => {
+                    const key = a.group || 'Anywhere';
+                    if (!byGroup[key]) {
+                        byGroup[key] = [];
+                        order.push(key);
+                    }
+                    byGroup[key].push(a);
+                });
+                order.sort((a, b) =>
+                    a === 'Vouchers' ? -1 : b === 'Vouchers' ? 1 : a === 'Anywhere' ? 1 : b === 'Anywhere' ? -1 : 0
+                );
+                order.forEach((key) => groups.push({ label: key, items: byGroup[key] }));
+            }
+            return groups;
+        },
+
         quitLabel() {
             void this.rev;
             return this.depth() > 0 ? 'Back' : 'Quit';

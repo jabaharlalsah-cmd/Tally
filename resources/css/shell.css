@@ -598,3 +598,127 @@
     padding: 0.4rem 0.7rem;
     margin: 0.6rem 0;
 }
+
+/* --- Keyboard help (F1) -------------------------------------------------
+   Tally's shortcut reference. Same overlay language as the Go To navigator
+   so the two feel like one system; ZeroBook's own tokens throughout. */
+.zb-help-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(11, 35, 27, 0.42);
+    z-index: 1350;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding-top: 8vh;
+}
+.zb-help {
+    width: min(860px, 94vw);
+    max-height: 80vh;
+    display: flex;
+    flex-direction: column;
+    background: var(--surface);
+    border-radius: var(--radius-card);
+    box-shadow: 0 24px 64px rgba(11, 35, 27, 0.35);
+    border: 1px solid var(--line);
+    overflow: hidden;
+}
+.zb-help:focus {
+    outline: none;
+}
+.zb-help-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.85rem 1.1rem;
+    border-bottom: 1px solid var(--line);
+    background: var(--evergreen-tint);
+}
+.zb-help-head h2 {
+    margin: 0;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--evergreen-700);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+.zb-help-close {
+    font-size: 0.72rem;
+    color: var(--muted);
+    cursor: pointer;
+}
+.zb-help-body {
+    overflow-y: auto;
+    padding: 0.9rem 1.1rem 1.2rem;
+    columns: 2;
+    column-gap: 2rem;
+}
+.zb-help-group {
+    break-inside: avoid;
+    margin-bottom: 1.1rem;
+}
+.zb-help-group h3 {
+    font-size: 0.62rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--faint);
+    margin: 0 0 0.4rem;
+}
+.zb-help-group dl {
+    margin: 0;
+}
+.zb-help-row {
+    display: grid;
+    grid-template-columns: 7.5rem 1fr;
+    gap: 0.5rem;
+    align-items: baseline;
+    padding: 0.16rem 0;
+}
+.zb-help-row dt {
+    margin: 0;
+    text-align: right;
+}
+.zb-help-row dd {
+    margin: 0;
+    font-size: 0.78rem;
+    color: var(--ink);
+}
+.zb-help-row dd em {
+    display: block;
+    font-style: normal;
+    font-size: 0.7rem;
+    color: var(--muted);
+}
+.zb-help-note {
+    font-size: 0.72rem;
+    color: var(--muted);
+    margin: 0 0 0.5rem;
+}
+.zb-help-reserved h3 {
+    color: var(--amber);
+}
+@media (max-width: 720px) {
+    .zb-help-body {
+        columns: 1;
+    }
+}
+.zb-help-install {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    border: 1px solid var(--evergreen);
+    background: var(--evergreen);
+    color: #fff;
+    border-radius: var(--radius-control, 6px);
+    padding: 0.4rem 0.75rem;
+    font-size: 0.76rem;
+    font-weight: 500;
+    cursor: pointer;
+    margin-bottom: 0.6rem;
+}
+.zb-help-install:hover {
+    background: var(--evergreen-600);
+    border-color: var(--evergreen-600);
+}

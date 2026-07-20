@@ -5,6 +5,7 @@
    ========================================================================= */
 
 import { zbStore, attachDispatcher } from './engine/engine.js';
+import { startInstallSupport } from './engine/install.js';
 import { registerComponents } from './engine/components.js';
 import { registerHarness } from './harness.js';
 import { registerMastersStore } from './masters/store.js';
@@ -55,3 +56,7 @@ document.addEventListener('alpine:init', () => {
 // Attach the single global keydown dispatcher immediately (reads the store
 // lazily once Alpine has initialised it).
 attachDispatcher();
+
+// Offer the app for install. Standalone mode is what gives F11/F12/Ctrl+T back
+// to Tally instead of the browser. No-op inside ZeroBook Desktop.
+startInstallSupport();

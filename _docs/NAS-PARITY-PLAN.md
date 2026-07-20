@@ -139,6 +139,111 @@ twice.
 
 ---
 
+## Phase 1 record
+
+**Approach changed after reading both engines — and the change reduced risk.**
+
+The original plan said "port NAS's engine into ZeroBook". On reading ZeroBook's
+engine in full, that turned out to be the wrong shape of work. ZeroBook's engine is
+*richer* than NAS's in the areas that matter to its own screens: a context stack with
+`popToContext`/`replaceTop`/`resetTo`, field chaining (Enter/Backspace), the
+accept-gate overlay, `yieldWhen`/`yieldInTextarea` escape hatches, auto-select-on-focus,
+and capture-phase numeric filtering. Sixty Livewire screens and ~28 JS modules are
+built on that API, and five screens register their contexts in inline Blade where no
+JS-only sweep would find them.
+
+Every defect was confined to the **key-matching layer** — the ~60 lines that turn a
+keypress into a shortcut name. So the port became surgical: keep ZeroBook's context
+engine and its entire caller-facing API untouched, replace only the matcher. Nothing
+downstream had to change.
+
+### What was wrong, and what it is now
+
+| Defect | Fix |
+|---|---|
+| `combo()` emitted `meta+a` for ⌘A while every binding is registered `ctrl+a`, and **no `meta+` binding exists anywhere** — so every Ctrl shortcut was dead on macOS | Command folded into Ctrl; screens register Ctrl once, both platforms reach it |
+| No macOS-reserved passthrough | ⌘ + Q/W/H/M/N/T/R, Space, Tab, brackets, comma pass to the OS untouched |
+| No IME or dead-key guard | `isComposing`, `keyCode 229`, `key === 'Dead'` never intercepted — Indic and CJK input types normally |
+| No AltGr guard | Ctrl+Alt on European layouts is treated as typing, not a command |
+| `Ctrl+R` unguarded — **silently discarded an in-progress voucher** | Joins F5 in an unconditional reload guard |
+| No auto-repeat policy | Held keys repeat navigation only; holding F5 no longer opens a stack of vouchers |
+| No unsaved-work guard (brief §3 requires one) | `registerDirty()` + `beforeunload`, **inert until screens opt in** — see note below |
+| Hints said `Ctrl+A` on a Mac | `prettyHint` is platform-aware; `labels.js` rewrites the 362 literal chips across 68 Blade files at runtime |
+| F1 had no help screen | Tally-style help overlay, read live from the engine registry |
+
+### Key resolution: deliberately hybrid, not pure `e.code`
+
+The brief asks for `e.code`. Applied bluntly that breaks non-US layouts — `e.code` is
+*positional*, so on AZERTY a pure-code matcher fires Ctrl+A when the user presses the
+key labelled Q. The stated *purpose* in the brief is that Alt/Option combos resolve on
+Mac keyboards, so: Alt/Option combos resolve through `e.code` (macOS composes Option+C
+into "ç", making `e.key` useless there), everything else through `e.key`. Both goals met.
+
+### Voucher keys corrected to TallyPrime 7.x
+
+Eight keys diverged; several used a key Tally assigns to a *different* voucher.
+Owner-approved 2026-07-20.
+
+| Action | Was | Now |
+|---|---|---|
+| Credit Note | `Ctrl+F8` *(Tally: Sales Order)* | `Alt+F6` |
+| Debit Note | `Ctrl+F9` *(Tally: Purchase Order)* | `Alt+F5` |
+| Receipt Note | `Alt+F5` *(Tally: Debit Note)* | `Alt+F9` |
+| Sales Order | `Alt+F6` *(Tally: Credit Note)* | `Ctrl+F8` |
+| Purchase Order | `Alt+F7` *(Tally: Stock Journal)* | `Ctrl+F9` |
+| Rejections In / Out | `Ctrl+F5` / `Ctrl+F6` | swapped to `Ctrl+F6` / `Ctrl+F5` |
+| Select Company | `F1` | `F3` — frees F1 for Help |
+| Calculator alternate | `Alt+N` | `Ctrl+Alt+N` (doc §F.4) |
+| Stock Journal · Physical Stock | *(unbound)* | `Alt+F7` · `Ctrl+F7` |
+
+### Installable app
+
+Manifest, service worker, icons and an install affordance inside the help screen.
+Three decisions worth recording:
+
+- **Root-relative `start_url`/`scope`.** ZeroBook is multi-tenant by subdomain and a
+  manifest's scope is origin-bound; relative URLs make each tenant install as its own
+  app. Linked from the *tenant* layout only, so nobody installs the marketing site
+  instead of their books.
+- **The service worker caches nothing, on purpose.** Cached Livewire HTML would carry a
+  stale CSRF token and snapshot, producing page-expired errors that look like data loss
+  mid-voucher; and cross-tenant cache bleed would be a confidentiality problem.
+  Its only job is to satisfy installability.
+- **Never registered inside ZeroBook Desktop**, which already runs its own offline layer
+  against local SQLite.
+
+Icons were derived from the existing 512×512 desktop mark; its background sampled as
+exactly `#0B6E4F`, confirming the brand primary. `public/favicon.ico` had been 0 bytes
+and is now a real icon.
+
+### Verification
+
+- **43 unit tests** (vitest + jsdom) over both the Windows and macOS maps. Proven
+  non-vacuous by mutation: reintroducing the original `meta+` defect fails the suite;
+  restoring it passes 43/43.
+- **26 browser tests** (Playwright) green on **Chromium and WebKit**. WebKit is Safari's
+  engine, so this is the closest automated proxy for the client's Mac. The macOS cases
+  fake `navigator.platform` and exercise the real Mac code path in a real WebKit build.
+- One e2e test initially failed and the *test* was wrong, not the app: F5 correctly
+  suppresses the browser reload **and** opens the Payment voucher, which is a
+  navigation. Verified directly (`defaultPrevented: true`, URL →
+  `/vouchers/create/payment`) before rewriting the assertion.
+
+### Deliberately deferred
+
+- **The dirty guard is inert.** No screen registers a probe yet, so `beforeunload` never
+  binds and bfcache is preserved. Wiring it into `Esc` would break the ~23 screens whose
+  `onEsc` currently assumes navigation is unconditional — that belongs with the voucher
+  work in Phase 4.
+- **Three dead `@keydown` handlers in Blade** (voucher date-segment Backspace, and the
+  company-picker Enter affordance) are dead *today*, before and after this change, because
+  the engine's `stopPropagation` runs first. Logged for Phase 4.
+- **Gateway hot-letter collisions**: `C`, `D` and `0` are each bound twice or three times
+  in `Shell::gatewayMenu()`; last-wins silently shadows Subscription, Data & Privacy and
+  Budgets/Ratios. Belongs with the Gateway rebuild in Phase 2.
+
+---
+
 ## Phase 0 record
 
 - `git init`, identity set repo-local. Baseline commit `ec2815f` — the app exactly as it stood
