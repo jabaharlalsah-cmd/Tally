@@ -62,7 +62,7 @@
                 <span class="zb-top-product" x-text="$store.zb.product">ZeroBook</span>
                 <span class="zb-top-sub">@yield('region', 'Gateway')</span>
             </div>
-            <div class="zb-top-cell zb-top-clickable" @click="$store.zb.emit('zb:open-company')" title="Select company (F1)">
+            <div class="zb-top-cell zb-top-clickable" @click="$store.zb.emit('zb:open-company')" title="Select company (F3)">
                 <span class="zb-top-sub">Company</span>
                 <span class="zb-top-value" x-text="$store.zb.company"></span>
                 {{-- Phase 12B — the group, when the active company is in one --}}
@@ -139,7 +139,7 @@
         {{-- ================= Engine overlays ============================== --}}
         @include('partials.calculator')
         @include('partials.goto')
-        @include('partials.company-picker') {{-- Phase 12A — F1 --}}
+        @include('partials.company-picker') {{-- Phase 12A — F3 --}}
         @include('partials.period')
         @include('partials.config')
         @include('partials.accept')

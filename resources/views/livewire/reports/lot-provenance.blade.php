@@ -52,7 +52,7 @@
                             <td>
                                 <a href="{{ route('vouchers.alter', $r['receiving_voucher_id']) }}">{{ $r['receiving_voucher'] }}</a>
                                 @if ($r['source_voucher_id'])
-                                    <div class="text-muted" style="font-size:.72rem">source vch #{{ $r['source_voucher_id'] }} in {{ $r['source_company'] }} — switch company (F1) to open</div>
+                                    <div class="text-muted" style="font-size:.72rem">source vch #{{ $r['source_voucher_id'] }} in {{ $r['source_company'] }} — switch company (F3) to open</div>
                                 @else
                                     <div style="font-size:.72rem;color:#b45309">source unmatched</div>
                                 @endif

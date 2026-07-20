@@ -1,4 +1,4 @@
-{{-- Phase 12A — Select Company (F1). Every active company in the tenant; --}}
+{{-- Phase 12A — Select Company (F3). Every active company in the tenant; --}}
 {{-- keyboard-navigable, filter-by-typing; Enter switches and reloads the Gateway. --}}
 {{-- Phase 16 — a name that matches nothing can be created here, without leaving the flow. --}}
 <div class="zb-goto-backdrop" x-data="zbCompanyPicker" x-show="$store.zb.companyPicker.open" x-cloak

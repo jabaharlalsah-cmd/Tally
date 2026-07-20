@@ -200,7 +200,7 @@ class CompanyWorkspace extends Component
     private function deactivationGuard(Company $c): ?string
     {
         if ($c->id === ActiveCompany::id()) {
-            return 'This is the company you are working in — switch companies (F1) first.';
+            return 'This is the company you are working in — switch companies (F3) first.';
         }
         if (Company::where('is_active', true)->where('id', '!=', $c->id)->doesntExist()) {
             return 'A tenant needs at least one active company.';

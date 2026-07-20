@@ -4,7 +4,7 @@
 
         @if (! $group)
             @if (count($groups) > 0)
-                <p class="text-muted">Your active company isn't in a group. Switch to a grouped company (F1), or pick a group:</p>
+                <p class="text-muted">Your active company isn't in a group. Switch to a grouped company (F3), or pick a group:</p>
                 @include('livewire.reports.partials.group-report-shell')
             @else
                 <p class="text-muted">No company group exists yet — create one under Companies › Groups.</p>

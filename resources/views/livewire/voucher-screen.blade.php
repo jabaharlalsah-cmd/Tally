@@ -393,7 +393,7 @@
             <p class="zb-invoice-note">
                 <template x-if="isOrderType">
                     <span>This is a <strong>commitment only</strong> — it records no stock and no accounting entry.
-                        Deliver against it with a <span class="zb-kbd" x-text="type === 'sales_order' ? 'Alt+F8' : 'Alt+F5'"></span>
+                        Deliver against it with a <span class="zb-kbd" x-text="$store.zb.hint(type === 'sales_order' ? 'alt+f8' : 'alt+f9')"></span>
                         <span x-text="type === 'sales_order' ? 'Delivery Note' : 'Receipt Note'"></span>.</span>
                 </template>
                 <template x-if="isStockWorkflowType">

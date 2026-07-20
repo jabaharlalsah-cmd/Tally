@@ -13,7 +13,7 @@
     {{-- MENU --}}
     <div x-show="mode === 'menu'" id="ws-menu" tabindex="-1" class="zb-gateway" style="max-width:560px">
         <h1 class="zb-gateway-heading">Companies</h1>
-        <p class="zb-gateway-sub">One tenant &middot; many isolated books &middot; switch with <span class="zb-kbd">F1</span></p>
+        <p class="zb-gateway-sub">One tenant &middot; many isolated books &middot; switch with <span class="zb-kbd">F3</span></p>
         <ul class="zb-menu">
             <template x-for="(it, i) in menuItems" :key="it.mode">
                 <li class="zb-menu-item" :class="{ 'is-active': i === menuActive }"

@@ -234,7 +234,7 @@ function zbGoto() {
     };
 }
 
-/* ---- Company picker (F1) — Phase 12A ------------------------------------
+/* ---- Company picker (F3) — Phase 12A ------------------------------------
  * The Tally "Select Company" list: every active company in the tenant,
  * keyboard-navigable with instant filter-by-typing (a zbGoto clone). Enter
  * POSTs the switch, then does a FULL page load to the Gateway — every client

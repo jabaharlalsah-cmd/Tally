@@ -30,7 +30,7 @@ class Shell
             // picker keep the clean company name.
             'companyGroup' => $company ? \App\Models\CompanyGroup::forCompany($company->id)?->name : null,
             'activeCompanyId' => $company?->id,
-            // Every ACTIVE company in the tenant — the F1 company picker's list.
+            // Every ACTIVE company in the tenant — the F3 company picker's list.
             'companies' => \App\Models\Company::where('is_active', true)
                 ->orderBy('name')->get()->map->toCache()->all(),
             'date'    => $today->format('d-M-Y'),
@@ -199,7 +199,7 @@ class Shell
             ['label' => 'Sales Orders Outstanding',    'sub' => 'Reports', 'kind' => 'nav', 'href' => route('reports.orders-outstanding', ['scope' => 'sales']),    'icon' => 'ti-clipboard-list', 'keywords' => 'sales orders outstanding pending delivery reconciliation report so undelivered'],
             ['label' => 'Purchase Orders Outstanding', 'sub' => 'Reports', 'kind' => 'nav', 'href' => route('reports.orders-outstanding', ['scope' => 'purchase']), 'icon' => 'ti-clipboard-list', 'keywords' => 'purchase orders outstanding pending receipt reconciliation report po unreceived'],
             ['label' => 'Company Features',    'sub' => 'Config',    'kind' => 'nav', 'href' => route('features'),               'icon' => 'ti-adjustments-cog', 'keywords' => 'f11 features gst cost centre bill wise'],
-            // Phase 12A — multi-company: manage companies + switch the active one (F1).
+            // Phase 12A — multi-company: manage companies + switch the active one (F3).
             ['label' => 'Companies',           'sub' => 'Config',    'kind' => 'nav', 'href' => route('companies'),              'icon' => 'ti-building',        'keywords' => 'company companies create rename deactivate multi manage books client'],
             // Phase 12B — groups + inter-company tagging (the 12C consolidation plumbing).
             ['label' => 'Company Groups',      'sub' => 'Config',    'kind' => 'nav', 'href' => route('companies.groups'),       'icon' => 'ti-topology-star',   'keywords' => 'group groups consolidation inter-company intercompany related subsidiaries holding tag'],
@@ -226,13 +226,14 @@ class Shell
             ['letter' => 'V', 'label' => 'Vouchers',          'desc' => 'Contra/Payment/Receipt/Journal · F4–F7', 'kind' => 'nav', 'href' => route('vouchers.create', ['type' => 'payment'])],
             ['letter' => '8', 'label' => 'Sales (F8)',        'desc' => 'Invoice · Dr Party / Cr Sales', 'kind' => 'nav', 'href' => route('vouchers.create', ['type' => 'sales'])],
             ['letter' => '9', 'label' => 'Purchase (F9)',     'desc' => 'Invoice · Dr Purchase / Cr Party', 'kind' => 'nav', 'href' => route('vouchers.create', ['type' => 'purchase'])],
-            ['letter' => 'J', 'label' => 'Stock Journal',     'desc' => 'Transfer between godowns · consumption', 'kind' => 'nav', 'href' => route('vouchers.create', ['type' => 'stock_journal'])],
-            ['letter' => 'K', 'label' => 'Physical Stock',    'desc' => 'Stock-take · reconcile counted vs book', 'kind' => 'nav', 'href' => route('vouchers.create', ['type' => 'physical_stock'])],
+            ['letter' => 'J', 'label' => 'Stock Journal',     'desc' => 'Alt+F7 · transfer between godowns · consumption', 'kind' => 'nav', 'href' => route('vouchers.create', ['type' => 'stock_journal'])],
+            ['letter' => 'K', 'label' => 'Physical Stock',    'desc' => 'Ctrl+F7 · stock-take · reconcile counted vs book', 'kind' => 'nav', 'href' => route('vouchers.create', ['type' => 'physical_stock'])],
             // Phase 8B — inventory-workflow vouchers (zero accounting). Rejections reachable via Go To.
-            ['letter' => 'E', 'label' => 'Sales Order',       'desc' => 'Alt+F6 · order received · commitment only',   'kind' => 'nav', 'href' => route('vouchers.create', ['type' => 'sales_order'])],
-            ['letter' => 'M', 'label' => 'Purchase Order',    'desc' => 'Alt+F7 · order placed · commitment only',     'kind' => 'nav', 'href' => route('vouchers.create', ['type' => 'purchase_order'])],
+            // Keys corrected 2026-07-20 to TallyPrime 7.x (_docs/keyboard-shortcuts.md §B appendix).
+            ['letter' => 'E', 'label' => 'Sales Order',       'desc' => 'Ctrl+F8 · order received · commitment only',  'kind' => 'nav', 'href' => route('vouchers.create', ['type' => 'sales_order'])],
+            ['letter' => 'M', 'label' => 'Purchase Order',    'desc' => 'Ctrl+F9 · order placed · commitment only',    'kind' => 'nav', 'href' => route('vouchers.create', ['type' => 'purchase_order'])],
             ['letter' => 'N', 'label' => 'Delivery Note',     'desc' => 'Alt+F8 · goods out · moves stock, no ledger', 'kind' => 'nav', 'href' => route('vouchers.create', ['type' => 'delivery_note'])],
-            ['letter' => 'U', 'label' => 'Receipt Note',      'desc' => 'Alt+F5 · goods in · moves stock, no ledger',  'kind' => 'nav', 'href' => route('vouchers.create', ['type' => 'receipt_note'])],
+            ['letter' => 'U', 'label' => 'Receipt Note',      'desc' => 'Alt+F9 · goods in · moves stock, no ledger',  'kind' => 'nav', 'href' => route('vouchers.create', ['type' => 'receipt_note'])],
             ['letter' => 'Q', 'label' => 'Orders Outstanding','desc' => 'Report · pending Sales/Purchase Orders',       'kind' => 'nav', 'href' => route('reports.orders-outstanding', ['scope' => 'sales'])],
             // Phase 9A / 9B — file the returns (a tenant is either GST or VAT, never both).
             ['letter' => '1', 'label' => 'GST Returns',      'desc' => 'GSTR-1 / GSTR-3B · preview & JSON export',     'kind' => 'nav', 'href' => route('reports.gst-returns')],
@@ -254,8 +255,8 @@ class Shell
             ['letter' => 'L', 'label' => 'Stock Summary',      'desc' => 'Report · inventory quantity & value', 'kind' => 'nav', 'href' => route('reports.stock-summary')],
             ['letter' => 'F', 'label' => 'Features (F11)',     'desc' => 'Company feature switches',     'kind' => 'nav', 'href' => route('features')],
             // Phase 12A — multi-company. 'Z' is the last free Gateway letter; the primary
-            // affordances are F1 (select company) and the clickable top-bar company cell.
-            ['letter' => 'Z', 'label' => 'Companies',          'desc' => 'Create / rename / deactivate · switch with F1', 'kind' => 'nav', 'href' => route('companies')],
+            // affordances are F3 (select company) and the clickable top-bar company cell.
+            ['letter' => 'Z', 'label' => 'Companies',          'desc' => 'Create / rename / deactivate · switch with F3', 'kind' => 'nav', 'href' => route('companies')],
             // Phase 14B — subscription & manual payments (account/billing, not accounting).
             ['letter' => 'C', 'label' => 'Subscription',       'desc' => 'Plan · record a payment · renew', 'kind' => 'nav', 'href' => route('subscription')],
             // Phase 14C — data export + account closure.

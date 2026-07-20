@@ -8,34 +8,25 @@
    100% client-side. No server round-trip is ever performed here.
    ========================================================================= */
 
-import { combo, isBareChar, isEditable, shouldHardBlock, uncapturableKeys } from './keys.js';
+import {
+    combo,
+    isBareChar,
+    isEditable,
+    isReloadCombo,
+    mayRepeat,
+    platform,
+    prettyHint,
+    shouldHardBlock,
+    shouldIgnore,
+    uncapturableKeys,
+} from './keys.js';
+import { startLabelLocalisation } from './labels.js';
 
 /* ---- display helpers ---------------------------------------------------- */
-const HINT = {
-    'arrowup': '↑',
-    'arrowdown': '↓',
-    'arrowleft': '←',
-    'arrowright': '→',
-    'enter': 'Enter',
-    'escape': 'Esc',
-    'space': 'Space',
-    'tab': 'Tab',
-};
-export function prettyHint(key) {
-    if (HINT[key]) return HINT[key];
-    return key
-        .split('+')
-        .map((p) => {
-            if (/^f\d{1,2}$/.test(p)) return p.toUpperCase();
-            if (HINT[p]) return HINT[p];
-            if (p === 'ctrl') return 'Ctrl';
-            if (p === 'alt') return 'Alt';
-            if (p === 'shift') return 'Shift';
-            if (p === 'meta') return 'Meta';
-            return p.length === 1 ? p.toUpperCase() : p.charAt(0).toUpperCase() + p.slice(1);
-        })
-        .join('+');
-}
+// prettyHint now lives in keys.js, where it can consult the detected platform
+// and print ⌘/⌥ on a Mac instead of Ctrl/Alt. Re-exported here so existing
+// importers of the engine keep working.
+export { prettyHint };
 
 /* ---- store factory ------------------------------------------------------ */
 export function zbStore() {
@@ -98,13 +89,19 @@ export function zbStore() {
         registerGlobals() {
             const g = [
                 {
-                    // Phase 12A — Select Company. F1 is Tally's own Select Company key
-                    // and is free here (alt+f1 is the report Detailed/Condensed toggle,
-                    // and the active context would shadow a global alt+f1 on reports).
-                    key: 'f1',
+                    // TallyPrime 7.x: F3 selects the company, F1 is Help.
+                    // (ZeroBook previously had Select Company on F1, which is
+                    // Tally.ERP 9 behaviour — corrected for parity.)
+                    key: 'f3',
                     label: 'Company',
                     group: 'Anywhere',
                     run: () => this.emit('zb:open-company'),
+                },
+                {
+                    key: 'f1',
+                    label: 'Help',
+                    group: 'Anywhere',
+                    run: () => this.emit('zb:open-help'),
                 },
                 {
                     key: 'alt+g',
@@ -119,7 +116,10 @@ export function zbStore() {
                     run: () => this.emit('zb:toggle-calc'),
                 },
                 {
-                    key: 'alt+n',
+                    // Doc §F.4: Ctrl+N opens a browser window even in an
+                    // installed PWA, so the calculator needs a binding the
+                    // browser will actually release.
+                    key: 'ctrl+alt+n',
                     label: 'Calculator (alt)',
                     group: 'Anywhere',
                     hidden: true,
@@ -130,6 +130,12 @@ export function zbStore() {
                     label: 'Change Date',
                     group: 'Anywhere',
                     run: () => this.emit('zb:open-period'),
+                },
+                {
+                    key: 'alt+f2',
+                    label: 'Change Period',
+                    group: 'Anywhere',
+                    run: () => this.emit('zb:open-period', { range: true }),
                 },
                 {
                     key: 'f4',
@@ -173,54 +179,42 @@ export function zbStore() {
                     allowInInput: true,
                     run: () => this.openVoucher('purchase'),
                 },
+                // ── Notes and inventory vouchers, on TallyPrime 7.x's own keys ──
+                // Corrected 2026-07-20 for Tally parity. ZeroBook previously used
+                // Tally.ERP 9-era and ad-hoc assignments, several of which collided
+                // with the voucher TallyPrime puts on that key (Ctrl+F8 was Credit
+                // Note here but is Sales Order in Tally; Alt+F6 was Sales Order here
+                // but is Credit Note in Tally). Authority: _docs/keyboard-shortcuts.md
+                // §B and its out-of-scope appendix.
                 {
-                    key: 'alt+f9',
-                    label: 'Purchase (alt)',
-                    hidden: true,
-                    allowInInput: true,
-                    run: () => this.openVoucher('purchase'),
-                },
-                {
-                    // Phase 8A — Tally's Credit Note key (customer-side / sales return).
-                    // Ctrl+F* combos are not browser-reserved, so they capture reliably.
-                    key: 'ctrl+f8',
+                    // TallyPrime: Credit Note is Alt+F6 (changed from ERP 9's Ctrl+F8).
+                    key: 'alt+f6',
                     label: 'Credit Note',
                     group: 'Vouchers',
                     allowInInput: true,
                     run: () => this.openVoucher('credit_note'),
                 },
                 {
-                    // Phase 8A — Tally's Debit Note key (supplier-side / purchase return).
-                    key: 'ctrl+f9',
+                    // TallyPrime: Debit Note is Alt+F5 (changed from ERP 9's Ctrl+F9).
+                    key: 'alt+f5',
                     label: 'Debit Note',
                     group: 'Vouchers',
                     allowInInput: true,
                     run: () => this.openVoucher('debit_note'),
                 },
-                // Phase 8B — the six inventory-workflow vouchers, on Tally's own keys.
-                // Alt+F6/F8 replace the old hidden Sales/Receipt "muscle-memory"
-                // alternates (removed above) with their authentic Order / Delivery
-                // meanings. These are the same keys real Tally uses for these vouchers.
-                {
-                    key: 'alt+f5',
-                    label: 'Receipt Note',
-                    group: 'Inventory Vouchers',
-                    allowInInput: true,
-                    run: () => this.openVoucher('receipt_note'),
-                },
-                {
-                    key: 'alt+f6',
-                    label: 'Sales Order',
-                    group: 'Inventory Vouchers',
-                    allowInInput: true,
-                    run: () => this.openVoucher('sales_order'),
-                },
                 {
                     key: 'alt+f7',
-                    label: 'Purchase Order',
+                    label: 'Stock Journal',
                     group: 'Inventory Vouchers',
                     allowInInput: true,
-                    run: () => this.openVoucher('purchase_order'),
+                    run: () => this.openVoucher('stock_journal'),
+                },
+                {
+                    key: 'ctrl+f7',
+                    label: 'Physical Stock',
+                    group: 'Inventory Vouchers',
+                    allowInInput: true,
+                    run: () => this.openVoucher('physical_stock'),
                 },
                 {
                     key: 'alt+f8',
@@ -230,18 +224,39 @@ export function zbStore() {
                     run: () => this.openVoucher('delivery_note'),
                 },
                 {
-                    key: 'ctrl+f5',
-                    label: 'Rejections In',
+                    key: 'alt+f9',
+                    label: 'Receipt Note',
                     group: 'Inventory Vouchers',
                     allowInInput: true,
-                    run: () => this.openVoucher('rejection_in'),
+                    run: () => this.openVoucher('receipt_note'),
                 },
                 {
-                    key: 'ctrl+f6',
+                    key: 'ctrl+f8',
+                    label: 'Sales Order',
+                    group: 'Inventory Vouchers',
+                    allowInInput: true,
+                    run: () => this.openVoucher('sales_order'),
+                },
+                {
+                    key: 'ctrl+f9',
+                    label: 'Purchase Order',
+                    group: 'Inventory Vouchers',
+                    allowInInput: true,
+                    run: () => this.openVoucher('purchase_order'),
+                },
+                {
+                    key: 'ctrl+f5',
                     label: 'Rejections Out',
                     group: 'Inventory Vouchers',
                     allowInInput: true,
                     run: () => this.openVoucher('rejection_out'),
+                },
+                {
+                    key: 'ctrl+f6',
+                    label: 'Rejections In',
+                    group: 'Inventory Vouchers',
+                    allowInInput: true,
+                    run: () => this.openVoucher('rejection_in'),
                 },
                 {
                     key: 'f11',
@@ -757,7 +772,35 @@ function getStore() {
 function dispatch(e) {
     const store = getStore();
     if (!store) return;
+
+    // Keystrokes that are never ours: IME composition, dead keys, AltGr typing,
+    // macOS-reserved Cmd combos, a held Windows key, and the native clipboard /
+    // undo combos while focus is in a field. Checked before anything else so a
+    // shortcut can never eat ordinary typing. See keys.js `shouldIgnore`.
+    if (shouldIgnore(e)) return;
+
+    // A reload must never fire from inside the app: F5 is Tally's Payment key,
+    // and Ctrl+R sits under the fingers mid-entry. Either one would discard an
+    // unsaved voucher. Claimed here whether or not a binding exists, so the
+    // guarantee does not depend on a screen having registered anything.
+    // (⌘R on macOS is left to the OS — the beforeunload guard covers it.)
+    if (isReloadCombo(e)) {
+        e.preventDefault();
+        e.stopPropagation();
+        // F5 still carries its Tally meaning; only the browser's reload is
+        // suppressed. Fall through so the Payment binding can run.
+        if (!/^f5$/i.test(e.code || e.key || '')) return;
+    }
+
     const c = combo(e);
+    if (!c) return;
+
+    // Held keys repeat navigation, never actions — holding F5 must not open a
+    // stack of Payment vouchers.
+    if (e.repeat && !mayRepeat(c)) {
+        if (shouldHardBlock(c)) e.preventDefault();
+        return;
+    }
 
     // Escape is always handled by the engine (pop context / custom onEsc).
     if (c === 'escape') {
@@ -884,6 +927,10 @@ export function attachDispatcher() {
     window.addEventListener('keydown', dispatch, true);
     window.addEventListener('focusin', autoSelectOnFocus, true);
     window.addEventListener('input', filterNumeric, true);
+    // On a Mac, rewrite every literal "Ctrl+A"/"Alt+F1" chip in the markup to
+    // ⌘A / ⌥F1 so the on-screen hints match the keys that actually work.
+    // No-op on Windows and Linux. See labels.js.
+    startLabelLocalisation();
     attached = true;
     // Expose a tiny debug surface for verification (devtools / harness).
     window.ZB = {
