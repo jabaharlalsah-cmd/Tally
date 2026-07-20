@@ -114,9 +114,13 @@ class ProveMultiCompanyCommand extends Command
             $this->expect('[B] 15 TDS sections', TdsSection::count(), 15);
             $this->expect('[B] INR base currency', Currency::base()?->code, 'INR');
             $this->expect('[B] Main Location godown', Godown::where('name', 'Main Location')->exists(), true);
+            // NOTE: this array is an exact-match assertion, so ADDING ANY F11 FLAG
+            // requires updating it here. 'inventory' was added by the NAS parity
+            // Gateway rearrangement.
             $this->expect('[B] fresh all-off F11', CompanyFeature::current()->toFlags(), [
                 'bill_by_bill' => false, 'cost_centres' => false, 'gst' => false,
-                'vat' => false, 'tds' => false, 'multi_currency' => false, 'budgets' => false,
+                'vat' => false, 'tds' => false, 'multi_currency' => false,
+                'inventory' => false, 'budgets' => false,
                 'ratio_analysis' => false, 'scenarios' => false,
             ]);
         });

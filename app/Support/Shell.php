@@ -86,22 +86,49 @@ class Shell
         return $company !== null && \App\Models\CompanyGroup::forCompany($company->id) !== null;
     }
 
-    /** Phase 15A — the F11 Budgets switch for the active company (gates the Budgets menu). */
-    private static function budgetsEnabled(): bool
+    /**
+     * The active company's F11 flags, read once per (company × database).
+     *
+     * CompanyFeature::current() is a firstOrCreate, so it hits the database on
+     * every call. Each menu-gating flag used to call it separately; now that the
+     * Gateway and the reports tree gate a dozen entries on flags, that would be a
+     * dozen queries to render one menu.
+     *
+     * THE KEY INCLUDES THE DATABASE NAME, not just the company id — the same
+     * hazard ActiveCompany::company() documents. One artisan process can walk
+     * several tenants in a row and every tenant's first company is id 1, so an
+     * id-only memo would serve tenant A's feature flags while tenant B is active.
+     *
+     * The memo is also dropped whenever a CompanyFeature row is written (see
+     * CompanyFeature::booted()). Without that, anything that toggles a flag and
+     * re-reads the menu in the same process — the F11 screen saving, a proof
+     * command, an import — would render from stale flags.
+     */
+    private static ?array $featureCache = null;
+
+    private static ?string $featureCacheKey = null;
+
+    private static function feature(string $key): bool
     {
-        return activeCompany() !== null && (bool) \App\Models\CompanyFeature::current()->budgets;
+        $company = activeCompany();
+        if ($company === null) {
+            return false;
+        }
+
+        $cacheKey = \Illuminate\Support\Facades\DB::connection()->getDatabaseName().'#'.$company->id;
+        if (self::$featureCache === null || self::$featureCacheKey !== $cacheKey) {
+            self::$featureCache = \App\Models\CompanyFeature::current()->toFlags();
+            self::$featureCacheKey = $cacheKey;
+        }
+
+        return (bool) (self::$featureCache[$key] ?? false);
     }
 
-    /** Phase 15B — the Ratio Analysis switch for the active company. */
-    private static function ratiosEnabled(): bool
+    /** Drop the memo. Called on every CompanyFeature write and company switch. */
+    public static function forgetFeatures(): void
     {
-        return activeCompany() !== null && (bool) \App\Models\CompanyFeature::current()->ratio_analysis;
-    }
-
-    /** Phase 15C — the Scenarios switch for the active company (gates the Scenarios menu). */
-    private static function scenariosEnabled(): bool
-    {
-        return activeCompany() !== null && (bool) \App\Models\CompanyFeature::current()->scenarios;
+        self::$featureCache = null;
+        self::$featureCacheKey = null;
     }
 
     /** Phase 15C — the Scenarios destinations (Go To palette rows), gated by the F11 flag. */
@@ -212,74 +239,147 @@ class Shell
             ['label' => 'Group Trial Balance', 'sub' => 'Group Reports', 'kind' => 'nav', 'href' => route('reports.group-trial-balance'), 'icon' => 'ti-scale',        'keywords' => 'group trial balance consolidation consolidated tb elimination'],
             ['label' => 'Group Balance Sheet', 'sub' => 'Group Reports', 'kind' => 'nav', 'href' => route('reports.group-balance-sheet'), 'icon' => 'ti-report-money', 'keywords' => 'group balance sheet consolidation consolidated bs elimination unrealised'],
             ['label' => 'Group P&L',           'sub' => 'Group Reports', 'kind' => 'nav', 'href' => route('reports.group-profit-loss'),   'icon' => 'ti-chart-bar',    'keywords' => 'group profit loss consolidation consolidated p&l pl elimination'],
-        ] : [], self::budgetsEnabled() ? self::budgetNav() : [], self::ratiosEnabled() ? self::ratioNav() : [], self::scenariosEnabled() ? self::scenarioNav() : []);
+        ] : [], self::feature('budgets') ? self::budgetNav() : [], self::feature('ratio_analysis') ? self::ratioNav() : [], self::feature('scenarios') ? self::scenarioNav() : []);
     }
 
     /** Highlighted-letter menu shown on the Gateway hub. */
+    /** One Gateway/menu row. */
+    private static function item(string $letter, string $label, string $desc, string $href): array
+    {
+        return ['letter' => $letter, 'label' => $label, 'desc' => $desc, 'kind' => 'nav', 'href' => $href];
+    }
+
+    /** Drop the nulls left by feature-gating and reindex. */
+    private static function only(array $items): array
+    {
+        return array_values(array_filter($items));
+    }
+
+    /**
+     * The Gateway, as four sections — the arrangement of the approved build
+     * (Masters / Transactions / Utilities / Reports), which is TallyPrime's own.
+     *
+     * WHY SECTIONS, NOT A FLAT LIST
+     * The previous Gateway was a single flat list of 37 entries that had run out
+     * of hot letters: the source comments recorded "every A–Z letter is already
+     * claimed", 'C' and 'D' were each claimed twice and '0' three times. Because
+     * the registry is last-wins, Subscription and Data & Privacy were silently
+     * unreachable by their advertised letter, and which report '0' opened changed
+     * with the F11 flags. Sections fix that at the root: the top level now holds
+     * ~17 entries and the long tail lives under Display More Reports, where the
+     * letters start again.
+     *
+     * Hot letters are unique across the WHOLE level, not per section, because
+     * letter-jump scans every row — the same rule the approved build follows (its
+     * Banking is 'K' precisely so 'B' can stay with Balance Sheet).
+     *
+     * Everything optional is gated on its F11 switch, so an accounts-only company
+     * sees an accounts-only Gateway. The Go To / Calculator / Date entries the old
+     * menu carried are gone: they are global shortcuts (Alt+G, Ctrl+N, F2), they
+     * are not menu items in Tally, and they were the source of the 'C'/'D' clashes.
+     */
     public static function gatewayMenu(): array
+    {
+        return self::only([
+            [
+                'key' => 'masters',
+                'label' => 'Masters',
+                'items' => self::only([
+                    self::item('H', 'Chart of Accounts', 'Groups & Ledgers', route('masters.index')),
+                    self::feature('inventory') ? self::item('I', 'Inventory Info', 'Stock items · groups · units · godowns', route('inventory.index')) : null,
+                    self::feature('cost_centres') ? self::item('O', 'Cost Centres', 'Analytical allocation masters', route('masters.cost-centres')) : null,
+                    self::feature('multi_currency') ? self::item('U', 'Currencies', 'Foreign currencies & exchange rates', route('masters.currencies')) : null,
+                    self::feature('tds') ? self::item('E', 'TDS Sections', 'Rate table by section', route('masters.tds-sections')) : null,
+                ]),
+            ],
+            [
+                'key' => 'transactions',
+                'label' => 'Transactions',
+                'items' => self::only([
+                    self::item('V', 'Vouchers', 'Contra · Payment · Receipt · Journal · F4–F9', route('vouchers.create', ['type' => 'payment'])),
+                    self::item('D', 'Day Book', 'Review & alter vouchers', route('daybook')),
+                ]),
+            ],
+            [
+                'key' => 'utilities',
+                'label' => 'Utilities',
+                'items' => self::only([
+                    self::item('C', 'Companies', 'Create · rename · deactivate · switch with F3', route('companies')),
+                    self::item('F', 'Features', 'Company feature switches · F11', route('features')),
+                    self::item('N', 'Subscription', 'Plan · record a payment · renew', route('subscription')),
+                    self::item('T', 'Data & Privacy', 'Download all your data · close account', route('account.data')),
+                ]),
+            ],
+            [
+                'key' => 'reports',
+                'label' => 'Reports',
+                'items' => self::only([
+                    self::item('B', 'Balance Sheet', 'Liabilities | Assets', route('reports.balance-sheet')),
+                    self::item('P', 'Profit & Loss A/c', 'Expenses | Income', route('reports.profit-loss')),
+                    // TallyPrime places Stock Summary between P&L and Ratio Analysis.
+                    self::feature('inventory') ? self::item('S', 'Stock Summary', 'Inventory quantity & value', route('reports.stock-summary')) : null,
+                    self::feature('ratio_analysis') ? self::item('R', 'Ratio Analysis', 'Financial health ratios & trends', route('reports.ratio-dashboard')) : null,
+                    self::item('M', 'Display More Reports', 'Account books · statements · analytical', route('reports.more')),
+                ]),
+            ],
+        ]);
+    }
+
+    /**
+     * "Display More Reports" — the second level of the Reports tree, grouped the
+     * way the approved build groups it (Account Books · Statements of Accounts ·
+     * …), extended with the report families ZeroBook has and that build does not
+     * (it excludes inventory and all statutory work by design).
+     *
+     * Hot letters are unique across the whole screen, as on the Gateway.
+     */
+    public static function reportsMenu(): array
     {
         $grouped = self::activeCompanyGrouped();
 
-        return array_merge([
-            ['letter' => 'A', 'label' => 'Chart of Accounts', 'desc' => 'Groups & Ledgers masters',    'kind' => 'nav', 'href' => route('masters.index')],
-            ['letter' => 'I', 'label' => 'Inventory Info',    'desc' => 'Stock Items / Groups / Units / Godowns', 'kind' => 'nav', 'href' => route('inventory.index')],
-            ['letter' => 'V', 'label' => 'Vouchers',          'desc' => 'Contra/Payment/Receipt/Journal · F4–F7', 'kind' => 'nav', 'href' => route('vouchers.create', ['type' => 'payment'])],
-            ['letter' => '8', 'label' => 'Sales (F8)',        'desc' => 'Invoice · Dr Party / Cr Sales', 'kind' => 'nav', 'href' => route('vouchers.create', ['type' => 'sales'])],
-            ['letter' => '9', 'label' => 'Purchase (F9)',     'desc' => 'Invoice · Dr Purchase / Cr Party', 'kind' => 'nav', 'href' => route('vouchers.create', ['type' => 'purchase'])],
-            ['letter' => 'J', 'label' => 'Stock Journal',     'desc' => 'Alt+F7 · transfer between godowns · consumption', 'kind' => 'nav', 'href' => route('vouchers.create', ['type' => 'stock_journal'])],
-            ['letter' => 'K', 'label' => 'Physical Stock',    'desc' => 'Ctrl+F7 · stock-take · reconcile counted vs book', 'kind' => 'nav', 'href' => route('vouchers.create', ['type' => 'physical_stock'])],
-            // Phase 8B — inventory-workflow vouchers (zero accounting). Rejections reachable via Go To.
-            // Keys corrected 2026-07-20 to TallyPrime 7.x (_docs/keyboard-shortcuts.md §B appendix).
-            ['letter' => 'E', 'label' => 'Sales Order',       'desc' => 'Ctrl+F8 · order received · commitment only',  'kind' => 'nav', 'href' => route('vouchers.create', ['type' => 'sales_order'])],
-            ['letter' => 'M', 'label' => 'Purchase Order',    'desc' => 'Ctrl+F9 · order placed · commitment only',    'kind' => 'nav', 'href' => route('vouchers.create', ['type' => 'purchase_order'])],
-            ['letter' => 'N', 'label' => 'Delivery Note',     'desc' => 'Alt+F8 · goods out · moves stock, no ledger', 'kind' => 'nav', 'href' => route('vouchers.create', ['type' => 'delivery_note'])],
-            ['letter' => 'U', 'label' => 'Receipt Note',      'desc' => 'Alt+F9 · goods in · moves stock, no ledger',  'kind' => 'nav', 'href' => route('vouchers.create', ['type' => 'receipt_note'])],
-            ['letter' => 'Q', 'label' => 'Orders Outstanding','desc' => 'Report · pending Sales/Purchase Orders',       'kind' => 'nav', 'href' => route('reports.orders-outstanding', ['scope' => 'sales'])],
-            // Phase 9A / 9B — file the returns (a tenant is either GST or VAT, never both).
-            ['letter' => '1', 'label' => 'GST Returns',      'desc' => 'GSTR-1 / GSTR-3B · preview & JSON export',     'kind' => 'nav', 'href' => route('reports.gst-returns')],
-            ['letter' => '2', 'label' => 'VAT Return',       'desc' => 'Nepal · अनुसूची-१० · preview & transcription',  'kind' => 'nav', 'href' => route('reports.vat-return')],
-            // Phase 10A — the third compliance destination, beside the two return screens.
-            ['letter' => '3', 'label' => 'TDS Deductions',   'desc' => 'Report · deducted per section & deductee · still payable', 'kind' => 'nav', 'href' => route('reports.tds-summary')],
-            ['letter' => '4', 'label' => 'TDS Returns (26Q)', 'desc' => 'Quarterly · Form 140 · export .txt · record token',  'kind' => 'nav', 'href' => route('reports.tds-returns')],
-            ['letter' => '5', 'label' => 'Forex Revaluation', 'desc' => 'Report · unrealised gain/loss on open foreign bills', 'kind' => 'nav', 'href' => route('reports.forex-revaluation')],
-            ['letter' => '6', 'label' => 'Lot Provenance',    'desc' => 'Report · inter-company inventory lots (FIFO trace)', 'kind' => 'nav', 'href' => route('reports.lot-provenance')],
-            ['letter' => 'B', 'label' => 'Day Book',          'desc' => 'Review & alter vouchers',     'kind' => 'nav', 'href' => route('daybook')],
-            ['letter' => 'T', 'label' => 'Trial Balance',     'desc' => 'Report · closing balances',   'kind' => 'nav', 'href' => route('reports.trial-balance')],
-            ['letter' => 'S', 'label' => 'Balance Sheet',     'desc' => 'Report · Liabilities | Assets','kind' => 'nav', 'href' => route('reports.balance-sheet')],
-            ['letter' => 'P', 'label' => 'Profit & Loss A/c', 'desc' => 'Report · Expenses | Income',   'kind' => 'nav', 'href' => route('reports.profit-loss')],
-            ['letter' => 'X', 'label' => 'GST Summary',       'desc' => 'Report · output/input tax · net payable', 'kind' => 'nav', 'href' => route('reports.gst-summary')],
-            ['letter' => 'W', 'label' => 'VAT Summary',       'desc' => 'Report · Nepal VAT · net payable',       'kind' => 'nav', 'href' => route('reports.vat-summary')],
-            ['letter' => 'R', 'label' => 'Receivables',       'desc' => 'Outstandings · bills owed to us',  'kind' => 'nav', 'href' => route('reports.receivables')],
-            ['letter' => 'Y', 'label' => 'Payables',          'desc' => 'Outstandings · bills we owe',      'kind' => 'nav', 'href' => route('reports.payables')],
-            ['letter' => 'O', 'label' => 'Cost Centre Breakup', 'desc' => 'Report · analytical cost allocation', 'kind' => 'nav', 'href' => route('reports.cost-breakup')],
-            ['letter' => 'L', 'label' => 'Stock Summary',      'desc' => 'Report · inventory quantity & value', 'kind' => 'nav', 'href' => route('reports.stock-summary')],
-            ['letter' => 'F', 'label' => 'Features (F11)',     'desc' => 'Company feature switches',     'kind' => 'nav', 'href' => route('features')],
-            // Phase 12A — multi-company. 'Z' is the last free Gateway letter; the primary
-            // affordances are F3 (select company) and the clickable top-bar company cell.
-            ['letter' => 'Z', 'label' => 'Companies',          'desc' => 'Create / rename / deactivate · switch with F3', 'kind' => 'nav', 'href' => route('companies')],
-            // Phase 14B — subscription & manual payments (account/billing, not accounting).
-            ['letter' => 'C', 'label' => 'Subscription',       'desc' => 'Plan · record a payment · renew', 'kind' => 'nav', 'href' => route('subscription')],
-            // Phase 14C — data export + account closure.
-            ['letter' => 'D', 'label' => 'Data & Privacy',     'desc' => 'Download all your data · close account', 'kind' => 'nav', 'href' => route('account.data')],
-            ['letter' => 'H', 'label' => 'Keyboard Harness',  'desc' => 'Engine verification screen',  'kind' => 'nav', 'href' => route('dev.harness')],
-            ['letter' => 'G', 'label' => 'Go To',             'desc' => 'Jump to anything · Alt+G',     'act'  => 'goto'],
-            ['letter' => 'C', 'label' => 'Calculator',        'desc' => 'Inline arithmetic · Ctrl+N',   'act'  => 'calc'],
-            ['letter' => 'D', 'label' => 'Date & Period',     'desc' => 'Set working date · F2',         'act'  => 'period'],
-        ], $grouped ? [
-            // Phase 12C-2 — the consolidation hub entry (grouped companies only).
-            ['letter' => '7', 'label' => 'Group Reports',     'desc' => 'Consolidated TB / BS / P&L with eliminations', 'kind' => 'nav', 'href' => route('reports.group-trial-balance')],
-        ] : [], self::budgetsEnabled() ? [
-            // Phase 15A — the Budgets hub entry (F11 budgets flag on). '0' hotkey (every
-            // A–Z letter is already claimed on the hub); the tile is arrow-navigable + clickable.
-            ['letter' => '0', 'label' => 'Budgets',           'desc' => 'Report · targets & actual-vs-budget variance', 'kind' => 'nav', 'href' => route('reports.budget-list')],
-        ] : [], self::ratiosEnabled() ? [
-            // Phase 15B — the Ratio Analysis hub entry (F11 ratio_analysis flag on). No free letter
-            // remains; the tile is arrow-navigable + clickable (Go To palette also lists it).
-            ['letter' => '0', 'label' => 'Ratio Analysis',    'desc' => 'Report · financial health ratios & trends', 'kind' => 'nav', 'href' => route('reports.ratio-dashboard')],
-        ] : [], self::scenariosEnabled() ? [
-            // Phase 15C — the Scenarios hub entry (F11 scenarios flag on). Like Budgets/Ratios no
-            // free letter remains; the tile is arrow-navigable + clickable (Go To palette lists it).
-            ['letter' => '0', 'label' => 'Scenarios',         'desc' => 'What-if · provisional vouchers · promote & impact', 'kind' => 'nav', 'href' => route('reports.scenario-master')],
-        ] : []);
+        $statutory = self::only([
+            self::feature('gst') ? self::item('G', 'GST Summary', 'Output/input tax · net payable', route('reports.gst-summary')) : null,
+            self::feature('gst') ? self::item('E', 'GST Returns', 'GSTR-1 / GSTR-3B · preview & JSON export', route('reports.gst-returns')) : null,
+            self::feature('vat') ? self::item('V', 'VAT Summary', 'Nepal VAT · net payable', route('reports.vat-summary')) : null,
+            self::feature('vat') ? self::item('A', 'VAT Return', 'Nepal · anusuchi-10 · preview & transcription', route('reports.vat-return')) : null,
+            self::feature('tds') ? self::item('D', 'TDS Deductions', 'Per section & deductee · still payable', route('reports.tds-summary')) : null,
+            self::feature('tds') ? self::item('Q', 'TDS Returns (26Q)', 'Quarterly · Form 140 · export .txt', route('reports.tds-returns')) : null,
+        ]);
+
+        $inventory = self::feature('inventory') ? self::only([
+            self::item('S', 'Stock Summary', 'Inventory quantity & value', route('reports.stock-summary')),
+            self::item('O', 'Orders Outstanding', 'Pending Sales / Purchase Orders', route('reports.orders-outstanding', ['scope' => 'sales'])),
+            self::item('L', 'Lot Provenance', 'Inter-company inventory lots (FIFO trace)', route('reports.lot-provenance')),
+        ]) : [];
+
+        $analytical = self::only([
+            self::feature('cost_centres') ? self::item('C', 'Cost Centre Breakup', 'Analytical cost allocation', route('reports.cost-breakup')) : null,
+            self::feature('multi_currency') ? self::item('F', 'Forex Revaluation', 'Unrealised gain/loss on open foreign bills', route('reports.forex-revaluation')) : null,
+            self::feature('budgets') ? self::item('B', 'Budgets', 'Targets & actual-vs-budget variance', route('reports.budget-list')) : null,
+            self::feature('scenarios') ? self::item('I', 'Scenarios', 'What-if · provisional vouchers · impact', route('reports.scenario-master')) : null,
+            $grouped ? self::item('U', 'Group Reports', 'Consolidated TB / BS / P&L with eliminations', route('reports.group-trial-balance')) : null,
+        ]);
+
+        return self::only([
+            [
+                'key' => 'account-books',
+                'label' => 'Account Books',
+                'items' => self::only([
+                    self::item('T', 'Trial Balance', 'Closing balances, grouped', route('reports.trial-balance')),
+                    self::item('N', 'Notes Register', 'Debit & credit notes', route('reports.notes-register')),
+                ]),
+            ],
+            [
+                'key' => 'statements',
+                'label' => 'Statements of Accounts',
+                'items' => self::only([
+                    self::item('R', 'Receivables', 'Outstandings · bills owed to us', route('reports.receivables')),
+                    self::item('P', 'Payables', 'Outstandings · bills we owe', route('reports.payables')),
+                ]),
+            ],
+            $statutory ? ['key' => 'statutory', 'label' => 'Statutory', 'items' => $statutory] : null,
+            $inventory ? ['key' => 'inventory', 'label' => 'Inventory', 'items' => $inventory] : null,
+            $analytical ? ['key' => 'analytical', 'label' => 'Analytical', 'items' => $analytical] : null,
+        ]);
     }
 }

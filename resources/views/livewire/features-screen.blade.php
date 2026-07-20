@@ -8,6 +8,7 @@
             { key: 'vat', label: 'Enable Value Added Tax (VAT · Nepal)' },
             { key: 'tds', label: 'Enable Tax Deducted at Source (TDS · India)' },
             { key: 'multi_currency', label: 'Enable multi-currency' },
+            { key: 'inventory', label: 'Maintain inventory (stock items, godowns, orders)' },
             { key: 'budgets', label: 'Maintain budgets (targets & variance)' },
             { key: 'ratio_analysis', label: 'Enable ratio analysis (financial health ratios)' },
             { key: 'scenarios', label: 'Enable scenarios (provisional what-if vouchers)' }

@@ -722,3 +722,43 @@
     background: var(--evergreen-600);
     border-color: var(--evergreen-600);
 }
+
+/* --- Sectioned menu screens (Gateway, Display More Reports) --------------
+   Section headings are rows in the same flat list as the items, so ↑/↓ wrap
+   and letter-jump work across the whole screen. They are not selectable. */
+.zb-menu-section {
+    padding: 0.55rem 1rem 0.3rem;
+    border-bottom: 1px solid var(--line);
+    background: var(--surface-2);
+    color: var(--faint);
+    font-size: 0.62rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    user-select: none;
+    cursor: default;
+}
+.zb-menu-section:first-child {
+    border-top: none;
+}
+
+/* Gateway account actions (change password / log out) — replaces the inline
+   styles that used to sit on these elements. */
+.zb-gateway-account {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 0.55rem;
+    margin-top: 0.9rem;
+    font-size: 0.78rem;
+}
+.zb-gateway-account form {
+    margin: 0;
+}
+.zb-linkbutton {
+    background: none;
+    border: 0;
+    padding: 0;
+    font: inherit;
+    cursor: pointer;
+}

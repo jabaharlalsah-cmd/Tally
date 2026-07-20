@@ -97,8 +97,9 @@ test.describe('keyboard engine', () => {
         await page.goto('/app');
         await page.waitForFunction(() => window.Alpine?.store?.('zb'));
 
-        // B is Day Book on the gateway menu.
-        await page.keyboard.press('b');
+        // D is Day Book on the Gateway. (It was B before the Phase 2
+        // rearrangement; B now belongs to Balance Sheet, as in TallyPrime.)
+        await page.keyboard.press('d');
         await page.waitForURL(/day-book/, { timeout: 10_000 });
     });
 });

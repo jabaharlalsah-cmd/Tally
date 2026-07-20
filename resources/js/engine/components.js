@@ -9,10 +9,34 @@ import { canInstall, installHint, promptInstall } from './install.js';
 import { isDesktopRuntime, isStandaloneRuntime } from './keys.js';
 import { ensureElementVisible } from './scroll.js';
 
-/* ---- Gateway hub: highlighted-letter menu navigation -------------------- */
+/* ---- Gateway hub: highlighted-letter menu navigation --------------------
+ * Accepts EITHER a flat `items` array (the masters/inventory sub-hubs) or a
+ * `sections` array of { label, items } (the Gateway and Display More Reports).
+ *
+ * Sections are flattened into one row list with the headers included as rows,
+ * exactly as the approved build does it. That flat model is load-bearing: it is
+ * what makes ↑/↓ wrap around across section boundaries and lets a hot letter
+ * jump anywhere on the screen. Rendering each section as its own nested list
+ * with its own index would quietly break both.
+ */
 function zbGateway(config) {
+    const sections = (config && config.sections) || null;
+    // rows = what is DRAWN (headers + items). items = what is NAVIGABLE.
+    const rows = [];
+    let n = 0;
+    const pushItem = (it) => rows.push({ type: 'item', itemIndex: n++, ...it });
+    if (sections) {
+        sections.forEach((s) => {
+            rows.push({ type: 'header', label: s.label, itemIndex: -1 });
+            (s.items || []).forEach(pushItem);
+        });
+    } else {
+        ((config && config.items) || []).forEach(pushItem);
+    }
+
     return {
-        items: (config && config.items) || [],
+        rows,
+        items: rows.filter((r) => r.type === 'item'),
         active: 0,
 
         init() {

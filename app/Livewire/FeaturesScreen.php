@@ -20,6 +20,11 @@ class FeaturesScreen extends Component
     // deducts tax at source whether or not it is GST-registered.
     public bool $tds = false;
     public bool $multi_currency = false;
+    // NAS parity Phase 2 — gates the inventory side of the Gateway. Deliberately NOT
+    // added to PlanGate::GATED: no plan's features JSON carries an "inventory" key, and
+    // Plan::allows() returns false for an absent key, so gating it would lock every
+    // tenant out of a module they already own. Ungated, like budgets/ratios/scenarios.
+    public bool $inventory = false;
     // Phase 15A — Budgets is orthogonal to the tax regime, like TDS.
     public bool $budgets = false;
     // Phase 15B — Ratio Analysis, likewise orthogonal.
@@ -58,6 +63,7 @@ class FeaturesScreen extends Component
         $this->vat = (bool) $f->vat;
         $this->tds = (bool) $f->tds;
         $this->multi_currency = (bool) $f->multi_currency;
+        $this->inventory = (bool) $f->inventory;
         $this->budgets = (bool) $f->budgets;
         $this->ratio_analysis = (bool) $f->ratio_analysis;
         $this->scenarios = (bool) $f->scenarios;
@@ -129,6 +135,7 @@ class FeaturesScreen extends Component
             'vat' => $this->vat,
             'tds' => $this->tds,
             'multi_currency' => $this->multi_currency,
+            'inventory' => $this->inventory,
             'budgets' => $this->budgets,
             'ratio_analysis' => $this->ratio_analysis,
             'scenarios' => $this->scenarios,

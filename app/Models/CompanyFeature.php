@@ -33,6 +33,10 @@ class CompanyFeature extends Model
         'vat' => 'boolean',
         'tds' => 'boolean',
         'multi_currency' => 'boolean',
+        // NAS parity Phase 2 — gates the whole inventory side of the Gateway
+        // (Inventory Info, the stock/order vouchers, Stock Summary, Lot
+        // Provenance), so an accounts-only company gets an accounts-only menu.
+        'inventory' => 'boolean',
         // Phase 15A — Budgets is orthogonal to the tax regime (like TDS): any company can
         // maintain budgets whether or not it runs GST/VAT.
         'budgets' => 'boolean',
@@ -41,6 +45,18 @@ class CompanyFeature extends Model
         // Phase 15C — Scenarios (provisional-voucher what-if layer).
         'scenarios' => 'boolean',
     ];
+
+    /**
+     * Shell memoises these flags to keep the Gateway down to one query. Any
+     * write here must drop that memo, or anything that toggles a flag and then
+     * re-renders the menu in the same process — the F11 screen saving, an
+     * import, a proof command — would render from stale flags.
+     */
+    protected static function booted(): void
+    {
+        static::saved(fn () => \App\Support\Shell::forgetFeatures());
+        static::deleted(fn () => \App\Support\Shell::forgetFeatures());
+    }
 
     /** The ACTIVE company's features row (created all-off on first access). */
     public static function current(): self
@@ -60,6 +76,8 @@ class CompanyFeature extends Model
             // company deducts TDS whether or not it is GST-registered.
             'tds' => (bool) $this->tds,
             'multi_currency' => (bool) $this->multi_currency,
+            // NAS parity Phase 2 — gates the inventory menu + stock voucher types.
+            'inventory' => (bool) $this->inventory,
             // Phase 15A — gates the Budgets menu + screens.
             'budgets' => (bool) $this->budgets,
             // Phase 15B — gates the Ratio Analysis menu + screens.

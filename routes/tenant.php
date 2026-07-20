@@ -202,6 +202,19 @@ Route::middleware([
         // Phase 16 — create a company inline from the F1 picker when nothing matches.
         Route::post('/companies', [\App\Http\Controllers\CompaniesController::class, 'store'])->name('company.create');
 
-        Route::get('/dev/keyboard-harness', [KeyboardHarnessController::class, 'index'])->name('dev.harness');
+        // NAS parity Phase 2 — "Display More Reports", the second level of the
+        // Reports tree (Gateway ▸ M).
+        Route::get('/reports/more', [GatewayController::class, 'reports'])->name('reports.more');
+
+        // The keyboard harness is a DEVELOPER verification screen. It was reachable
+        // by any signed-in customer in production and listed on the Gateway; it is
+        // now confined to local/testing. The route is still NAMED in every
+        // environment so route('dev.harness') never throws — it just 404s in
+        // production.
+        Route::get('/dev/keyboard-harness', function (KeyboardHarnessController $controller) {
+            abort_unless(app()->environment(['local', 'testing']), 404);
+
+            return $controller->index();
+        })->name('dev.harness');
     });
 });
