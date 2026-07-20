@@ -1,0 +1,1383 @@
+{
+  "_meta": {
+    "source": "GSTN Returns Offline Tool v3.2.4 (utility/returnStructure.js build side, service/offline.js post-processing, utility/jsonToExcel.js read/export side, utility/common.js formDataFormat, public/data/*.json enumerations, and public/pages/returns/upload|error Angular summary templates)",
+    "tool_version": "Returns Offline Tool v3.2.4",
+    "derived_on_behalf_of": "ZeroBook",
+    "hsn_bifurcation_start_fp": "052025",
+    "caveats": [
+      "cdnur (VERIFIER DISAGREEMENT, corrected): itm_det for cdnur carries ONLY {txval, rt, iamt, csamt}. Unlike cdnr there is NO intra-state branch, so camt/samt are NEVER emitted. The original extraction incorrectly listed camt/samt at cdnur[].itms[].itm_det; both keys were removed per returnStructure.js:3196-3206 (single cdnur/cdnura itemFn), jsonToExcel.js:3959-3972 (camt/samt reads commented out for cdnur), and tool cdnur.csv having no Central/State tax columns.",
+      "cdnur: sp_typ is a disabled UI-only Angular select (summary.html:161-164, ng-disabled=true) and is NOT part of the authoritative GSTR-1 cdnur submission JSON (sp_typ only appears in the GSTR-2 builders). Excluded from _fields and _skeleton.",
+      "Tax-amount mutual exclusivity: in b2b, b2cl, b2cs, cdnr and cdnur an intra-state line carries {camt, samt} and an inter-state line carries {iamt} — never both. b2b/b2cl/cdnr skeletons that show them together (or only one) do so for key-vocabulary completeness; a real line emits EITHER {camt,samt} OR {iamt}. csamt (cess) is present in both branches.",
+      "diff_percent: only the value 0.65 (65% of the existing rate) survives to the uploaded JSON in every section; any other value is stripped. It is stored as a FRACTION (0.65), not a percent. In b2cs it is additionally deleted when it equals 1 or is falsy.",
+      "chksum (b2b) and flag/chksum (b2cl, b2cs, cdnr) are edit / error-correction (import) flow metadata read from the 'Mandatory Check Field' column; they are NOT part of a fresh prepared upload payload. Treated as optional.",
+      "cname (b2b, cdnr) is display/import metadata. cdnr strips it via removeCName() before the final GSTR-1 upload JSON; b2b reads it back on export, so it is retained as optional. Other transient builder keys (diffval, status, supplierRecipientName, cfs, updby, ref_key, error_cd, error_msg, old_inum, old_ntnum, opd, d_flag, cflag, rsn) are UI/import metadata and are NOT canonical upload keys.",
+      "cdnr/cdnur are CDN-delinked (tool release 2.4): the invoice-reference keys inum, idt and the pre-GST flag p_gst are explicitly deleted from the final note JSON (offline.js removePOS/cleanCDN).",
+      "hsn: the final-JSON uqc is the SHORT code only (e.g. 'KGS', 'PCS', 'BAG'); the UI/Excel 'KGS-Kilograms' form is split on '-' and only [0] is kept (offline.js fixUQC). 'NA' passes through unchanged.",
+      "hsn: user_desc (taxpayer free-text description) appears ONLY in bifurcated hsn_b2b/hsn_b2c rows and is not stripped, so it persists into the tool-generated file. Confidence that GSTN's own schema formally accepts user_desc is LOWER than for the other keys; treat as a tool-carried field (desc = standardized 'Description as per HSN Code').",
+      "hsn: legacy pre-052025 files use a single hsn.data[] array (no hsn_b2b/hsn_b2c). In legacy data[] rt is present only in the newer rate-wise sub-branch and val only in the older value-wise sub-branch; bifurcated rows carry BOTH rt and val.",
+      "rate.json (VERIFIER presentation correction): each rate is stored as an object {\"value\": N}, not a bare scalar. The numeric values enumerated in _rules.rates are exact; only the array-of-objects wrapper was abbreviated.",
+      "doc_num: the build path (returnStructure.js:1604) maps 1-based via docDetails.indexOf(name)+1. The Excel read path (jsonToExcel.js:4448) reads docDetails[doc_num] 0-based, an off-by-one that mislabels the export only; it does not change the JSON key shape.",
+      "All GSTR-1 sections were reported at HIGH confidence by both the extractor and the independent verifier."
+    ]
+  },
+  "_skeleton": {
+    "gstin": "24AAAAA1234A1Z5",
+    "fp": "052025",
+    "gt": 12345,
+    "cur_gt": 12345,
+    "b2b": [
+      {
+        "ctin": "24AAAAA1234A1Z5",
+        "cname": "Recipient Name",
+        "inv": [
+          {
+            "inum": "INV-001",
+            "idt": "24-05-2025",
+            "val": 118000,
+            "pos": "27",
+            "rchrg": "N",
+            "inv_typ": "R",
+            "etin": "",
+            "diff_percent": 0.65,
+            "chksum": "54aad0...",
+            "itms": [
+              {
+                "num": 1801,
+                "itm_det": {
+                  "txval": 100000,
+                  "rt": 18,
+                  "iamt": 18000,
+                  "camt": 9000,
+                  "samt": 9000,
+                  "csamt": 0
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "b2cl": [
+      {
+        "pos": "27",
+        "inv": [
+          {
+            "inum": "INV-001",
+            "idt": "24-05-2025",
+            "val": 300000,
+            "etin": "27ABCDE1234F1Z5",
+            "diff_percent": 0.65,
+            "itms": [
+              {
+                "num": 1801,
+                "itm_det": {
+                  "txval": 250000,
+                  "rt": 18,
+                  "iamt": 45000,
+                  "csamt": 0
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "b2cs": [
+      {
+        "sply_ty": "INTER",
+        "typ": "OE",
+        "pos": "27",
+        "rt": 18,
+        "txval": 10000,
+        "iamt": 1800,
+        "csamt": 0,
+        "etin": "27ABCDE1234F1Z5",
+        "diff_percent": 0.65
+      },
+      {
+        "sply_ty": "INTRA",
+        "typ": "OE",
+        "pos": "24",
+        "rt": 18,
+        "txval": 10000,
+        "camt": 900,
+        "samt": 900,
+        "csamt": 0,
+        "etin": "24ABCDE1234F1Z5"
+      }
+    ],
+    "cdnr": [
+      {
+        "ctin": "24ABCDE1234F1Z5",
+        "nt": [
+          {
+            "ntty": "C",
+            "nt_num": "CN-001",
+            "nt_dt": "31-05-2025",
+            "val": 12000,
+            "pos": "24",
+            "rchrg": "N",
+            "inv_typ": "R",
+            "diff_percent": 0.65,
+            "itms": [
+              {
+                "num": 1801,
+                "itm_det": {
+                  "txval": 10000,
+                  "rt": 18,
+                  "iamt": 1800,
+                  "csamt": 0
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "cdnur": [
+      {
+        "typ": "B2CL",
+        "ntty": "C",
+        "nt_num": "N-001",
+        "nt_dt": "10-05-2025",
+        "pos": "06",
+        "val": 5000,
+        "diff_percent": 0.65,
+        "itms": [
+          {
+            "num": 1,
+            "itm_det": {
+              "txval": 4237.29,
+              "rt": 18,
+              "iamt": 762.71,
+              "csamt": 0
+            }
+          }
+        ]
+      }
+    ],
+    "nil": {
+      "inv": [
+        {
+          "sply_ty": "INTRB2B",
+          "expt_amt": 0,
+          "nil_amt": 0,
+          "ngsup_amt": 0
+        }
+      ]
+    },
+    "hsn": {
+      "hsn_b2b": [
+        {
+          "num": 1,
+          "hsn_sc": "1001",
+          "user_desc": "My wheat",
+          "desc": "WHEAT",
+          "uqc": "KGS",
+          "qty": 100,
+          "rt": 5,
+          "txval": 1000,
+          "iamt": 0,
+          "camt": 25,
+          "samt": 25,
+          "csamt": 0,
+          "val": 1050
+        }
+      ],
+      "hsn_b2c": [
+        {
+          "num": 1,
+          "hsn_sc": "1001",
+          "user_desc": "My wheat",
+          "desc": "WHEAT",
+          "uqc": "KGS",
+          "qty": 50,
+          "rt": 5,
+          "txval": 500,
+          "iamt": 0,
+          "camt": 12.5,
+          "samt": 12.5,
+          "csamt": 0,
+          "val": 525
+        }
+      ]
+    },
+    "doc_issue": {
+      "doc_det": [
+        {
+          "doc_num": 1,
+          "docs": [
+            {
+              "num": 1,
+              "from": "1",
+              "to": "100",
+              "totnum": 100,
+              "cancel": 5,
+              "net_issue": 95
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "_skeleton_notes": {
+    "hsn_legacy_pre_052025": {
+      "hsn": {
+        "data": [
+          {
+            "num": 1,
+            "hsn_sc": "1001",
+            "desc": "WHEAT",
+            "uqc": "KGS",
+            "qty": 100,
+            "val": 1050,
+            "txval": 1000,
+            "iamt": 0,
+            "camt": 25,
+            "samt": 25,
+            "csamt": 0
+          }
+        ]
+      },
+      "note": "For return periods BEFORE fp '052025' the hsn section is a single legacy 'data' array (NO hsn_b2b/hsn_b2c and NO user_desc)."
+    }
+  },
+  "_fields": [
+    {
+      "json_path": "(root)",
+      "key": "gstin",
+      "type": "string",
+      "required": true,
+      "precision": "n/a",
+      "meaning": "Taxpayer GSTIN"
+    },
+    {
+      "json_path": "(root)",
+      "key": "fp",
+      "type": "string",
+      "required": true,
+      "precision": "n/a",
+      "meaning": "Filing/return period, MMYYYY (e.g. '052025'); reordered to YYYYMM for the B2CL threshold comparison"
+    },
+    {
+      "json_path": "(root)",
+      "key": "gt",
+      "type": "integer",
+      "required": false,
+      "precision": "integer",
+      "meaning": "Aggregate turnover; parseInt(req.body.gt); the key is omitted entirely from the JSON when isNaN(gt)"
+    },
+    {
+      "json_path": "(root)",
+      "key": "cur_gt",
+      "type": "integer",
+      "required": false,
+      "precision": "integer",
+      "meaning": "Current-year turnover; parseInt(req.body.cur_gt); emitted only in the same template branch as gt (omitted when gt is NaN)"
+    },
+    {
+      "json_path": "(root)",
+      "key": "b2b",
+      "type": "array",
+      "required": false,
+      "precision": "n/a",
+      "meaning": "Table 4: taxable outward supplies to registered persons, grouped by recipient GSTIN"
+    },
+    {
+      "json_path": "b2b[]",
+      "key": "ctin",
+      "type": "string",
+      "required": true,
+      "precision": "n/a",
+      "meaning": "Recipient (counterparty) GSTIN; groups the invoices"
+    },
+    {
+      "json_path": "b2b[]",
+      "key": "cname",
+      "type": "string",
+      "required": false,
+      "precision": "n/a",
+      "meaning": "Recipient/trade name (optional; written on export, read back as cname)"
+    },
+    {
+      "json_path": "b2b[]",
+      "key": "inv",
+      "type": "array",
+      "required": true,
+      "precision": "n/a",
+      "meaning": "Array of invoice objects for this ctin"
+    },
+    {
+      "json_path": "b2b[].inv[]",
+      "key": "inum",
+      "type": "string",
+      "required": true,
+      "precision": "n/a",
+      "meaning": "Invoice number (maxlength 16)"
+    },
+    {
+      "json_path": "b2b[].inv[]",
+      "key": "idt",
+      "type": "string",
+      "required": true,
+      "precision": "n/a",
+      "meaning": "Invoice date, format DD-MM-YYYY (regex enforces day-month-4digit year)"
+    },
+    {
+      "json_path": "b2b[].inv[]",
+      "key": "val",
+      "type": "number",
+      "required": true,
+      "precision": "2dp money",
+      "meaning": "Invoice value (total)"
+    },
+    {
+      "json_path": "b2b[].inv[]",
+      "key": "pos",
+      "type": "string",
+      "required": true,
+      "precision": "n/a",
+      "meaning": "Place of supply, 2-char state code (substring(0,2) of the POS)"
+    },
+    {
+      "json_path": "b2b[].inv[]",
+      "key": "rchrg",
+      "type": "string",
+      "required": true,
+      "precision": "n/a",
+      "meaning": "Reverse charge flag, 'Y'/'N'"
+    },
+    {
+      "json_path": "b2b[].inv[]",
+      "key": "inv_typ",
+      "type": "string",
+      "required": true,
+      "precision": "n/a",
+      "meaning": "Invoice type code: R/DE/SEWP/SEWOP/CBW"
+    },
+    {
+      "json_path": "b2b[].inv[]",
+      "key": "etin",
+      "type": "string",
+      "required": false,
+      "precision": "n/a",
+      "meaning": "E-commerce operator GSTIN (only when inv_typ=R; may be empty)"
+    },
+    {
+      "json_path": "b2b[].inv[]",
+      "key": "diff_percent",
+      "type": "number",
+      "required": false,
+      "precision": "2dp rate",
+      "meaning": "Differential % of tax-rate applicability; only value 0.65 is retained, otherwise deleted before upload"
+    },
+    {
+      "json_path": "b2b[].inv[]",
+      "key": "chksum",
+      "type": "string",
+      "required": false,
+      "precision": "n/a",
+      "meaning": "Mandatory check/hash field; present only on the edit/error-correction (import) path, read from 'Mandatory Check Field'"
+    },
+    {
+      "json_path": "b2b[].inv[]",
+      "key": "itms",
+      "type": "array",
+      "required": true,
+      "precision": "n/a",
+      "meaning": "Line-item (rate-wise) array"
+    },
+    {
+      "json_path": "b2b[].inv[].itms[]",
+      "key": "num",
+      "type": "integer",
+      "required": true,
+      "precision": "quantity",
+      "meaning": "Unique item serial number (hidden identifier, else rt*100+1)"
+    },
+    {
+      "json_path": "b2b[].inv[].itms[]",
+      "key": "itm_det",
+      "type": "object",
+      "required": true,
+      "precision": "n/a",
+      "meaning": "Tax detail for the rate line"
+    },
+    {
+      "json_path": "b2b[].inv[].itms[].itm_det",
+      "key": "txval",
+      "type": "number",
+      "required": true,
+      "precision": "2dp money",
+      "meaning": "Taxable value"
+    },
+    {
+      "json_path": "b2b[].inv[].itms[].itm_det",
+      "key": "rt",
+      "type": "number",
+      "required": true,
+      "precision": "2dp rate",
+      "meaning": "Tax rate %"
+    },
+    {
+      "json_path": "b2b[].inv[].itms[].itm_det",
+      "key": "iamt",
+      "type": "number",
+      "required": false,
+      "precision": "2dp money",
+      "meaning": "Integrated tax amount (inter-state case only; mutually exclusive with camt/samt)"
+    },
+    {
+      "json_path": "b2b[].inv[].itms[].itm_det",
+      "key": "camt",
+      "type": "number",
+      "required": false,
+      "precision": "2dp money",
+      "meaning": "Central tax amount (intra-state case only; paired with samt)"
+    },
+    {
+      "json_path": "b2b[].inv[].itms[].itm_det",
+      "key": "samt",
+      "type": "number",
+      "required": false,
+      "precision": "2dp money",
+      "meaning": "State/UT tax amount (intra-state case only; paired with camt)"
+    },
+    {
+      "json_path": "b2b[].inv[].itms[].itm_det",
+      "key": "csamt",
+      "type": "number",
+      "required": true,
+      "precision": "2dp money",
+      "meaning": "Cess amount (always present, 0 if none)"
+    },
+    {
+      "json_path": "(root)",
+      "key": "b2cl",
+      "type": "array",
+      "required": false,
+      "precision": "n/a",
+      "meaning": "Table 5: large inter-state invoices to unregistered persons, grouped by place of supply"
+    },
+    {
+      "json_path": "b2cl[]",
+      "key": "pos",
+      "type": "string",
+      "required": true,
+      "precision": "n/a",
+      "meaning": "Place of supply state code (2-char, sliced from full POS)"
+    },
+    {
+      "json_path": "b2cl[]",
+      "key": "inv",
+      "type": "array",
+      "required": true,
+      "precision": "n/a",
+      "meaning": "Invoices grouped under this POS"
+    },
+    {
+      "json_path": "b2cl[].inv[]",
+      "key": "inum",
+      "type": "string",
+      "required": true,
+      "precision": "n/a",
+      "meaning": "Invoice number"
+    },
+    {
+      "json_path": "b2cl[].inv[]",
+      "key": "idt",
+      "type": "string",
+      "required": true,
+      "precision": "n/a",
+      "meaning": "Invoice date (DD-MM-YYYY)"
+    },
+    {
+      "json_path": "b2cl[].inv[]",
+      "key": "val",
+      "type": "number",
+      "required": true,
+      "precision": "2dp money",
+      "meaning": "Invoice value; must be > B2CL threshold (see _rules)"
+    },
+    {
+      "json_path": "b2cl[].inv[]",
+      "key": "etin",
+      "type": "string",
+      "required": false,
+      "precision": "n/a",
+      "meaning": "E-Commerce GSTIN"
+    },
+    {
+      "json_path": "b2cl[].inv[]",
+      "key": "diff_percent",
+      "type": "number",
+      "required": false,
+      "precision": "2dp rate",
+      "meaning": "Differential tax-rate factor; retained in final JSON only when equal to 0.65, otherwise deleted"
+    },
+    {
+      "json_path": "b2cl[].inv[]",
+      "key": "itms",
+      "type": "array",
+      "required": true,
+      "precision": "n/a",
+      "meaning": "Line items (rate-wise)"
+    },
+    {
+      "json_path": "b2cl[].inv[].itms[]",
+      "key": "num",
+      "type": "integer",
+      "required": true,
+      "precision": "n/a",
+      "meaning": "Item serial/unique num identifier (rate*100+1 or hidden excel num)"
+    },
+    {
+      "json_path": "b2cl[].inv[].itms[]",
+      "key": "itm_det",
+      "type": "object",
+      "required": true,
+      "precision": "n/a",
+      "meaning": "Tax detail object for the line"
+    },
+    {
+      "json_path": "b2cl[].inv[].itms[].itm_det",
+      "key": "txval",
+      "type": "number",
+      "required": true,
+      "precision": "2dp money",
+      "meaning": "Taxable value"
+    },
+    {
+      "json_path": "b2cl[].inv[].itms[].itm_det",
+      "key": "rt",
+      "type": "number",
+      "required": true,
+      "precision": "2dp rate",
+      "meaning": "Combined tax rate %"
+    },
+    {
+      "json_path": "b2cl[].inv[].itms[].itm_det",
+      "key": "iamt",
+      "type": "number",
+      "required": false,
+      "precision": "2dp money",
+      "meaning": "Integrated tax amount (inter-state branch; the normal B2CL case)"
+    },
+    {
+      "json_path": "b2cl[].inv[].itms[].itm_det",
+      "key": "camt",
+      "type": "number",
+      "required": false,
+      "precision": "2dp money",
+      "meaning": "Central tax amount (intra-state branch only, when a row is intra-classified; paired with samt)"
+    },
+    {
+      "json_path": "b2cl[].inv[].itms[].itm_det",
+      "key": "samt",
+      "type": "number",
+      "required": false,
+      "precision": "2dp money",
+      "meaning": "State/UT tax amount (intra-state branch only; paired with camt)"
+    },
+    {
+      "json_path": "b2cl[].inv[].itms[].itm_det",
+      "key": "csamt",
+      "type": "number",
+      "required": true,
+      "precision": "2dp money",
+      "meaning": "Cess amount"
+    },
+    {
+      "json_path": "(root)",
+      "key": "b2cs",
+      "type": "array",
+      "required": false,
+      "precision": "n/a",
+      "meaning": "Table 7: consolidated rate-wise B2C (small) supplies; FLAT array of rate rows (no nested itms)"
+    },
+    {
+      "json_path": "b2cs[]",
+      "key": "sply_ty",
+      "type": "string",
+      "required": true,
+      "precision": "enum",
+      "meaning": "Supply type. Enum: INTER (POS != supplier state) or INTRA (POS == supplier state)"
+    },
+    {
+      "json_path": "b2cs[]",
+      "key": "typ",
+      "type": "string",
+      "required": true,
+      "precision": "enum",
+      "meaning": "Transaction type. Enum: OE = Other than E-Commerce, E = E-Commerce (E option currently commented out in UI but still a valid value)"
+    },
+    {
+      "json_path": "b2cs[]",
+      "key": "pos",
+      "type": "string",
+      "required": true,
+      "precision": "n/a",
+      "meaning": "Place of Supply, 2-char state code"
+    },
+    {
+      "json_path": "b2cs[]",
+      "key": "rt",
+      "type": "number",
+      "required": true,
+      "precision": "2dp rate",
+      "meaning": "Combined tax rate (percent)"
+    },
+    {
+      "json_path": "b2cs[]",
+      "key": "txval",
+      "type": "number",
+      "required": true,
+      "precision": "2dp money",
+      "meaning": "Taxable value"
+    },
+    {
+      "json_path": "b2cs[]",
+      "key": "iamt",
+      "type": "number",
+      "required": false,
+      "precision": "2dp money",
+      "meaning": "IGST amount; present ONLY when sply_ty == INTER (mutually exclusive with camt/samt)"
+    },
+    {
+      "json_path": "b2cs[]",
+      "key": "camt",
+      "type": "number",
+      "required": false,
+      "precision": "2dp money",
+      "meaning": "CGST amount; present ONLY when sply_ty == INTRA (paired with samt)"
+    },
+    {
+      "json_path": "b2cs[]",
+      "key": "samt",
+      "type": "number",
+      "required": false,
+      "precision": "2dp money",
+      "meaning": "SGST amount; present ONLY when sply_ty == INTRA (paired with camt)"
+    },
+    {
+      "json_path": "b2cs[]",
+      "key": "csamt",
+      "type": "number",
+      "required": true,
+      "precision": "2dp money",
+      "meaning": "Cess amount (defaults to 0)"
+    },
+    {
+      "json_path": "b2cs[]",
+      "key": "etin",
+      "type": "string",
+      "required": false,
+      "precision": "n/a",
+      "meaning": "E-Commerce operator GSTIN; required only when typ == E; empty/absent for OE"
+    },
+    {
+      "json_path": "b2cs[]",
+      "key": "diff_percent",
+      "type": "number",
+      "required": false,
+      "precision": "2dp rate",
+      "meaning": "Applicable % of tax rate (differential), stored as a fraction e.g. 0.65 = 65%; deleted from JSON when value == 1 or falsy"
+    },
+    {
+      "json_path": "(root)",
+      "key": "cdnr",
+      "type": "array",
+      "required": false,
+      "precision": "n/a",
+      "meaning": "Table 9B: credit/debit notes to registered persons, grouped by recipient GSTIN (CDN-delinked)"
+    },
+    {
+      "json_path": "cdnr[]",
+      "key": "ctin",
+      "type": "string",
+      "required": true,
+      "precision": "n/a",
+      "meaning": "GSTIN/UIN of the registered recipient; groups the note array"
+    },
+    {
+      "json_path": "cdnr[]",
+      "key": "nt",
+      "type": "array",
+      "required": true,
+      "precision": "n/a",
+      "meaning": "Array of credit/debit notes issued to this ctin"
+    },
+    {
+      "json_path": "cdnr[].nt[]",
+      "key": "ntty",
+      "type": "string",
+      "required": true,
+      "precision": "n/a",
+      "meaning": "Note type: C=Credit note, D=Debit note (dropdown also allows R)"
+    },
+    {
+      "json_path": "cdnr[].nt[]",
+      "key": "nt_num",
+      "type": "string",
+      "required": true,
+      "precision": "n/a",
+      "meaning": "Credit/Debit note number"
+    },
+    {
+      "json_path": "cdnr[].nt[]",
+      "key": "nt_dt",
+      "type": "string",
+      "required": true,
+      "precision": "n/a",
+      "meaning": "Credit/Debit note date (DD-MM-YYYY)"
+    },
+    {
+      "json_path": "cdnr[].nt[]",
+      "key": "val",
+      "type": "number",
+      "required": true,
+      "precision": "2dp money",
+      "meaning": "Note value (total)"
+    },
+    {
+      "json_path": "cdnr[].nt[]",
+      "key": "pos",
+      "type": "string",
+      "required": false,
+      "precision": "n/a",
+      "meaning": "Place of supply, 2-digit state code"
+    },
+    {
+      "json_path": "cdnr[].nt[]",
+      "key": "rchrg",
+      "type": "string",
+      "required": false,
+      "precision": "n/a",
+      "meaning": "Reverse charge flag Y/N"
+    },
+    {
+      "json_path": "cdnr[].nt[]",
+      "key": "inv_typ",
+      "type": "string",
+      "required": true,
+      "precision": "n/a",
+      "meaning": "Note supply type: R=Regular, SEWP, SEWOP, DE (getNoteSupplyType)"
+    },
+    {
+      "json_path": "cdnr[].nt[]",
+      "key": "diff_percent",
+      "type": "number",
+      "required": false,
+      "precision": "2dp rate",
+      "meaning": "Applicable % of tax rate; only present when 0.65, else omitted"
+    },
+    {
+      "json_path": "cdnr[].nt[]",
+      "key": "itms",
+      "type": "array",
+      "required": true,
+      "precision": "n/a",
+      "meaning": "Rate-wise item/tax lines"
+    },
+    {
+      "json_path": "cdnr[].nt[].itms[]",
+      "key": "num",
+      "type": "integer",
+      "required": true,
+      "precision": "n/a",
+      "meaning": "Line/rate identifier (rate*100+1 or unique num from excel)"
+    },
+    {
+      "json_path": "cdnr[].nt[].itms[]",
+      "key": "itm_det",
+      "type": "object",
+      "required": true,
+      "precision": "n/a",
+      "meaning": "Tax detail object for the line"
+    },
+    {
+      "json_path": "cdnr[].nt[].itms[].itm_det",
+      "key": "txval",
+      "type": "number",
+      "required": true,
+      "precision": "2dp money",
+      "meaning": "Taxable value"
+    },
+    {
+      "json_path": "cdnr[].nt[].itms[].itm_det",
+      "key": "rt",
+      "type": "number",
+      "required": true,
+      "precision": "2dp rate",
+      "meaning": "Tax rate %"
+    },
+    {
+      "json_path": "cdnr[].nt[].itms[].itm_det",
+      "key": "iamt",
+      "type": "number",
+      "required": false,
+      "precision": "2dp money",
+      "meaning": "IGST amount (inter-state; present instead of camt/samt)"
+    },
+    {
+      "json_path": "cdnr[].nt[].itms[].itm_det",
+      "key": "camt",
+      "type": "number",
+      "required": false,
+      "precision": "2dp money",
+      "meaning": "CGST amount (intra-state, non-SEZ)"
+    },
+    {
+      "json_path": "cdnr[].nt[].itms[].itm_det",
+      "key": "samt",
+      "type": "number",
+      "required": false,
+      "precision": "2dp money",
+      "meaning": "SGST amount (intra-state, non-SEZ)"
+    },
+    {
+      "json_path": "cdnr[].nt[].itms[].itm_det",
+      "key": "csamt",
+      "type": "number",
+      "required": true,
+      "precision": "2dp money",
+      "meaning": "Cess amount (0 when none / SEWOP)"
+    },
+    {
+      "json_path": "(root)",
+      "key": "cdnur",
+      "type": "array",
+      "required": false,
+      "precision": "n/a",
+      "meaning": "Table 9B: credit/debit notes to unregistered parties; FLAT array (deduped by nt_num, no GSTIN grouping)"
+    },
+    {
+      "json_path": "cdnur[]",
+      "key": "typ",
+      "type": "string",
+      "required": true,
+      "precision": "enum",
+      "meaning": "UR (unregistered) supply type. Allowed values: B2CL, EXPWP, EXPWOP"
+    },
+    {
+      "json_path": "cdnur[]",
+      "key": "ntty",
+      "type": "string",
+      "required": true,
+      "precision": "n/a",
+      "meaning": "Note type: C = Credit note, D = Debit note"
+    },
+    {
+      "json_path": "cdnur[]",
+      "key": "nt_num",
+      "type": "string",
+      "required": true,
+      "precision": "n/a",
+      "meaning": "Note/Refund voucher number (max 16, pattern [a-zA-Z0-9-/])"
+    },
+    {
+      "json_path": "cdnur[]",
+      "key": "nt_dt",
+      "type": "string",
+      "required": true,
+      "precision": "n/a",
+      "meaning": "Note/Refund voucher date, DD-MM-YYYY"
+    },
+    {
+      "json_path": "cdnur[]",
+      "key": "pos",
+      "type": "string",
+      "required": false,
+      "precision": "n/a",
+      "meaning": "Place of supply state code; required for typ=B2CL; disabled/omitted for typ=EXPWP/EXPWOP"
+    },
+    {
+      "json_path": "cdnur[]",
+      "key": "val",
+      "type": "number",
+      "required": true,
+      "precision": "2dp money",
+      "meaning": "Note/Refund voucher value"
+    },
+    {
+      "json_path": "cdnur[]",
+      "key": "diff_percent",
+      "type": "number",
+      "required": false,
+      "precision": "2dp rate",
+      "meaning": "Differential % of tax rate; only value used is 0.65 (UI shows 65); disabled for EXPWP/EXPWOP"
+    },
+    {
+      "json_path": "cdnur[]",
+      "key": "itms",
+      "type": "array",
+      "required": true,
+      "precision": "n/a",
+      "meaning": "Line items array"
+    },
+    {
+      "json_path": "cdnur[].itms[]",
+      "key": "num",
+      "type": "integer",
+      "required": true,
+      "precision": "quantity",
+      "meaning": "Rate-line serial number"
+    },
+    {
+      "json_path": "cdnur[].itms[]",
+      "key": "itm_det",
+      "type": "object",
+      "required": true,
+      "precision": "n/a",
+      "meaning": "Tax detail object for the rate line; carries EXACTLY txval, rt, iamt, csamt (no camt/samt for cdnur)"
+    },
+    {
+      "json_path": "cdnur[].itms[].itm_det",
+      "key": "txval",
+      "type": "number",
+      "required": true,
+      "precision": "2dp money",
+      "meaning": "Taxable value"
+    },
+    {
+      "json_path": "cdnur[].itms[].itm_det",
+      "key": "rt",
+      "type": "number",
+      "required": true,
+      "precision": "2dp rate",
+      "meaning": "Tax rate"
+    },
+    {
+      "json_path": "cdnur[].itms[].itm_det",
+      "key": "iamt",
+      "type": "number",
+      "required": false,
+      "precision": "2dp money",
+      "meaning": "Integrated tax amount; EXPWOP forces iamt=0 (and csamt=0). No camt/samt branch exists for cdnur"
+    },
+    {
+      "json_path": "cdnur[].itms[].itm_det",
+      "key": "csamt",
+      "type": "number",
+      "required": false,
+      "precision": "2dp money",
+      "meaning": "Cess amount"
+    },
+    {
+      "json_path": "(root)",
+      "key": "nil",
+      "type": "object",
+      "required": false,
+      "precision": "n/a",
+      "meaning": "Table 8: nil-rated / exempt / non-GST outward supplies. Object with a single 'inv' array"
+    },
+    {
+      "json_path": "nil",
+      "key": "inv",
+      "type": "array",
+      "required": true,
+      "precision": "n/a",
+      "meaning": "Array of nil/exempt/non-GST supply summary rows, one per supply type"
+    },
+    {
+      "json_path": "nil.inv[]",
+      "key": "sply_ty",
+      "type": "string",
+      "required": true,
+      "precision": "enum",
+      "meaning": "Supply type code. Enum: INTRB2B, INTRB2C, INTRAB2B, INTRAB2C"
+    },
+    {
+      "json_path": "nil.inv[]",
+      "key": "expt_amt",
+      "type": "number",
+      "required": true,
+      "precision": "2dp money",
+      "meaning": "Exempted (other than nil-rated / non-GST) amount"
+    },
+    {
+      "json_path": "nil.inv[]",
+      "key": "nil_amt",
+      "type": "number",
+      "required": true,
+      "precision": "2dp money",
+      "meaning": "Nil Rated Supplies amount"
+    },
+    {
+      "json_path": "nil.inv[]",
+      "key": "ngsup_amt",
+      "type": "number",
+      "required": true,
+      "precision": "2dp money",
+      "meaning": "Non-GST Supplies amount"
+    },
+    {
+      "json_path": "(root)",
+      "key": "hsn",
+      "type": "object",
+      "required": false,
+      "precision": "n/a",
+      "meaning": "Table 12: HSN-wise summary. Post-052025 bifurcated into hsn_b2b/hsn_b2c; pre-052025 a single legacy 'data' array"
+    },
+    {
+      "json_path": "hsn",
+      "key": "hsn_b2b",
+      "type": "array",
+      "required": false,
+      "precision": "n/a",
+      "meaning": "B2B rate/HSN-wise summary rows (post-052025 only)"
+    },
+    {
+      "json_path": "hsn",
+      "key": "hsn_b2c",
+      "type": "array",
+      "required": false,
+      "precision": "n/a",
+      "meaning": "B2C rate/HSN-wise summary rows (post-052025 only)"
+    },
+    {
+      "json_path": "hsn",
+      "key": "data",
+      "type": "array",
+      "required": false,
+      "precision": "n/a",
+      "meaning": "Legacy single HSN summary array (pre-052025 only; no hsn_b2b/hsn_b2c, no user_desc)"
+    },
+    {
+      "json_path": "hsn.hsn_b2b[] | hsn.hsn_b2c[] | hsn.data[]",
+      "key": "num",
+      "type": "integer",
+      "required": true,
+      "precision": "integer",
+      "meaning": "Serial number of the row"
+    },
+    {
+      "json_path": "hsn.hsn_b2b[] | hsn.hsn_b2c[] | hsn.data[]",
+      "key": "hsn_sc",
+      "type": "string",
+      "required": true,
+      "precision": "n/a",
+      "meaning": "HSN/SAC code; deleted from the row when empty"
+    },
+    {
+      "json_path": "hsn.hsn_b2b[] | hsn.hsn_b2c[]",
+      "key": "user_desc",
+      "type": "string",
+      "required": false,
+      "precision": "n/a",
+      "meaning": "User's own free-text description (tool-carried; bifurcated rows only, NOT in legacy data[])"
+    },
+    {
+      "json_path": "hsn.hsn_b2b[] | hsn.hsn_b2c[] | hsn.data[]",
+      "key": "desc",
+      "type": "string",
+      "required": false,
+      "precision": "n/a",
+      "meaning": "HSN description; in bifurcated rows = 'Description as per HSN Code', in legacy data[] = 'Description'"
+    },
+    {
+      "json_path": "hsn.hsn_b2b[] | hsn.hsn_b2c[] | hsn.data[]",
+      "key": "uqc",
+      "type": "string",
+      "required": true,
+      "precision": "n/a",
+      "meaning": "Unit Quantity Code; SHORT code only in final JSON (e.g. 'KGS'); 'NA' passes through"
+    },
+    {
+      "json_path": "hsn.hsn_b2b[] | hsn.hsn_b2c[] | hsn.data[]",
+      "key": "qty",
+      "type": "number",
+      "required": false,
+      "precision": "quantity",
+      "meaning": "Total quantity; coerced via Number()"
+    },
+    {
+      "json_path": "hsn.hsn_b2b[] | hsn.hsn_b2c[]",
+      "key": "rt",
+      "type": "number",
+      "required": false,
+      "precision": "2dp rate",
+      "meaning": "Tax rate %; present in bifurcated b2b/b2c rows (live dedup key). In legacy data[] present only in the newer rate-wise sub-branch"
+    },
+    {
+      "json_path": "hsn.hsn_b2b[] | hsn.hsn_b2c[] | hsn.data[]",
+      "key": "val",
+      "type": "number",
+      "required": false,
+      "precision": "2dp money",
+      "meaning": "Total value; parsed onto bifurcated rows; in legacy data[] set only by the value-based sub-branch"
+    },
+    {
+      "json_path": "hsn.hsn_b2b[] | hsn.hsn_b2c[] | hsn.data[]",
+      "key": "txval",
+      "type": "number",
+      "required": true,
+      "precision": "2dp money",
+      "meaning": "Taxable value"
+    },
+    {
+      "json_path": "hsn.hsn_b2b[] | hsn.hsn_b2c[] | hsn.data[]",
+      "key": "iamt",
+      "type": "number",
+      "required": false,
+      "precision": "2dp money",
+      "meaning": "Integrated tax amount"
+    },
+    {
+      "json_path": "hsn.hsn_b2b[] | hsn.hsn_b2c[] | hsn.data[]",
+      "key": "camt",
+      "type": "number",
+      "required": false,
+      "precision": "2dp money",
+      "meaning": "Central tax amount"
+    },
+    {
+      "json_path": "hsn.hsn_b2b[] | hsn.hsn_b2c[] | hsn.data[]",
+      "key": "samt",
+      "type": "number",
+      "required": false,
+      "precision": "2dp money",
+      "meaning": "State/UT tax amount"
+    },
+    {
+      "json_path": "hsn.hsn_b2b[] | hsn.hsn_b2c[] | hsn.data[]",
+      "key": "csamt",
+      "type": "number",
+      "required": false,
+      "precision": "2dp money",
+      "meaning": "Cess amount"
+    },
+    {
+      "json_path": "(root)",
+      "key": "doc_issue",
+      "type": "object",
+      "required": false,
+      "precision": "n/a",
+      "meaning": "Table 13: summary of documents issued during the tax period. Container object with a doc_det array"
+    },
+    {
+      "json_path": "doc_issue",
+      "key": "doc_det",
+      "type": "array",
+      "required": true,
+      "precision": "n/a",
+      "meaning": "Array of per-document-nature detail objects, one per Nature of Document"
+    },
+    {
+      "json_path": "doc_issue.doc_det[]",
+      "key": "doc_num",
+      "type": "integer",
+      "required": true,
+      "precision": "n/a",
+      "meaning": "Nature-of-Document code (1-based index into the 12-item list; built as docDetails.indexOf(name)+1)"
+    },
+    {
+      "json_path": "doc_issue.doc_det[]",
+      "key": "docs",
+      "type": "array",
+      "required": true,
+      "precision": "n/a",
+      "meaning": "Array of serial-range rows for this document nature"
+    },
+    {
+      "json_path": "doc_issue.doc_det[].docs[]",
+      "key": "num",
+      "type": "integer",
+      "required": true,
+      "precision": "n/a",
+      "meaning": "Serial number of the range row within the docs array (parseInt of row index)"
+    },
+    {
+      "json_path": "doc_issue.doc_det[].docs[]",
+      "key": "from",
+      "type": "string",
+      "required": true,
+      "precision": "n/a",
+      "meaning": "Sr. No. From (starting document serial number of the range), stored as a string"
+    },
+    {
+      "json_path": "doc_issue.doc_det[].docs[]",
+      "key": "to",
+      "type": "string",
+      "required": true,
+      "precision": "n/a",
+      "meaning": "Sr. No. To (ending document serial number of the range), stored as a string"
+    },
+    {
+      "json_path": "doc_issue.doc_det[].docs[]",
+      "key": "totnum",
+      "type": "number",
+      "required": true,
+      "precision": "quantity",
+      "meaning": "Total number of documents in the range (parseFloat)"
+    },
+    {
+      "json_path": "doc_issue.doc_det[].docs[]",
+      "key": "cancel",
+      "type": "number",
+      "required": true,
+      "precision": "quantity",
+      "meaning": "Cancelled count (parseFloat)"
+    },
+    {
+      "json_path": "doc_issue.doc_det[].docs[]",
+      "key": "net_issue",
+      "type": "number",
+      "required": true,
+      "precision": "quantity",
+      "meaning": "Net issued = Total Number - Cancelled"
+    }
+  ],
+  "_rules": {
+    "b2cl_invoice_value_threshold": {
+      "before_Aug2024": 250000,
+      "from_Aug2024_onward": 100000,
+      "cutoff_period_fp": "082024",
+      "operator": "An invoice is INVALID/dropped when Invoice Value <= limit; a VALID B2CL/B2CLA invoice requires value STRICTLY GREATER THAN the limit (>), not >=",
+      "period_comparison": "fp is stored MMYYYY and reordered to YYYYMM via fp.substring(2)+fp.substring(0,2); if < 202408 the limit is 250000, else 100000",
+      "rounding": "raw numeric compare with <= (no Math.round/toFixed on the value), so values 100000.01-100000.49 (and 250000.01-250000.49) correctly exceed the integer limit and are retained",
+      "applies_to": [
+        "b2cl",
+        "b2cla"
+      ],
+      "evidence": "constants.js:83-84 (B2CL_MIN_VAL=100000, B2CL_MIN_VAL_STR_PRD='082024'); returnStructure.js:8698-8706; offline.js:10654-10681; returns1.ctrl.js:128-130,2384"
+    },
+    "rates": {
+      "storage_shape": "public/data/rate.json stores each rate as an OBJECT {\"value\": N}, not a bare scalar",
+      "IGST": [
+        0,
+        5,
+        12,
+        18,
+        28
+      ],
+      "CommGST": [
+        0,
+        0.1,
+        0.25,
+        1,
+        1.5,
+        3,
+        5,
+        6,
+        7.5,
+        12,
+        18,
+        28,
+        40
+      ],
+      "CGST": [
+        0,
+        2.5,
+        6,
+        9,
+        14
+      ],
+      "SGST": [
+        0,
+        2.5,
+        6,
+        9,
+        14
+      ],
+      "CESS": [
+        0,
+        15,
+        135,
+        290
+      ]
+    },
+    "inv_typ_enum": {
+      "b2b_and_cdnr_current": [
+        "R",
+        "DE",
+        "SEWP",
+        "SEWOP",
+        "CBW"
+      ],
+      "b2b15_legacy": [
+        "R",
+        "DE",
+        "SEWP",
+        "SEWOP"
+      ],
+      "labels": {
+        "R": "Regular B2B",
+        "DE": "Deemed Exports",
+        "SEWP": "SEZ Supplies with payment",
+        "SEWOP": "SEZ Supplies without payment",
+        "CBW": "Intra-State supplies attracting IGST"
+      }
+    },
+    "cdnur_typ_enum": [
+      "B2CL",
+      "EXPWP",
+      "EXPWOP"
+    ],
+    "ntty_enum": {
+      "values": [
+        "C",
+        "D"
+      ],
+      "note": "C=Credit note, D=Debit note; the cdnr dropdown additionally allows R"
+    },
+    "b2cs_enums": {
+      "sply_ty": [
+        "INTER",
+        "INTRA"
+      ],
+      "typ": [
+        "OE",
+        "E"
+      ],
+      "note": "typ 'E' (E-Commerce) is currently commented out in the UI dropdown; real files emit 'OE', but 'E' remains valid and requires etin"
+    },
+    "nil_sply_ty_enum": {
+      "INTRB2B": "Inter-State supplies to registered persons",
+      "INTRB2C": "Inter-State supplies to unregistered persons",
+      "INTRAB2B": "Intra-State supplies to registered persons",
+      "INTRAB2C": "Intra-State supplies to unregistered persons"
+    },
+    "doc_num_codes": {
+      "1": "Invoices for outward supply",
+      "2": "Invoices for inward supply from unregistered person",
+      "3": "Revised Invoice",
+      "4": "Debit Note",
+      "5": "Credit Note",
+      "6": "Receipt Voucher",
+      "7": "Payment Voucher",
+      "8": "Refund Voucher",
+      "9": "Delivery Challan for job work",
+      "10": "Delivery Challan for supply on approval",
+      "11": "Delivery Challan in case of liquid gas",
+      "12": "Delivery Challan in case other than by way of supply (excluding at S no. 9 to 11)"
+    },
+    "doc_num_mapping": "1-based: doc_num = docDetails.indexOf(Nature-of-Document name) + 1",
+    "state_pos_codes": {
+      "format": "2-char zero-padded STRING (e.g. '01', '27')",
+      "range": "01-38 with NO code 28 (27 Maharashtra jumps to 29 Karnataka); includes 37 Andhra Pradesh, 38 Ladakh, 25 Daman and Diu, 26 Dadra and Nagar Haveli and Daman and Diu",
+      "other_territory": "97"
+    },
+    "cdn_reason_codes_rsn": {
+      "01": "Sales Return",
+      "02": "Post Sale Discount",
+      "03": "Deficiency in services",
+      "04": "Correction in Invoice",
+      "05": "Change in POS",
+      "06": "Finalization of Provisional assessment",
+      "07": "Others",
+      "note": "rsn does NOT appear in the final GSTR-1 outward cdnr/cdnur upload JSON; these codes back the CDN reason dropdown / GSTR-2 layout only"
+    },
+    "gstin_regex": "/[0-9]{2}[a-zA-Z]{5}[0-9]{4}[a-zA-Z]{1}[1-9A-Za-z]{1}[Zz1-9A-Ja-j]{1}[0-9a-zA-Z]{1}/",
+    "gstin_regex_source": "directives1.4.js:330 (v3.2.4); older directives1.1.js:282 used a stricter [Z]{1} in the 14th position; ng-pattern anchors it implicitly",
+    "gt_cur_gt": {
+      "type": "integer",
+      "builder": "parseInt(req.body.gt) / parseInt(req.body.cur_gt); emitted unquoted",
+      "omission": "both keys are omitted entirely from the top-level JSON when gt isNaN"
+    },
+    "date_format": "DD-MM-YYYY for idt (b2b/b2cl) and nt_dt (cdnr/cdnur)",
+    "diff_percent_rule": "Only the value 0.65 (65% of the existing rate) survives to the uploaded JSON in every section; stored as a FRACTION; any other value is stripped. In b2cs it is additionally deleted when == 1 or falsy",
+    "uqc_rule": "hsn final JSON stores the SHORT UQC code only (split on '-' from the UI 'CODE-Name' form; e.g. 'KGS-Kilograms' -> 'KGS'); 'NA' passes through unchanged",
+    "cdn_delinking": "cdnr/cdnur are CDN-delinked (tool release 2.4): inum, idt and p_gst are deleted from the final note JSON"
+  }
+}

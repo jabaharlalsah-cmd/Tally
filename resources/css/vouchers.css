@@ -1,0 +1,640 @@
+/* =========================================================================
+   ZeroBook — Phase 3 voucher entry + Day Book styling
+   ========================================================================= */
+
+.zb-voucher {
+    max-width: 900px;
+}
+
+/* header */
+.zb-voucher-head {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 0.75rem;
+}
+.zb-voucher-title {
+    display: flex;
+    align-items: baseline;
+    gap: 0.75rem;
+}
+.zb-voucher-type {
+    font-family: var(--font-display);
+    font-size: 1.35rem;
+    font-weight: 700;
+    color: var(--evergreen-600);
+}
+.zb-voucher-no {
+    font-size: 0.9rem;
+    color: var(--muted);
+}
+.zb-voucher-edit {
+    font-size: 0.8rem;
+    color: var(--amber);
+    font-weight: 600;
+}
+.zb-voucher-date {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.82rem;
+    color: var(--muted);
+}
+.zb-voucher-fy {
+    font-size: 0.72rem;
+    color: var(--faint);
+}
+
+/* Segmented date (DD-MM-YYYY) — three inputs that read as one field, so Enter
+   can chain day → month → year. The wrapper carries the border and the focus
+   ring; the segments themselves stay chrome-free. */
+.zb-datefield {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.1rem;
+    padding: 0.34rem 0.6rem;
+    border: 1px solid var(--line-strong);
+    border-radius: var(--radius-control);
+    background: var(--surface);
+    font-variant-numeric: tabular-nums;
+}
+.zb-datefield:focus-within {
+    border-color: var(--evergreen);
+    box-shadow: 0 0 0 3px rgba(var(--evergreen-rgb), 0.22);
+}
+.zb-datefield.is-bad {
+    border-color: var(--rust);
+}
+.zb-datefield-seg {
+    /* Wide enough for the DD/MM placeholders, which are letters and so run
+       wider than the two digits they stand in for. */
+    width: 2.9ch;
+    padding: 0;
+    border: 0;
+    outline: none;
+    background: transparent;
+    color: var(--ink);
+    font: inherit;
+    font-size: 0.95rem;
+    text-align: center;
+}
+.zb-datefield-seg.is-year {
+    width: 4.8ch;
+}
+.zb-datefield-seg::placeholder {
+    color: var(--faint);
+}
+.zb-datefield-sep {
+    color: var(--faint);
+    user-select: none;
+}
+
+/* entry table */
+.zb-vtable {
+    width: 100%;
+    border-collapse: collapse;
+}
+.zb-vtable thead th {
+    text-align: left;
+    font-size: 0.68rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--faint);
+    padding: 0.3rem 0.45rem;
+    border-bottom: 1px solid var(--line);
+}
+.zb-vtable .zb-vt-right {
+    text-align: right;
+}
+.zb-vtable td {
+    padding: 0.2rem 0.35rem;
+    vertical-align: top;
+}
+.zb-vrow.is-active td {
+    background: var(--evergreen-tint);
+}
+.zb-v-drcr {
+    width: 4.5rem;
+    padding: 0.35rem 0.4rem;
+    font-weight: 600;
+}
+.zb-v-amt {
+    text-align: right;
+    padding: 0.35rem 0.5rem;
+}
+.zb-vt-muted {
+    color: var(--faint);
+    display: inline-block;
+    padding: 0.35rem 0.5rem;
+}
+.zb-vt-x {
+    text-align: center;
+    vertical-align: middle;
+}
+.zb-vt-remove {
+    border: none;
+    background: transparent;
+    color: var(--faint);
+    font-size: 1.1rem;
+    line-height: 1;
+    cursor: pointer;
+    border-radius: 5px;
+    width: 1.5rem;
+    height: 1.5rem;
+}
+.zb-vt-remove:hover {
+    background: rgba(176, 58, 46, 0.12);
+    color: var(--rust);
+}
+.zb-vtotals td {
+    border-top: 2px solid var(--line-strong);
+    padding-top: 0.45rem;
+    font-weight: 600;
+    font-family: var(--font-display);
+}
+.zb-vdiff td {
+    padding-top: 0.15rem;
+    font-size: 0.82rem;
+    color: var(--muted);
+}
+.zb-vdiff.is-balanced td {
+    color: var(--evergreen-600);
+    font-weight: 600;
+}
+.zb-vdiff.is-off td {
+    color: var(--rust);
+    font-weight: 600;
+}
+
+/* narration */
+.zb-voucher-narr {
+    margin-top: 1rem;
+    align-items: start;
+}
+.zb-voucher-narr textarea {
+    resize: vertical;
+}
+
+/* inline sub-screen variant (single stack) */
+.zb-sub-1 {
+    z-index: 1282;
+}
+
+/* current-balance hint on a line */
+.zb-line-bal {
+    display: block;
+    font-size: 0.68rem;
+    color: var(--faint);
+    padding: 0.05rem 0.55rem 0;
+}
+.zb-line-bal span {
+    color: var(--muted);
+    font-weight: 600;
+}
+
+/* single-entry mode */
+.zb-single-acct {
+    align-items: flex-start;
+    padding-bottom: 0.75rem;
+    margin-bottom: 0.5rem;
+    border-bottom: 1px solid var(--line);
+}
+.zb-single-acct label {
+    font-weight: 600;
+    color: var(--ink);
+}
+.zb-single-hint {
+    margin-top: 0.6rem;
+    font-size: 0.76rem;
+    color: var(--evergreen-600);
+    background: var(--evergreen-tint);
+    border-radius: 8px;
+    padding: 0.4rem 0.7rem;
+    display: inline-block;
+}
+
+/* ---- As-Invoice (Sales/Purchase) mode ---- */
+.zb-voucher-mode {
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--evergreen-600);
+    background: var(--evergreen-tint);
+    border-radius: 6px;
+    padding: 0.08rem 0.45rem;
+}
+.zb-mode-toggle {
+    border: 1px solid var(--line-strong);
+    background: var(--surface-2);
+    color: var(--evergreen-600);
+    font-size: 0.72rem;
+    font-weight: 600;
+    border-radius: 7px;
+    padding: 0.2rem 0.55rem;
+    cursor: pointer;
+    white-space: nowrap;
+}
+.zb-mode-toggle:hover {
+    background: var(--evergreen-tint);
+    border-color: var(--evergreen);
+}
+.zb-invoice-party {
+    align-items: flex-start;
+    padding-bottom: 0.6rem;
+    margin-bottom: 0.5rem;
+    border-bottom: 1px solid var(--line);
+}
+.zb-invoice-party > label {
+    font-weight: 600;
+    color: var(--ink);
+    min-width: 12rem;
+}
+.zb-invoice-ref {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.75rem;
+    flex-wrap: wrap;
+}
+.zb-invoice-ref > label {
+    font-size: 0.82rem;
+    color: var(--muted);
+}
+.zb-invoice-refno {
+    width: 12rem;
+}
+.zb-invoice-ref-datelbl {
+    margin-left: 0.75rem;
+}
+.zb-invoice-refdate {
+    width: 10rem;
+}
+.zb-invoice-note {
+    margin-top: 0.5rem;
+    font-size: 0.72rem;
+    color: var(--faint);
+}
+.zb-vtax td {
+    padding: 0.15rem 0.35rem;
+    font-size: 0.82rem;
+    color: var(--muted);
+}
+.zb-vtax td:first-child {
+    color: var(--sky);
+    font-weight: 600;
+}
+.zb-vgrand td {
+    border-top: 2px solid var(--evergreen);
+    color: var(--evergreen-600);
+    font-size: 0.95rem;
+}
+.zb-gst-badge {
+    display: inline-block;
+    font-size: 0.68rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--sky);
+    background: rgba(46, 125, 154, 0.1);
+    border-radius: 5px;
+    padding: 0.05rem 0.4rem;
+}
+
+/* ---- Bill-wise allocation sub-screen (Phase 5C) ---- */
+.zb-bill-card {
+    max-width: 720px;
+}
+.zb-bill-side {
+    font-size: 0.68rem;
+    font-weight: 700;
+    color: var(--faint);
+    border: 1px solid var(--line-strong);
+    border-radius: 4px;
+    padding: 0 0.3rem;
+    margin-left: 0.35rem;
+}
+.zb-bill-table th {
+    white-space: nowrap;
+}
+.zb-bill-table input[type='date']:disabled {
+    opacity: 0.4;
+}
+.zb-bill-remain td {
+    font-size: 0.86rem;
+    font-weight: 600;
+    padding-top: 0.2rem;
+}
+.zb-bill-remain.is-ok td {
+    color: var(--evergreen-600);
+}
+.zb-bill-remain.is-off td {
+    color: var(--rust);
+}
+
+/* ---- Cost-centre allocation sub-screen (Phase 5D) ---- */
+.zb-cost-card {
+    max-width: 620px;
+}
+.zb-cost-table th {
+    white-space: nowrap;
+}
+.zb-cost-note {
+    margin-top: 0.5rem;
+    font-size: 0.72rem;
+    color: var(--sky);
+    background: rgba(46, 125, 154, 0.08);
+    border-radius: 6px;
+    padding: 0.35rem 0.6rem;
+}
+
+/* ---- Day Book ---- */
+.zb-daybook {
+    max-width: 960px;
+}
+.zb-daybook-period {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.75rem;
+    font-size: 0.82rem;
+    color: var(--muted);
+}
+.zb-daybook-period input {
+    width: 10rem;
+}
+.zb-daybook-list {
+    max-height: 62vh;
+    overflow-y: auto;
+}
+.zb-daybook-item {
+    display: grid;
+    grid-template-columns: 6.5rem 5.5rem 6rem 1fr auto;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: 0.86rem;
+}
+.zb-db-date {
+    color: var(--muted);
+    font-variant-numeric: tabular-nums;
+}
+.zb-db-type {
+    font-size: 0.68rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-weight: 700;
+    padding: 0.05rem 0.4rem;
+    border-radius: 5px;
+    text-align: center;
+    background: var(--surface-2);
+    border: 1px solid var(--line);
+}
+.zb-db-contra {
+    color: var(--sky);
+}
+.zb-db-payment {
+    color: var(--rust);
+}
+.zb-db-receipt {
+    color: var(--evergreen-600);
+}
+.zb-db-journal {
+    color: var(--indigo);
+}
+.zb-db-no {
+    font-weight: 600;
+    color: var(--ink);
+}
+.zb-db-particulars {
+    color: var(--muted);
+    font-size: 0.78rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.zb-db-drcr {
+    font-weight: 700;
+    color: var(--faint);
+}
+.zb-db-sep {
+    margin: 0 0.25rem;
+    color: var(--line-strong);
+}
+.zb-db-amount {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+    font-weight: 600;
+}
+.zb-daybook-item.is-active .zb-db-date,
+.zb-daybook-item.is-active .zb-db-particulars,
+.zb-daybook-item.is-active .zb-db-drcr {
+    color: rgba(255, 255, 255, 0.85);
+}
+.zb-daybook-item.is-active .zb-db-no,
+.zb-daybook-item.is-active .zb-db-amount,
+.zb-daybook-item.is-active .zb-db-type {
+    color: #fff;
+}
+.zb-daybook-item.is-active .zb-db-type {
+    background: rgba(255, 255, 255, 0.16);
+    border-color: rgba(255, 255, 255, 0.35);
+}
+
+/* ---- TDS deduction panel (Phase 10A) ----
+   Sits under a Payment's entry grid. Amber, not evergreen: this is money being
+   withheld from the vendor and owed to the Revenue, and it should read as such. */
+.zb-tds {
+    margin-top: 0.9rem;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-control);
+    background: var(--surface-2);
+}
+.zb-tds-head {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.55rem 0.85rem;
+    border-bottom: 1px solid transparent;
+}
+.zb-tds-body {
+    padding: 0.25rem 0.85rem 0.85rem;
+    border-top: 1px solid var(--line);
+}
+.zb-tds-engage {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    font-weight: 600;
+    color: var(--ink);
+    cursor: pointer;
+    margin: 0;
+}
+.zb-tds-engage input {
+    accent-color: var(--evergreen);
+    width: 1rem;
+    height: 1rem;
+}
+.zb-tds-hint {
+    font-size: 0.76rem;
+    color: var(--muted);
+}
+.zb-tds-badge {
+    margin-left: auto;
+    font-size: 0.74rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    color: var(--amber);
+    background: rgba(183, 121, 31, 0.1);
+    border-radius: 6px;
+    padding: 0.2rem 0.55rem;
+}
+.zb-tds-badge.is-nil {
+    color: var(--muted);
+    background: var(--canvas);
+}
+.zb-tds-206aa {
+    display: inline-block;
+    margin-top: 0.3rem;
+    font-size: 0.74rem;
+    font-weight: 600;
+    color: var(--rust);
+}
+.zb-tds-table {
+    margin-top: 0.6rem;
+    max-width: 34rem;
+}
+.zb-tds-table td {
+    padding: 0.3rem 0.5rem;
+}
+.zb-tds-sub {
+    font-size: 0.72rem;
+    color: var(--muted);
+    font-weight: 400;
+}
+.zb-tds-deducted td {
+    color: var(--amber);
+    font-weight: 700;
+}
+.zb-tds-reason {
+    margin-top: 0.5rem;
+    font-size: 0.76rem;
+    color: var(--amber);
+    background: rgba(183, 121, 31, 0.08);
+    border-radius: 6px;
+    padding: 0.4rem 0.65rem;
+}
+.zb-tds-shape {
+    margin-top: 0.4rem;
+    font-size: 0.74rem;
+    color: var(--muted);
+}
+
+/* Number inputs carry no spinner arrows anywhere in ZeroBook; `select` keeps its
+   dropdown arrow. Restated here so the TDS panel's fields match the house rule. */
+.zb-tds input[type='number']::-webkit-outer-spin-button,
+.zb-tds input[type='number']::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+.zb-tds input[type='number'] {
+    -moz-appearance: textfield;
+    appearance: textfield;
+}
+
+/* ---- TDS challan capture (Phase 10B) — a remittance is a positive act, so evergreen ---- */
+.zb-challan .zb-tds-badge {
+    color: var(--evergreen-600);
+    background: var(--evergreen-tint);
+}
+
+/* ---- Multi-currency line entry (Phase 11) ---- */
+.zb-fx-line {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    margin-top: 0.3rem;
+    font-size: 0.8rem;
+}
+.zb-fx-code {
+    font-weight: 700;
+    color: var(--evergreen-700);
+    background: var(--evergreen-tint);
+    border-radius: 4px;
+    padding: 0.05rem 0.35rem;
+    font-size: 0.72rem;
+}
+.zb-fx-inp {
+    max-width: 8rem;
+    padding: 0.2rem 0.4rem;
+    height: auto;
+}
+.zb-fx-x,
+.zb-fx-eq {
+    color: var(--muted);
+    white-space: nowrap;
+}
+.zb-fx-eq {
+    font-weight: 600;
+    color: var(--ink);
+}
+.zb-fx-inr {
+    color: var(--muted);
+    font-variant-numeric: tabular-nums;
+}
+.zb-fx-override {
+    margin-top: 0.6rem;
+    padding: 0.5rem 0.75rem;
+    border: 1px solid var(--amber);
+    border-radius: var(--radius-control);
+    background: rgba(183, 121, 31, 0.07);
+}
+.zb-fx-override-check {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--amber);
+    cursor: pointer;
+    margin: 0;
+}
+.zb-fx-override-check input {
+    accent-color: var(--amber);
+}
+.zb-fx-override input[type='text'] {
+    margin-top: 0.45rem;
+}
+/* No spinner arrows on the forex number inputs (house rule). */
+.zb-fx-inp::-webkit-outer-spin-button,
+.zb-fx-inp::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+.zb-fx-inp {
+    -moz-appearance: textfield;
+    appearance: textfield;
+}
+
+/* ── Phase 12B — inter-company marker ─────────────────────────────────────
+   A derived, non-editable chip on any line whose ledger is linked to a
+   same-group company: the voucher will carry the consolidation tag. */
+.zb-ic-badge {
+    display: inline-block;
+    margin-left: .45rem;
+    padding: .05rem .45rem;
+    border-radius: 999px;
+    font-size: .68rem;
+    font-weight: 600;
+    letter-spacing: .02em;
+    color: var(--zb-evergreen, #0B6E4F);
+    /* Static fallbacks first: color-mix() is Safari 16.2+, and the #0B6E4F inside
+       the function can't rescue an older Safari — it drops the whole declaration
+       at parse time, leaving no background and no border. */
+    background: rgba(11, 110, 79, .12);
+    border: 1px solid rgba(11, 110, 79, .35);
+    background: color-mix(in srgb, var(--zb-evergreen, #0B6E4F) 12%, transparent);
+    border: 1px solid color-mix(in srgb, var(--zb-evergreen, #0B6E4F) 35%, transparent);
+    white-space: nowrap;
+    vertical-align: middle;
+}

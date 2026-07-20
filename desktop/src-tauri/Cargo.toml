@@ -1,0 +1,33 @@
+[package]
+name = "zerobook-desktop"
+version = "1.0.0"
+description = "ZeroBook Desktop — keyboard-first accounting"
+authors = ["ZeroBook"]
+edition = "2021"
+rust-version = "1.77"
+
+# The library the binary calls into (keeps main.rs thin; standard Tauri v2 layout).
+[lib]
+name = "zerobook_desktop_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+tauri = { version = "2", features = ["tray-icon"] }
+tauri-plugin-sql = { version = "2", features = ["sqlite"] }
+tauri-plugin-updater = "2"
+tauri-plugin-dialog = "2"
+tauri-plugin-process = "2"
+tauri-plugin-window-state = "2"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+keyring = "3"
+
+[profile.release]
+panic = "abort"     # smaller binary; a Rust panic aborts rather than unwinds
+codegen-units = 1
+lto = true
+opt-level = "s"
+strip = true

@@ -1,0 +1,25 @@
+/* =========================================================================
+   ZeroBook — application stylesheet entry (bundled by Vite)
+   Order matters: vendor first, then brand tokens, then base rules, then shell.
+   ========================================================================= */
+
+/* --- Vendor: Tabler (Bootstrap 5 base) + icon webfont ------------------- */
+@import '@tabler/core/dist/css/tabler.min.css';
+@import '@tabler/icons-webfont/dist/tabler-icons.min.css';
+
+/* --- Vendor: self-hosted brand fonts ----------------------------------- */
+@import '@fontsource/inter/400.css';
+@import '@fontsource/inter/500.css';
+@import '@fontsource/inter/600.css';
+@import '@fontsource/inter/700.css';
+@import '@fontsource/spectral/500.css';
+@import '@fontsource/spectral/600.css';
+@import '@fontsource/spectral/700.css';
+
+/* --- ZeroBook brand + app layers --------------------------------------- */
+@import './tokens.css';
+@import './base.css';
+@import './shell.css';
+@import './masters.css';
+@import './vouchers.css';
+@import './reports.css';

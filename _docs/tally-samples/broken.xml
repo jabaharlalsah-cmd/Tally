@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ZeroBook Phase 7A — a DELIBERATELY BROKEN Tally export.
+
+  The single Journal below debits 1,000.00 but credits only 900.00 — Dr ≠ Cr. Tally
+  itself would never export this (it enforces balance on entry); it exists purely to
+  prove ZeroBook's importer REFUSES it: the voucher is named in the rejection and the
+  ENTIRE import (masters included) is rolled back. A half-imported book is never left.
+-->
+<ENVELOPE>
+ <HEADER><TALLYREQUEST>Export Data</TALLYREQUEST></HEADER>
+ <BODY>
+  <IMPORTDATA>
+   <REQUESTDESC>
+    <REPORTNAME>All Masters</REPORTNAME>
+    <STATICVARIABLES><SVCURRENTCOMPANY>Broken Sample Co</SVCURRENTCOMPANY></STATICVARIABLES>
+   </REQUESTDESC>
+   <REQUESTDATA>
+    <TALLYMESSAGE xmlns:UDF="TallyUDF"><GROUP NAME="Indirect Expenses" RESERVEDNAME="Indirect Expenses"><NAME.LIST><NAME>Indirect Expenses</NAME></NAME.LIST><PARENT/></GROUP></TALLYMESSAGE>
+    <TALLYMESSAGE xmlns:UDF="TallyUDF"><GROUP NAME="Sundry Creditors" RESERVEDNAME="Sundry Creditors"><NAME.LIST><NAME>Sundry Creditors</NAME></NAME.LIST><PARENT>Current Liabilities</PARENT></GROUP></TALLYMESSAGE>
+    <TALLYMESSAGE xmlns:UDF="TallyUDF"><LEDGER NAME="Broken Expense"><NAME.LIST><NAME>Broken Expense</NAME></NAME.LIST><PARENT>Indirect Expenses</PARENT></LEDGER></TALLYMESSAGE>
+    <TALLYMESSAGE xmlns:UDF="TallyUDF"><LEDGER NAME="Broken Party"><NAME.LIST><NAME>Broken Party</NAME></NAME.LIST><PARENT>Sundry Creditors</PARENT></LEDGER></TALLYMESSAGE>
+
+    <TALLYMESSAGE xmlns:UDF="TallyUDF">
+     <VOUCHER VCHTYPE="Journal" ACTION="Create">
+      <DATE>20260410</DATE>
+      <VOUCHERTYPENAME>Journal</VOUCHERTYPENAME>
+      <VOUCHERNUMBER>7</VOUCHERNUMBER>
+      <NARRATION>Deliberately unbalanced — Dr 1000 vs Cr 900</NARRATION>
+      <ALLLEDGERENTRIES.LIST>
+       <LEDGERNAME>Broken Expense</LEDGERNAME>
+       <ISDEEMEDPOSITIVE>Yes</ISDEEMEDPOSITIVE>
+       <AMOUNT>-1000.00</AMOUNT>
+      </ALLLEDGERENTRIES.LIST>
+      <ALLLEDGERENTRIES.LIST>
+       <LEDGERNAME>Broken Party</LEDGERNAME>
+       <ISDEEMEDPOSITIVE>No</ISDEEMEDPOSITIVE>
+       <AMOUNT>900.00</AMOUNT>
+      </ALLLEDGERENTRIES.LIST>
+     </VOUCHER>
+    </TALLYMESSAGE>
+   </REQUESTDATA>
+  </IMPORTDATA>
+ </BODY>
+</ENVELOPE>

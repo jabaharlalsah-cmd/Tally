@@ -1,0 +1,84 @@
+/* =========================================================================
+   ZeroBook — brand design tokens
+   Deep evergreen identity. Inter (UI) + Spectral (display). ZeroBook's own
+   brand — not an imitation of any third-party product's colours or name.
+   ========================================================================= */
+
+:root {
+    /* Brand */
+    --evergreen: #0B6E4F;
+    --evergreen-600: #0A5E44;
+    --evergreen-700: #084C37;
+    --evergreen-tint: #E6F2EC;
+    --evergreen-rgb: 11, 110, 79;
+
+    /* Ink & neutrals */
+    --ink: #14231E;
+    --muted: #5F726A;
+    --faint: #8B9A92;
+    --canvas: #F6F7F5;
+    --surface: #FFFFFF;
+    --surface-2: #FBFCFB;
+    --line: #E4E7E3;
+    --line-strong: #D3D9D4;
+
+    /* Accents */
+    --rust: #B03A2E;
+    --amber: #B7791F;
+    --indigo: #3B5BA5;
+    --sky: #2E7D9A;
+
+    /* Shape */
+    --radius-card: 14px;
+    --radius-control: 10px;
+
+    /* Type */
+    --font-ui: 'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', roboto, sans-serif;
+    --font-display: 'Spectral', Georgia, 'Times New Roman', serif;
+
+    /* Re-map Tabler / Bootstrap so stock components inherit the brand */
+    --tblr-primary: var(--evergreen);
+    --tblr-primary-rgb: var(--evergreen-rgb);
+    --tblr-body-bg: var(--canvas);
+    --tblr-body-color: var(--ink);
+    --tblr-font-sans-serif: var(--font-ui);
+    --tblr-border-color: var(--line);
+    --tblr-border-radius: var(--radius-control);
+    --tblr-link-color: var(--evergreen);
+    --tblr-link-hover-color: var(--evergreen-600);
+}
+
+[data-bs-theme='dark'] {
+    --evergreen: #1E9D74;
+    --evergreen-600: #178A65;
+    --evergreen-700: #127353;
+    --evergreen-tint: #12271F;
+    --ink: #E8EEE9;
+    --muted: #A7B6AE;
+    --faint: #6E8177;
+    --canvas: #0E1512;
+    --surface: #151E1A;
+    --surface-2: #101815;
+    --line: #24312B;
+    --line-strong: #33463D;
+
+    --tblr-body-bg: var(--canvas);
+    --tblr-body-color: var(--ink);
+    --tblr-border-color: var(--line);
+}
+
+html,
+body {
+    background: var(--canvas);
+    color: var(--ink);
+    font-family: var(--font-ui);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+}
+
+/* Display / serif utility */
+.zb-display,
+.zb-serif {
+    font-family: var(--font-display);
+    letter-spacing: 0.01em;
+}

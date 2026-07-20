@@ -1,0 +1,600 @@
+/* =========================================================================
+   ZeroBook — Gateway shell + engine surfaces
+   Fixed regional layout: top identity | centre work area | right button bar |
+   bottom status bar. Plus calculator pane, Go To palette, gateway menu, harness.
+   ========================================================================= */
+
+.zb-app {
+    --zb-buttonbar-w: 232px;
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+    grid-template-columns: 1fr;
+    height: 100vh;
+    min-height: 0;
+    background: var(--canvas);
+    color: var(--ink);
+    overflow: hidden;
+}
+
+/* --- TOP: product / company identity, date, period ---------------------- */
+.zb-top {
+    display: flex;
+    align-items: stretch;
+    gap: 0;
+    background: var(--evergreen);
+    color: #fff;
+    border-bottom: 3px solid var(--evergreen-700);
+    font-size: 0.86rem;
+}
+.zb-top-cell {
+    padding: 0.5rem 1rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    line-height: 1.25;
+}
+.zb-top-cell + .zb-top-cell {
+    border-left: 1px solid rgba(255, 255, 255, 0.18);
+}
+.zb-top-product {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 1.05rem;
+    letter-spacing: 0.02em;
+}
+.zb-top-sub {
+    font-size: 0.72rem;
+    opacity: 0.85;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+.zb-top-spacer {
+    flex: 1 1 auto;
+}
+.zb-top-cell .zb-top-value {
+    font-weight: 600;
+}
+.zb-top-cell.zb-top-clickable {
+    cursor: pointer;
+}
+.zb-top-cell.zb-top-clickable:hover {
+    background: rgba(255, 255, 255, 0.08);
+}
+
+/* --- MAIN: centre work area + right vertical button bar ----------------- */
+.zb-main {
+    display: grid;
+    grid-template-columns: 1fr var(--zb-buttonbar-w);
+    min-height: 0;
+}
+.zb-centre {
+    position: relative;
+    min-height: 0;
+    overflow: auto;
+    padding: 1.25rem 1.5rem;
+}
+
+/* --- RIGHT button bar: context-aware action list ------------------------ */
+.zb-buttonbar {
+    background: var(--surface);
+    border-left: 1px solid var(--line);
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    padding: 0.25rem;
+    gap: 0.15rem;
+}
+.zb-buttonbar-group-label {
+    font-size: 0.62rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--faint);
+    padding: 0.5rem 0.5rem 0.2rem;
+}
+.zb-btnbar-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    width: 100%;
+    text-align: left;
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: 8px;
+    padding: 0.4rem 0.55rem;
+    color: var(--ink);
+    font-size: 0.82rem;
+    cursor: pointer;
+    transition: background 0.08s ease, border-color 0.08s ease;
+}
+.zb-btnbar-item:hover {
+    background: var(--evergreen-tint);
+    border-color: var(--line);
+}
+.zb-btnbar-item:disabled,
+.zb-btnbar-item[aria-disabled='true'] {
+    opacity: 0.4;
+    cursor: default;
+}
+.zb-btnbar-item .zb-btnbar-label {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.zb-btnbar-item .zb-kbd {
+    flex: 0 0 auto;
+}
+
+/* --- BOTTOM: status bar ------------------------------------------------- */
+.zb-bottom {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    background: var(--surface);
+    border-top: 1px solid var(--line);
+    padding: 0.3rem 1rem;
+    font-size: 0.76rem;
+    color: var(--muted);
+    min-height: 34px;
+}
+.zb-bottom .zb-status-accept {
+    color: #fff;
+    background: var(--evergreen);
+    border-radius: 6px;
+    padding: 0.1rem 0.6rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+.zb-bottom .zb-status-quit {
+    color: var(--ink);
+    background: var(--surface-2);
+    border: 1px solid var(--line-strong);
+    border-radius: 6px;
+    padding: 0.1rem 0.6rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+.zb-bottom-spacer {
+    flex: 1 1 auto;
+}
+.zb-bottom .zb-status-flag {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0.05rem 0.5rem;
+    border-radius: 6px;
+    background: var(--surface-2);
+    border: 1px solid var(--line);
+}
+.zb-bottom .zb-status-flag.is-on {
+    background: var(--evergreen-tint);
+    border-color: var(--evergreen);
+    color: var(--evergreen-600);
+    font-weight: 600;
+}
+
+/* --- Work-area cards / panels ------------------------------------------ */
+.zb-panel {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-card);
+    padding: 1.1rem 1.25rem;
+}
+.zb-panel + .zb-panel {
+    margin-top: 1rem;
+}
+.zb-panel-title {
+    font-family: var(--font-display);
+    font-size: 1.15rem;
+    font-weight: 600;
+    margin: 0 0 0.75rem;
+    color: var(--ink);
+}
+
+/* --- Gateway hub menu (highlighted-letter navigation) ------------------- */
+.zb-gateway {
+    max-width: 640px;
+    margin: 0 auto;
+}
+.zb-gateway-heading {
+    text-align: center;
+    font-family: var(--font-display);
+    font-size: 1.35rem;
+    color: var(--evergreen-600);
+    margin-bottom: 0.25rem;
+}
+.zb-gateway-sub {
+    text-align: center;
+    color: var(--muted);
+    font-size: 0.82rem;
+    margin-bottom: 1.25rem;
+}
+.zb-menu {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-card);
+    overflow: hidden;
+    background: var(--surface);
+}
+.zb-menu-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.7rem 1rem;
+    cursor: pointer;
+    border-bottom: 1px solid var(--line);
+    color: var(--ink);
+    font-size: 0.95rem;
+    user-select: none;
+}
+.zb-menu-item:last-child {
+    border-bottom: none;
+}
+.zb-menu-item .zb-menu-desc {
+    color: var(--faint);
+    font-size: 0.76rem;
+}
+.zb-menu-item.is-active {
+    background: var(--evergreen);
+    color: #fff;
+}
+.zb-menu-item.is-active .zb-menu-desc {
+    color: rgba(255, 255, 255, 0.8);
+}
+.zb-menu-item.is-active .zb-hot {
+    color: #fff;
+    text-decoration-color: rgba(255, 255, 255, 0.7);
+}
+
+/* --- Calculator pane (Ctrl+N) ------------------------------------------- */
+.zb-calc {
+    position: fixed;
+    right: calc(var(--zb-buttonbar-w) + 16px);
+    bottom: 46px;
+    width: 300px;
+    background: var(--surface);
+    border: 1px solid var(--line-strong);
+    border-radius: var(--radius-card);
+    box-shadow: 0 18px 48px rgba(11, 35, 27, 0.22);
+    z-index: 1200;
+    overflow: hidden;
+}
+.zb-calc-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.5rem 0.75rem;
+    background: var(--evergreen);
+    color: #fff;
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+}
+.zb-calc-body {
+    padding: 0.6rem 0.75rem 0.8rem;
+}
+.zb-calc-input {
+    width: 100%;
+    font-family: 'Inter', ui-monospace, monospace;
+    font-size: 1rem;
+    padding: 0.45rem 0.6rem;
+    border: 1px solid var(--line-strong);
+    border-radius: var(--radius-control);
+    background: var(--surface-2);
+    color: var(--ink);
+}
+.zb-calc-result {
+    margin-top: 0.5rem;
+    font-family: var(--font-display);
+    font-size: 1.5rem;
+    font-weight: 600;
+    text-align: right;
+    color: var(--evergreen-600);
+    min-height: 1.6em;
+    word-break: break-all;
+}
+.zb-calc-result.is-error {
+    color: var(--rust);
+    font-size: 0.95rem;
+    font-family: var(--font-ui);
+}
+.zb-calc-tape {
+    margin-top: 0.5rem;
+    max-height: 120px;
+    overflow-y: auto;
+    border-top: 1px solid var(--line);
+    padding-top: 0.4rem;
+}
+.zb-calc-tape-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.76rem;
+    color: var(--muted);
+    padding: 0.1rem 0;
+}
+.zb-calc-hint {
+    margin-top: 0.4rem;
+    font-size: 0.68rem;
+    color: var(--faint);
+}
+
+/* --- Go To navigator (Alt+G) ------------------------------------------- */
+.zb-goto-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(11, 35, 27, 0.42);
+    z-index: 1300;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding-top: 12vh;
+}
+.zb-goto {
+    width: min(620px, 92vw);
+    background: var(--surface);
+    border-radius: var(--radius-card);
+    box-shadow: 0 24px 64px rgba(11, 35, 27, 0.35);
+    overflow: hidden;
+    border: 1px solid var(--line);
+}
+.zb-goto-input-wrap {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.85rem 1rem;
+    border-bottom: 1px solid var(--line);
+}
+.zb-goto-input-wrap i {
+    color: var(--evergreen);
+    font-size: 1.15rem;
+}
+.zb-goto-input {
+    flex: 1;
+    border: none;
+    outline: none;
+    background: transparent;
+    font-size: 1.05rem;
+    color: var(--ink);
+}
+.zb-goto-results {
+    max-height: 44vh;
+    overflow-y: auto;
+    padding: 0.35rem;
+}
+.zb-goto-section {
+    font-size: 0.62rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--faint);
+    padding: 0.5rem 0.6rem 0.25rem;
+}
+.zb-goto-item {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.5rem 0.6rem;
+    border-radius: 8px;
+    cursor: pointer;
+    color: var(--ink);
+    font-size: 0.9rem;
+}
+.zb-goto-item .zb-goto-item-sub {
+    color: var(--faint);
+    font-size: 0.74rem;
+    margin-left: auto;
+}
+.zb-goto-item.is-active {
+    background: var(--evergreen);
+    color: #fff;
+}
+.zb-goto-item.is-active .zb-goto-item-sub {
+    color: rgba(255, 255, 255, 0.82);
+}
+.zb-goto-empty {
+    padding: 1.5rem;
+    text-align: center;
+    color: var(--faint);
+    font-size: 0.86rem;
+}
+
+/* --- Period picker stub (F2) ------------------------------------------- */
+.zb-modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(11, 35, 27, 0.42);
+    z-index: 1250;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.zb-modal {
+    width: min(420px, 92vw);
+    background: var(--surface);
+    border-radius: var(--radius-card);
+    border: 1px solid var(--line);
+    box-shadow: 0 24px 64px rgba(11, 35, 27, 0.35);
+    overflow: hidden;
+}
+.zb-modal-head {
+    padding: 0.85rem 1.1rem;
+    background: var(--evergreen);
+    color: #fff;
+    font-family: var(--font-display);
+    font-weight: 600;
+}
+.zb-modal-body {
+    padding: 1.1rem;
+}
+.zb-modal-foot {
+    padding: 0.75rem 1.1rem;
+    border-top: 1px solid var(--line);
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.5rem;
+}
+
+/* --- "Accept? Yes or No" gate ------------------------------------------
+   Sits above every other layer it can be raised over: the inline quick-create
+   sub-screen (z 30) creates a master, and the delete confirm (z 1260) is a
+   prompt in its own right — this one must be able to open on top of both. */
+.zb-accept-backdrop {
+    z-index: 1400;
+}
+.zb-accept {
+    width: min(340px, 92vw);
+}
+.zb-accept .zb-modal-body {
+    padding: 1rem 1.1rem 0.9rem;
+}
+.zb-accept-q {
+    margin: 0;
+    font-size: 0.95rem;
+    font-weight: 600;
+}
+.zb-accept-hint {
+    margin: 0.5rem 0 0;
+    font-size: 0.76rem;
+}
+
+/* --- Harness-specific ---------------------------------------------------- */
+.zb-form-row {
+    display: grid;
+    grid-template-columns: 180px 1fr;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.35rem 0;
+}
+.zb-form-row label {
+    color: var(--muted);
+    font-size: 0.85rem;
+    margin: 0;
+}
+.zb-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-control);
+    overflow: hidden;
+}
+.zb-list-item {
+    padding: 0.45rem 0.7rem;
+    border-bottom: 1px solid var(--line);
+    cursor: pointer;
+    font-size: 0.88rem;
+}
+.zb-list-item:last-child {
+    border-bottom: none;
+}
+.zb-list-item.is-active {
+    background: var(--evergreen);
+    color: #fff;
+}
+.zb-context-trail {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    flex-wrap: wrap;
+    font-size: 0.76rem;
+    color: var(--muted);
+}
+.zb-context-trail .zb-crumb {
+    background: var(--surface-2);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 0.05rem 0.45rem;
+}
+.zb-context-trail .zb-crumb.is-top {
+    background: var(--evergreen-tint);
+    border-color: var(--evergreen);
+    color: var(--evergreen-600);
+    font-weight: 600;
+}
+.zb-log {
+    font-family: ui-monospace, 'Cascadia Code', monospace;
+    font-size: 0.74rem;
+    background: var(--ink);
+    color: #cfe8dd;
+    border-radius: var(--radius-control);
+    padding: 0.6rem 0.75rem;
+    max-height: 180px;
+    overflow-y: auto;
+    line-height: 1.5;
+}
+.zb-log .zb-log-key {
+    color: #8fd9bd;
+    font-weight: 600;
+}
+
+/* --- Nested sub-screens (Tally screen-within-screen) -------------------- */
+.zb-subscreen {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 2rem 1.5rem;
+    background: rgba(11, 35, 27, 0.14);
+    overflow: auto;
+}
+.zb-subscreen .zb-subscreen-card {
+    width: min(560px, 100%);
+    background: var(--surface);
+    border: 1px solid var(--line-strong);
+    border-radius: var(--radius-card);
+    box-shadow: 0 22px 60px rgba(11, 35, 27, 0.28);
+    overflow: hidden;
+}
+.zb-subscreen .zb-subscreen-head {
+    background: var(--evergreen);
+    color: #fff;
+    padding: 0.6rem 1rem;
+    font-family: var(--font-display);
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+.zb-subscreen .zb-subscreen-body {
+    padding: 1rem 1.15rem 1.25rem;
+}
+.zb-sub-1 {
+    z-index: 20;
+}
+.zb-sub-2 {
+    z-index: 30;
+    padding-top: 3.25rem;
+}
+.zb-sub-3 {
+    z-index: 40;
+    padding-top: 4.5rem;
+}
+
+.zb-accepted-flash {
+    background: var(--evergreen-tint);
+    border: 1px solid var(--evergreen);
+    color: var(--evergreen-600);
+    border-radius: var(--radius-control);
+    padding: 0.4rem 0.7rem;
+    font-size: 0.82rem;
+    font-weight: 600;
+}
+
+/* Utility: hide element but keep it focus-reachable off-screen if needed */
+[x-cloak] {
+    display: none !important;
+}
+
+/* Phase 5E — F11 tax-regime mutual-exclusivity note */
+.zb-regime-note {
+    font-size: 0.78rem;
+    color: var(--amber);
+    background: rgba(183, 121, 31, 0.1);
+    border: 1px solid rgba(183, 121, 31, 0.3);
+    border-radius: 8px;
+    padding: 0.4rem 0.7rem;
+    margin: 0.6rem 0;
+}

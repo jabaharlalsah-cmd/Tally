@@ -1,0 +1,580 @@
+{
+  "_meta": {
+    "source": "Official GSTR-3B Offline Excel Utility V5.8 — the JSON is assembled by literal string concatenation inside vbaProject.bin; key names, order and enums were read from the extracted printable-string dump",
+    "tool_version": "GSTR-3B Excel Utility V5.8",
+    "derived_on_behalf_of": "ZeroBook",
+    "hsn_bifurcation_start_fp": "n/a (GSTR-3B has no HSN section)",
+    "caveats": [
+      "The utility zero-fills ALL 5 sup_details objects with the full {txval,iamt,camt,samt,csamt} set rather than trimming osup_zero/osup_nil_exmp/osup_nongst as the portal schema does.",
+      "eco_reg_sup (3.1.1(ii)) emits ONLY txval (omits iamt/camt/samt/csamt).",
+      "ltfee_details emits ONLY {camt, samt} (omits iamt and csamt).",
+      "inter_sup arrays (unreg_details/comp_details/uin_details) each emit ONLY {pos, txval, iamt} (iamt only, inter-state).",
+      "itc_net is an OBJECT {iamt,camt,samt,csamt}; itc_avl/itc_rev/itc_inelg are ARRAYS of {ty,...}. No txval anywhere under itc_elg.",
+      "Top-level key order is gstin, ret_period, sup_details, eco_dtls, itc_elg, inward_sup, intr_ltfee, inter_sup — inter_sup (Table 3.2) is emitted LAST, after intr_ltfee, not adjacent to sup_details.",
+      "Modest string-extraction caveat: sup_details' single shared money-key literal block is consistent with a loop that writes all 5 keys to every object; a per-object conditional skip cannot be 100% excluded from the string dump alone, but no trimmed variant appears.",
+      "Extractor and independent verifier both reported HIGH confidence; the verifier reproduced the exact literal stream and offsets."
+    ]
+  },
+  "_skeleton": {
+    "gstin": "...",
+    "ret_period": "MMYYYY",
+    "sup_details": {
+      "osup_det": {
+        "txval": 0,
+        "iamt": 0,
+        "camt": 0,
+        "samt": 0,
+        "csamt": 0
+      },
+      "osup_zero": {
+        "txval": 0,
+        "iamt": 0,
+        "camt": 0,
+        "samt": 0,
+        "csamt": 0
+      },
+      "osup_nil_exmp": {
+        "txval": 0,
+        "iamt": 0,
+        "camt": 0,
+        "samt": 0,
+        "csamt": 0
+      },
+      "isup_rev": {
+        "txval": 0,
+        "iamt": 0,
+        "camt": 0,
+        "samt": 0,
+        "csamt": 0
+      },
+      "osup_nongst": {
+        "txval": 0,
+        "iamt": 0,
+        "camt": 0,
+        "samt": 0,
+        "csamt": 0
+      }
+    },
+    "eco_dtls": {
+      "eco_sup": {
+        "txval": 0,
+        "iamt": 0,
+        "camt": 0,
+        "samt": 0,
+        "csamt": 0
+      },
+      "eco_reg_sup": {
+        "txval": 0
+      }
+    },
+    "itc_elg": {
+      "itc_avl": [
+        {
+          "ty": "IMPG",
+          "iamt": 0,
+          "camt": 0,
+          "samt": 0,
+          "csamt": 0
+        },
+        {
+          "ty": "IMPS",
+          "iamt": 0,
+          "camt": 0,
+          "samt": 0,
+          "csamt": 0
+        },
+        {
+          "ty": "ISRC",
+          "iamt": 0,
+          "camt": 0,
+          "samt": 0,
+          "csamt": 0
+        },
+        {
+          "ty": "ISD",
+          "iamt": 0,
+          "camt": 0,
+          "samt": 0,
+          "csamt": 0
+        },
+        {
+          "ty": "OTH",
+          "iamt": 0,
+          "camt": 0,
+          "samt": 0,
+          "csamt": 0
+        }
+      ],
+      "itc_rev": [
+        {
+          "ty": "RUL",
+          "iamt": 0,
+          "camt": 0,
+          "samt": 0,
+          "csamt": 0
+        },
+        {
+          "ty": "OTH",
+          "iamt": 0,
+          "camt": 0,
+          "samt": 0,
+          "csamt": 0
+        }
+      ],
+      "itc_net": {
+        "iamt": 0,
+        "camt": 0,
+        "samt": 0,
+        "csamt": 0
+      },
+      "itc_inelg": [
+        {
+          "ty": "RUL",
+          "iamt": 0,
+          "camt": 0,
+          "samt": 0,
+          "csamt": 0
+        },
+        {
+          "ty": "OTH",
+          "iamt": 0,
+          "camt": 0,
+          "samt": 0,
+          "csamt": 0
+        }
+      ]
+    },
+    "inward_sup": {
+      "isup_details": [
+        {
+          "ty": "GST",
+          "inter": 0,
+          "intra": 0
+        },
+        {
+          "ty": "NONGST",
+          "inter": 0,
+          "intra": 0
+        }
+      ]
+    },
+    "intr_ltfee": {
+      "intr_details": {
+        "iamt": 0,
+        "camt": 0,
+        "samt": 0,
+        "csamt": 0
+      },
+      "ltfee_details": {
+        "camt": 0,
+        "samt": 0
+      }
+    },
+    "inter_sup": {
+      "unreg_details": [
+        {
+          "pos": "NN",
+          "txval": 0,
+          "iamt": 0
+        }
+      ],
+      "comp_details": [
+        {
+          "pos": "NN",
+          "txval": 0,
+          "iamt": 0
+        }
+      ],
+      "uin_details": [
+        {
+          "pos": "NN",
+          "txval": 0,
+          "iamt": 0
+        }
+      ]
+    }
+  },
+  "_fields": [
+    {
+      "json_path": "(root)",
+      "key": "gstin",
+      "type": "string",
+      "required": true,
+      "precision": "n/a",
+      "meaning": "Taxpayer GSTIN"
+    },
+    {
+      "json_path": "(root)",
+      "key": "ret_period",
+      "type": "string",
+      "required": true,
+      "precision": "n/a",
+      "meaning": "Return period MMYYYY (two-char month token 01-12 concatenated with the year)"
+    },
+    {
+      "json_path": "(root)",
+      "key": "sup_details",
+      "type": "object",
+      "required": true,
+      "precision": "n/a",
+      "meaning": "Table 3.1 outward supplies and inward supplies liable to reverse charge"
+    },
+    {
+      "json_path": "sup_details",
+      "key": "osup_det",
+      "type": "object",
+      "required": true,
+      "precision": "n/a",
+      "meaning": "3.1(a) outward taxable (other than zero-rated/nil/exempt)"
+    },
+    {
+      "json_path": "sup_details",
+      "key": "osup_zero",
+      "type": "object",
+      "required": true,
+      "precision": "n/a",
+      "meaning": "3.1(b) outward zero-rated"
+    },
+    {
+      "json_path": "sup_details",
+      "key": "osup_nil_exmp",
+      "type": "object",
+      "required": true,
+      "precision": "n/a",
+      "meaning": "3.1(c) other outward nil-rated/exempt"
+    },
+    {
+      "json_path": "sup_details",
+      "key": "isup_rev",
+      "type": "object",
+      "required": true,
+      "precision": "n/a",
+      "meaning": "3.1(d) inward supplies liable to reverse charge"
+    },
+    {
+      "json_path": "sup_details",
+      "key": "osup_nongst",
+      "type": "object",
+      "required": true,
+      "precision": "n/a",
+      "meaning": "3.1(e) non-GST outward supplies"
+    },
+    {
+      "json_path": "sup_details.{osup_det|osup_zero|osup_nil_exmp|isup_rev|osup_nongst}",
+      "key": "txval",
+      "type": "number",
+      "required": true,
+      "precision": "2dp money",
+      "meaning": "Taxable value; emitted for ALL 5 sup_details objects"
+    },
+    {
+      "json_path": "sup_details.{osup_det|osup_zero|osup_nil_exmp|isup_rev|osup_nongst}",
+      "key": "iamt",
+      "type": "number",
+      "required": true,
+      "precision": "2dp money",
+      "meaning": "Integrated tax"
+    },
+    {
+      "json_path": "sup_details.{osup_det|osup_zero|osup_nil_exmp|isup_rev|osup_nongst}",
+      "key": "camt",
+      "type": "number",
+      "required": true,
+      "precision": "2dp money",
+      "meaning": "Central tax"
+    },
+    {
+      "json_path": "sup_details.{osup_det|osup_zero|osup_nil_exmp|isup_rev|osup_nongst}",
+      "key": "samt",
+      "type": "number",
+      "required": true,
+      "precision": "2dp money",
+      "meaning": "State/UT tax"
+    },
+    {
+      "json_path": "sup_details.{osup_det|osup_zero|osup_nil_exmp|isup_rev|osup_nongst}",
+      "key": "csamt",
+      "type": "number",
+      "required": true,
+      "precision": "2dp money",
+      "meaning": "Cess"
+    },
+    {
+      "json_path": "(root)",
+      "key": "eco_dtls",
+      "type": "object",
+      "required": true,
+      "precision": "n/a",
+      "meaning": "Table 3.1.1 supplies u/s 9(5) through e-commerce operators"
+    },
+    {
+      "json_path": "eco_dtls",
+      "key": "eco_sup",
+      "type": "object",
+      "required": true,
+      "precision": "n/a",
+      "meaning": "3.1.1(i) supplies on which ECO pays tax; emits txval,iamt,camt,samt,csamt"
+    },
+    {
+      "json_path": "eco_dtls",
+      "key": "eco_reg_sup",
+      "type": "object",
+      "required": true,
+      "precision": "n/a",
+      "meaning": "3.1.1(ii) registered-person supplies through ECO; emits ONLY txval (omits iamt/camt/samt/csamt)"
+    },
+    {
+      "json_path": "(root)",
+      "key": "itc_elg",
+      "type": "object",
+      "required": true,
+      "precision": "n/a",
+      "meaning": "Table 4 eligible ITC"
+    },
+    {
+      "json_path": "itc_elg",
+      "key": "itc_avl",
+      "type": "array",
+      "required": true,
+      "precision": "n/a",
+      "meaning": "4(A) ITC available; each entry {ty,iamt,camt,samt,csamt} (NO txval)"
+    },
+    {
+      "json_path": "itc_elg.itc_avl[]",
+      "key": "ty",
+      "type": "string",
+      "required": true,
+      "precision": "n/a",
+      "meaning": "ITC-available category enum: IMPG, IMPS, ISRC, ISD, OTH"
+    },
+    {
+      "json_path": "itc_elg",
+      "key": "itc_rev",
+      "type": "array",
+      "required": true,
+      "precision": "n/a",
+      "meaning": "4(B) ITC reversed; each entry {ty,iamt,camt,samt,csamt}"
+    },
+    {
+      "json_path": "itc_elg.itc_rev[]",
+      "key": "ty",
+      "type": "string",
+      "required": true,
+      "precision": "n/a",
+      "meaning": "ITC-reversal category enum: RUL, OTH"
+    },
+    {
+      "json_path": "itc_elg",
+      "key": "itc_net",
+      "type": "object",
+      "required": true,
+      "precision": "n/a",
+      "meaning": "4(C) net ITC available; OBJECT {iamt,camt,samt,csamt} (NOT an array, NO txval)"
+    },
+    {
+      "json_path": "itc_elg",
+      "key": "itc_inelg",
+      "type": "array",
+      "required": true,
+      "precision": "n/a",
+      "meaning": "4(D) ineligible ITC; each entry {ty,iamt,camt,samt,csamt}"
+    },
+    {
+      "json_path": "itc_elg.itc_inelg[]",
+      "key": "ty",
+      "type": "string",
+      "required": true,
+      "precision": "n/a",
+      "meaning": "Ineligible-ITC category enum: RUL, OTH"
+    },
+    {
+      "json_path": "itc_elg.itc_avl[] | itc_elg.itc_rev[] | itc_elg.itc_net | itc_elg.itc_inelg[]",
+      "key": "iamt/camt/samt/csamt",
+      "type": "number",
+      "required": true,
+      "precision": "2dp money",
+      "meaning": "Tax amounts on each ITC entry; there is NO txval anywhere under itc_elg"
+    },
+    {
+      "json_path": "(root)",
+      "key": "inward_sup",
+      "type": "object",
+      "required": true,
+      "precision": "n/a",
+      "meaning": "Table 5 values of exempt/nil/non-GST inward supplies"
+    },
+    {
+      "json_path": "inward_sup",
+      "key": "isup_details",
+      "type": "array",
+      "required": true,
+      "precision": "n/a",
+      "meaning": "Array of {ty,inter,intra}"
+    },
+    {
+      "json_path": "inward_sup.isup_details[]",
+      "key": "ty",
+      "type": "string",
+      "required": true,
+      "precision": "n/a",
+      "meaning": "Inward category enum: GST, NONGST"
+    },
+    {
+      "json_path": "inward_sup.isup_details[]",
+      "key": "inter",
+      "type": "number",
+      "required": true,
+      "precision": "2dp money",
+      "meaning": "Inter-state value (uses inter/intra, NOT txval/iamt money keys)"
+    },
+    {
+      "json_path": "inward_sup.isup_details[]",
+      "key": "intra",
+      "type": "number",
+      "required": true,
+      "precision": "2dp money",
+      "meaning": "Intra-state value"
+    },
+    {
+      "json_path": "(root)",
+      "key": "intr_ltfee",
+      "type": "object",
+      "required": true,
+      "precision": "n/a",
+      "meaning": "Table 5.1 interest and late fee"
+    },
+    {
+      "json_path": "intr_ltfee",
+      "key": "intr_details",
+      "type": "object",
+      "required": true,
+      "precision": "n/a",
+      "meaning": "Interest; {iamt,camt,samt,csamt} (NO txval)"
+    },
+    {
+      "json_path": "intr_ltfee",
+      "key": "ltfee_details",
+      "type": "object",
+      "required": true,
+      "precision": "n/a",
+      "meaning": "Late fee; emits ONLY {camt,samt} (omits iamt and csamt)"
+    },
+    {
+      "json_path": "(root)",
+      "key": "inter_sup",
+      "type": "object",
+      "required": true,
+      "precision": "n/a",
+      "meaning": "Table 3.2 inter-state supplies to unregistered / composition / UIN holders (emitted last)"
+    },
+    {
+      "json_path": "inter_sup",
+      "key": "unreg_details",
+      "type": "array",
+      "required": true,
+      "precision": "n/a",
+      "meaning": "To unregistered persons; each {pos,txval,iamt}"
+    },
+    {
+      "json_path": "inter_sup",
+      "key": "comp_details",
+      "type": "array",
+      "required": true,
+      "precision": "n/a",
+      "meaning": "To composition taxable persons; each {pos,txval,iamt}"
+    },
+    {
+      "json_path": "inter_sup",
+      "key": "uin_details",
+      "type": "array",
+      "required": true,
+      "precision": "n/a",
+      "meaning": "To UIN holders; each {pos,txval,iamt}"
+    },
+    {
+      "json_path": "inter_sup.{unreg_details|comp_details|uin_details}[]",
+      "key": "pos",
+      "type": "string",
+      "required": true,
+      "precision": "n/a",
+      "meaning": "Place of supply (state code)"
+    },
+    {
+      "json_path": "inter_sup.{unreg_details|comp_details|uin_details}[]",
+      "key": "txval",
+      "type": "number",
+      "required": true,
+      "precision": "2dp money",
+      "meaning": "Taxable value"
+    },
+    {
+      "json_path": "inter_sup.{unreg_details|comp_details|uin_details}[]",
+      "key": "iamt",
+      "type": "number",
+      "required": true,
+      "precision": "2dp money",
+      "meaning": "Integrated tax; ONLY iamt (inter-state, so NO camt/samt/csamt)"
+    }
+  ],
+  "_rules": {
+    "ret_period_format": "MMYYYY — a two-char month token ('01'..'12') concatenated with the selected 4-digit year",
+    "ty_enums": {
+      "itc_avl": [
+        "IMPG",
+        "IMPS",
+        "ISRC",
+        "ISD",
+        "OTH"
+      ],
+      "itc_rev": [
+        "RUL",
+        "OTH"
+      ],
+      "itc_inelg": [
+        "RUL",
+        "OTH"
+      ],
+      "isup_details": [
+        "GST",
+        "NONGST"
+      ]
+    },
+    "money_key_coverage": {
+      "sup_details_all_5_objects": "each of osup_det, osup_zero, osup_nil_exmp, isup_rev, osup_nongst emits the FULL set {txval,iamt,camt,samt,csamt} (tool zero-fills; does NOT trim like the portal schema)",
+      "eco_sup": "{txval,iamt,camt,samt,csamt}",
+      "eco_reg_sup": "{txval} ONLY (omits iamt/camt/samt/csamt)",
+      "itc_avl_rev_inelg": "arrays of {ty,iamt,camt,samt,csamt} — NO txval",
+      "itc_net": "OBJECT {iamt,camt,samt,csamt} — NOT an array, NO txval",
+      "isup_details": "{ty,inter,intra} — uses inter/intra, NOT txval/iamt money keys",
+      "intr_details": "{iamt,camt,samt,csamt}",
+      "ltfee_details": "{camt,samt} ONLY (omits iamt and csamt)",
+      "inter_sup_arrays": "unreg_details/comp_details/uin_details each = {pos,txval,iamt} (iamt only, inter-state)"
+    },
+    "top_level_key_order": [
+      "gstin",
+      "ret_period",
+      "sup_details",
+      "eco_dtls",
+      "itc_elg",
+      "inward_sup",
+      "intr_ltfee",
+      "inter_sup"
+    ],
+    "top_level_order_note": "inter_sup (Table 3.2) is emitted LAST, after intr_ltfee — not adjacent to sup_details",
+    "gstin_regex": "/[0-9]{2}[a-zA-Z]{5}[0-9]{4}[a-zA-Z]{1}[1-9A-Za-z]{1}[Zz1-9A-Ja-j]{1}[0-9a-zA-Z]{1}/"
+  },
+  "_absent": [
+    {
+      "expected_key": "tx_pmt / tax_pmt / txpmt / pmt_det",
+      "status": "DOES NOT EXIST",
+      "meaning": "No tax-payment / liability-payment section (e.g. Table 6.1 payment of tax) is emitted by the GSTR-3B Excel Utility V5.8 JSON",
+      "evidence": "grep for tx_pmt|tax_pmt|txpmt|pmt_det across the entire vbaProject.bin printable-string dump returned ZERO matches"
+    },
+    {
+      "expected_key": "cash / liab (cash-ledger / liability-ledger keys)",
+      "status": "DOES NOT EXIST",
+      "meaning": "No cash-ledger or liability-ledger keys exist anywhere in this JSON",
+      "evidence": "grep for cash|liab across the entire vbaProject.bin returned ZERO matches"
+    }
+  ]
+}

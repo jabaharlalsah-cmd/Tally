@@ -1,0 +1,464 @@
+/* =========================================================================
+   ZeroBook — Phase 4 financial reports styling
+   ========================================================================= */
+
+.zb-report {
+    max-width: 940px;
+}
+.zb-report-head {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 0.75rem;
+    flex-wrap: wrap;
+}
+.zb-report-title {
+    font-family: var(--font-display);
+    font-size: 1.35rem;
+    font-weight: 700;
+    color: var(--evergreen-600);
+}
+.zb-report-period {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.82rem;
+    color: var(--muted);
+}
+.zb-report-period input {
+    width: 9.5rem;
+}
+.zb-report-toggle {
+    background: var(--surface-2);
+    border: 1px solid var(--line-strong);
+    border-radius: 8px;
+    padding: 0.25rem 0.55rem;
+    font-size: 0.78rem;
+    color: var(--ink);
+    cursor: pointer;
+}
+.zb-report-toggle:hover {
+    background: var(--evergreen-tint);
+}
+
+.zb-report-surface {
+    outline: none;
+    max-height: 60vh;
+    overflow-y: auto;
+}
+.zb-report-surface:focus-visible {
+    box-shadow: inset 0 0 0 2px rgba(var(--evergreen-rgb), 0.25);
+    border-radius: 8px;
+}
+
+.zb-rtable {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.88rem;
+}
+.zb-rtable thead th {
+    text-align: left;
+    font-size: 0.68rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--faint);
+    padding: 0.3rem 0.5rem;
+    border-bottom: 1px solid var(--line);
+    position: sticky;
+    top: 0;
+    background: var(--surface);
+}
+.zb-rtable td {
+    padding: 0.28rem 0.5rem;
+    border-bottom: 1px solid var(--surface-2);
+}
+.zb-rtable .zb-vt-right {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+}
+.zb-rrow {
+    cursor: pointer;
+}
+.zb-r-caret {
+    display: inline-block;
+    width: 1em;
+    color: var(--faint);
+    font-size: 0.7rem;
+}
+.zb-r-group > td:first-child {
+    font-weight: 600;
+    color: var(--ink);
+}
+.zb-r-ledger > td:first-child {
+    color: var(--muted);
+}
+.zb-r-total > td {
+    border-top: 2px solid var(--line-strong);
+    border-bottom: none;
+    font-weight: 700;
+    font-family: var(--font-display);
+    padding-top: 0.45rem;
+}
+.zb-r-net > td {
+    color: var(--evergreen-600);
+    font-weight: 600;
+}
+.zb-r-diff > td {
+    color: var(--rust);
+    font-style: italic;
+}
+/* Phase 6D — P&L Opening/Closing Stock lines + Gross Profit c/d subtotal, and the
+   Stock Summary item leaf. */
+.zb-r-stock > td:first-child {
+    font-weight: 600;
+    color: var(--ink);
+}
+.zb-r-gross > td {
+    color: var(--evergreen-700);
+    font-weight: 600;
+    font-style: italic;
+}
+.zb-r-subtotal > td {
+    border-top: 1px solid var(--line);
+    border-bottom: 1px solid var(--line-strong);
+    font-weight: 600;
+}
+.zb-r-item > td:first-child {
+    color: var(--muted);
+}
+.zb-r-empty {
+    color: var(--muted);
+    text-align: center;
+    padding: 1.5rem;
+}
+.zb-rrow.is-active > td {
+    background: var(--evergreen);
+    color: #fff;
+}
+.zb-rrow.is-active .zb-r-caret {
+    color: rgba(255, 255, 255, 0.8);
+}
+
+/* two-column layout (BS / P&L) */
+.zb-rcols {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0 1.25rem;
+}
+.zb-rcol {
+    min-width: 0;
+}
+.zb-rcol + .zb-rcol {
+    border-left: 1px solid var(--line);
+    padding-left: 1.25rem;
+}
+.zb-rcol-head {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--faint);
+    font-weight: 700;
+    padding: 0.3rem 0.5rem;
+    border-bottom: 1px solid var(--line);
+}
+
+/* status footer */
+.zb-report-status {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-top: 0.75rem;
+    padding-top: 0.6rem;
+    border-top: 1px solid var(--line);
+    font-size: 0.84rem;
+}
+.zb-r-ok {
+    color: var(--evergreen-600);
+    font-weight: 600;
+}
+.zb-r-bad {
+    color: var(--rust);
+    font-weight: 600;
+}
+.zb-report-fy {
+    color: var(--faint);
+    font-size: 0.76rem;
+}
+
+/* ledger vouchers drill */
+.zb-lv-summary {
+    display: flex;
+    gap: 1.5rem;
+    margin: 0.5rem 0 0.75rem;
+    font-size: 0.84rem;
+    color: var(--muted);
+}
+.zb-daybook-item .zb-lv-running {
+    color: var(--evergreen-600);
+    font-weight: 600;
+}
+.zb-daybook-item.is-active .zb-lv-running {
+    color: #fff;
+}
+.zb-r-ledgername {
+    color: var(--evergreen-600);
+}
+
+/* ---- F11 features / F12 config ---- */
+.zb-feature-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+.zb-feature-toggle {
+    font-size: 0.78rem;
+    font-weight: 700;
+    padding: 0.1rem 0.55rem;
+    border-radius: 6px;
+    background: var(--surface-2);
+    border: 1px solid var(--line-strong);
+    color: var(--faint);
+    min-width: 3rem;
+    text-align: center;
+}
+.zb-feature-toggle.is-on {
+    background: var(--evergreen);
+    border-color: var(--evergreen);
+    color: #fff;
+}
+.zb-menu-item.is-active .zb-feature-toggle {
+    box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.4);
+}
+
+.zb-config {
+    width: min(460px, 92vw);
+    background: var(--surface);
+    border-radius: var(--radius-card);
+    border: 1px solid var(--line);
+    box-shadow: 0 24px 64px rgba(11, 35, 27, 0.35);
+    overflow: hidden;
+}
+.zb-config-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.75rem 1rem;
+    background: var(--evergreen);
+    color: #fff;
+    font-family: var(--font-display);
+    font-weight: 600;
+}
+.zb-config-ctx {
+    font-family: var(--font-ui);
+    font-size: 0.72rem;
+    font-weight: 400;
+    opacity: 0.85;
+    text-transform: capitalize;
+}
+.zb-config-body {
+    padding: 0.4rem;
+    outline: none;
+    max-height: 50vh;
+    overflow-y: auto;
+}
+.zb-config-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.55rem 0.7rem;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.9rem;
+}
+.zb-config-item.is-active {
+    background: var(--evergreen-tint);
+}
+.zb-config-foot {
+    padding: 0.5rem 1rem;
+    border-top: 1px solid var(--line);
+    font-size: 0.74rem;
+    color: var(--faint);
+}
+
+/* ---- GST Summary (Phase 5B) ---- */
+.zb-gst-off {
+    background: rgba(183, 121, 31, 0.1);
+    border: 1px solid rgba(183, 121, 31, 0.35);
+    color: var(--amber);
+    border-radius: 8px;
+    padding: 0.55rem 0.8rem;
+    font-size: 0.82rem;
+    margin-bottom: 0.75rem;
+}
+.zb-gst-table td {
+    padding: 0.35rem 0.6rem;
+}
+.zb-gst-section td {
+    font-family: var(--font-display);
+    font-weight: 700;
+    color: var(--evergreen-600);
+    border-top: 2px solid var(--line-strong);
+    padding-top: 0.6rem;
+    text-transform: none;
+}
+.zb-gst-row td {
+    color: var(--ink);
+}
+.zb-gst-row[data-ledger-id]:not([data-ledger-id=""]) {
+    cursor: pointer;
+}
+.zb-gst-row.is-active td {
+    background: var(--evergreen-tint);
+}
+.zb-gst-total td {
+    font-weight: 700;
+    border-top: 1px solid var(--line);
+}
+.zb-gst-net td {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 1.05rem;
+    color: var(--rust);
+    border-top: 2px solid var(--evergreen);
+    padding-top: 0.6rem;
+}
+.zb-gst-drill {
+    font-size: 0.66rem;
+    color: var(--faint);
+    margin-left: 0.5rem;
+}
+
+/* ---- Outstandings (Receivables / Payables) — Phase 5C ---- */
+.zb-out-table td { padding: 0.3rem 0.6rem; }
+.zb-out-party td {
+    font-family: var(--font-display);
+    font-weight: 700;
+    color: var(--evergreen-600);
+    border-top: 2px solid var(--line-strong);
+    padding-top: 0.55rem;
+}
+.zb-out-bill td { color: var(--ink); }
+.zb-out-bill[data-ref] { cursor: pointer; }
+.zb-out-bill.is-active td { background: var(--evergreen-tint); }
+.zb-out-ref { font-weight: 600; padding-left: 0.75rem; }
+.zb-out-onaccount td { color: var(--faint); font-style: italic; padding-left: 0.75rem; }
+.zb-out-subtotal td {
+    font-weight: 700;
+    border-bottom: 1px solid var(--line);
+    color: var(--muted);
+}
+.zb-out-grand td {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 1.02rem;
+    color: var(--evergreen-700);
+    border-top: 2px solid var(--evergreen);
+    padding-top: 0.5rem;
+}
+.zb-out-overdue-tag {
+    font-size: 0.62rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--rust);
+    background: rgba(176, 58, 46, 0.1);
+    border-radius: 4px;
+    padding: 0 0.3rem;
+    margin-left: 0.4rem;
+}
+
+/* ---- Cost Centre Breakup (Phase 5D) ---- */
+.zb-cc-table td { padding: 0.35rem 0.6rem; }
+.zb-cc-centre td {
+    font-family: var(--font-display);
+    font-weight: 700;
+    color: var(--evergreen-600);
+    border-top: 2px solid var(--line-strong);
+    padding-top: 0.55rem;
+    cursor: pointer;
+}
+.zb-cc-centre.is-active td { background: var(--evergreen-tint); }
+.zb-cc-ledger { padding-left: 0.9rem; color: var(--ink); }
+.zb-cc-subtotal td {
+    font-weight: 700;
+    border-bottom: 1px solid var(--line);
+    color: var(--muted);
+}
+.zb-cc-grand td {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 1.02rem;
+    color: var(--evergreen-700);
+    border-top: 2px solid var(--evergreen);
+    padding-top: 0.5rem;
+}
+.zb-cc-drill { font-size: 0.66rem; color: var(--faint); margin-left: 0.5rem; }
+
+/* ---- TDS Deduction Summary (Phase 10A) ---- */
+.zb-tds-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
+    gap: 0.6rem;
+    margin-bottom: 0.9rem;
+}
+.zb-tds-card {
+    border: 1px solid var(--line);
+    border-radius: var(--radius-control);
+    background: var(--surface-2);
+    padding: 0.55rem 0.75rem;
+}
+.zb-tds-card-label {
+    font-size: 0.72rem;
+    color: var(--muted);
+    letter-spacing: 0.02em;
+}
+.zb-tds-card-value {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--ink);
+    font-variant-numeric: tabular-nums;
+}
+.zb-tds-card-value.is-amber {
+    color: var(--amber);
+}
+.zb-tds-rtable td,
+.zb-tds-rtable th {
+    padding: 0.35rem 0.6rem;
+}
+.zb-tds-section td {
+    font-weight: 700;
+    background: var(--evergreen-tint);
+    color: var(--evergreen-700);
+}
+.zb-tds-deductee-name {
+    padding-left: 1rem;
+}
+.zb-tds-subtotal td {
+    font-weight: 600;
+    border-top: 1px solid var(--line);
+    color: var(--muted);
+}
+.zb-tds-pan {
+    font-family: ui-monospace, 'SF Mono', 'Cascadia Mono', menlo, monospace;
+    font-size: 0.76rem;
+    color: var(--muted);
+}
+.zb-tds-recon {
+    margin-top: 0.6rem;
+    font-size: 0.76rem;
+    line-height: 1.5;
+    color: var(--muted);
+    background: var(--surface-2);
+    border-left: 3px solid var(--amber);
+    border-radius: 0 6px 6px 0;
+    padding: 0.5rem 0.75rem;
+}
+.zb-tds-drill-reason {
+    list-style: none;
+    padding: 0.15rem 0.75rem 0.5rem 3.2rem;
+    font-size: 0.74rem;
+    color: var(--amber);
+}

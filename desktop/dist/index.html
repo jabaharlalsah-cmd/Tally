@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ZeroBook Desktop</title>
+    <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+    <div class="shell">
+        <header class="brand"><span class="dot"></span> ZeroBook <span class="edition">Desktop</span></header>
+
+        <main class="card">
+            <h1>Open a company</h1>
+            <p class="sub">Your books, keyboard-first — with full-keyboard control and offline entry.</p>
+
+            <ul id="tenant-list" class="tenants" aria-label="Remembered companies"></ul>
+
+            <form id="add-form" class="add">
+                <label for="host">Add a company</label>
+                <div class="row">
+                    <input id="host" type="text" placeholder="acme.zerobook.io" autocomplete="off" autofocus onclick="this.select()" />
+                    <button type="submit" class="btn">Open</button>
+                </div>
+                <p class="hint">Enter your company's ZeroBook address (e.g. <code>acme.zerobook.io</code>). For local dev, <code>acme.zerobook.local</code> or <code>localhost:8000</code>.</p>
+            </form>
+
+            <p id="err" class="err" hidden></p>
+        </main>
+
+        <footer class="foot">
+            ZeroBook Desktop · <span id="version">v—</span> · Phase 7C
+        </footer>
+    </div>
+
+    <script src="shell.js"></script>
+</body>
+</html>

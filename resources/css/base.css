@@ -1,0 +1,82 @@
+/* =========================================================================
+   ZeroBook — base UX standing rules (apply everywhere, all phases)
+   ========================================================================= */
+
+/* Remove number-input spinner arrows (Tally-style bare number fields) ----- */
+input[type='number'] {
+    -moz-appearance: textfield;
+    appearance: textfield;
+}
+input[type='number']::-webkit-outer-spin-button,
+input[type='number']::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+/* Keep the dropdown arrow on <select> visible (do NOT strip it) ----------- */
+select.form-select,
+select {
+    appearance: auto;
+}
+
+/* Brand focus ring — clear, keyboard-first ------------------------------- */
+.zb-field:focus,
+.zb-field:focus-visible,
+input.form-control:focus,
+select.form-select:focus,
+textarea.form-control:focus,
+[data-zb-focusable]:focus,
+[data-zb-focusable]:focus-visible {
+    outline: none;
+    border-color: var(--evergreen);
+    box-shadow: 0 0 0 3px rgba(var(--evergreen-rgb), 0.22);
+}
+
+/* Highlighted selection colour uses the brand tint ----------------------- */
+::selection {
+    background: rgba(var(--evergreen-rgb), 0.22);
+    color: var(--ink);
+}
+
+/* Keyboard badge --------------------------------------------------------- */
+kbd,
+.zb-kbd {
+    display: inline-block;
+    min-width: 1.35em;
+    padding: 0.05em 0.4em;
+    font-family: var(--font-ui);
+    font-size: 0.72rem;
+    font-weight: 600;
+    line-height: 1.4;
+    text-align: center;
+    color: var(--ink);
+    background: var(--surface);
+    border: 1px solid var(--line-strong);
+    border-bottom-width: 2px;
+    border-radius: 6px;
+    box-shadow: none;
+}
+
+/* A hot-letter within a menu label (highlighted-letter navigation) ------- */
+.zb-hot {
+    color: var(--evergreen);
+    font-weight: 700;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}
+[data-bs-theme='dark'] .zb-hot {
+    color: var(--evergreen);
+}
+
+/* Utility: brand primary button ------------------------------------------ */
+.zb-btn-primary {
+    background: var(--evergreen);
+    border-color: var(--evergreen);
+    color: #fff;
+}
+.zb-btn-primary:hover,
+.zb-btn-primary:focus {
+    background: var(--evergreen-600);
+    border-color: var(--evergreen-600);
+    color: #fff;
+}

@@ -1,0 +1,298 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ZeroBook Phase 7A — synthetic Tally XML export used by `zerobook:prove-tally-import`.
+
+  This models a documented TallyPrime "All Masters + Day Book" combined export:
+  an <ENVELOPE> wrapping <TALLYMESSAGE> records for masters and <VOUCHER>s.
+
+  Sign convention (the single most version-sensitive assumption — see PHASE7A_README):
+    • Ledger OPENINGBALANCE and voucher AMOUNT: NEGATIVE = Debit, POSITIVE = Credit.
+    • ISDEEMEDPOSITIVE = Yes marks the Debit side (cross-checks the amount sign).
+
+  The four vouchers are emitted DELIBERATELY OUT OF DATE ORDER (Journal 06th, then
+  Sales 05th, Payment 02nd, Purchase 03rd). The importer must sort them into strict
+  chronological order before posting — otherwise the Sales (05th) would post before
+  the Purchase (03rd) and lock the wrong weighted-average cost. That reordering is
+  exactly what the prove asserts.
+-->
+<ENVELOPE>
+ <HEADER>
+  <TALLYREQUEST>Export Data</TALLYREQUEST>
+ </HEADER>
+ <BODY>
+  <IMPORTDATA>
+   <REQUESTDESC>
+    <REPORTNAME>All Masters</REPORTNAME>
+    <STATICVARIABLES>
+     <SVCURRENTCOMPANY>Demo Trading Co (ZeroBook Sample)</SVCURRENTCOMPANY>
+    </STATICVARIABLES>
+   </REQUESTDESC>
+   <REQUESTDATA>
+
+    <!-- ===================== PREDEFINED GROUPS (must be REUSED, not duplicated) ===================== -->
+    <TALLYMESSAGE xmlns:UDF="TallyUDF"><GROUP NAME="Capital Account" RESERVEDNAME="Capital Account"><NAME.LIST><NAME>Capital Account</NAME></NAME.LIST><PARENT/></GROUP></TALLYMESSAGE>
+    <TALLYMESSAGE xmlns:UDF="TallyUDF"><GROUP NAME="Sales Accounts" RESERVEDNAME="Sales Accounts"><NAME.LIST><NAME>Sales Accounts</NAME></NAME.LIST><PARENT/></GROUP></TALLYMESSAGE>
+    <TALLYMESSAGE xmlns:UDF="TallyUDF"><GROUP NAME="Purchase Accounts" RESERVEDNAME="Purchase Accounts"><NAME.LIST><NAME>Purchase Accounts</NAME></NAME.LIST><PARENT/></GROUP></TALLYMESSAGE>
+    <TALLYMESSAGE xmlns:UDF="TallyUDF"><GROUP NAME="Sundry Debtors" RESERVEDNAME="Sundry Debtors"><NAME.LIST><NAME>Sundry Debtors</NAME></NAME.LIST><PARENT>Current Assets</PARENT></GROUP></TALLYMESSAGE>
+    <TALLYMESSAGE xmlns:UDF="TallyUDF"><GROUP NAME="Sundry Creditors" RESERVEDNAME="Sundry Creditors"><NAME.LIST><NAME>Sundry Creditors</NAME></NAME.LIST><PARENT>Current Liabilities</PARENT></GROUP></TALLYMESSAGE>
+    <TALLYMESSAGE xmlns:UDF="TallyUDF"><GROUP NAME="Cash-in-Hand" RESERVEDNAME="Cash-in-Hand"><NAME.LIST><NAME>Cash-in-Hand</NAME></NAME.LIST><PARENT>Current Assets</PARENT></GROUP></TALLYMESSAGE>
+
+    <!-- ===================== CUSTOM GROUPS (created; North Sales nests under a custom parent) ===================== -->
+    <TALLYMESSAGE xmlns:UDF="TallyUDF"><GROUP NAME="Sales Division"><NAME.LIST><NAME>Sales Division</NAME></NAME.LIST><PARENT>Sales Accounts</PARENT></GROUP></TALLYMESSAGE>
+    <TALLYMESSAGE xmlns:UDF="TallyUDF"><GROUP NAME="North Sales"><NAME.LIST><NAME>North Sales</NAME></NAME.LIST><PARENT>Sales Division</PARENT></GROUP></TALLYMESSAGE>
+    <TALLYMESSAGE xmlns:UDF="TallyUDF"><GROUP NAME="Cost of Goods"><NAME.LIST><NAME>Cost of Goods</NAME></NAME.LIST><PARENT>Purchase Accounts</PARENT></GROUP></TALLYMESSAGE>
+
+    <!-- ===================== UNITS ===================== -->
+    <TALLYMESSAGE xmlns:UDF="TallyUDF"><UNIT NAME="Nos"><NAME.LIST><NAME>Nos</NAME></NAME.LIST><ORIGINALNAME>Nos</ORIGINALNAME><DECIMALPLACES>0</DECIMALPLACES><ISSIMPLEUNIT>Yes</ISSIMPLEUNIT></UNIT></TALLYMESSAGE>
+    <TALLYMESSAGE xmlns:UDF="TallyUDF"><UNIT NAME="Kg"><NAME.LIST><NAME>Kg</NAME></NAME.LIST><ORIGINALNAME>Kg</ORIGINALNAME><DECIMALPLACES>3</DECIMALPLACES><ISSIMPLEUNIT>Yes</ISSIMPLEUNIT></UNIT></TALLYMESSAGE>
+
+    <!-- ===================== STOCK GROUP + GODOWN (Main Location REUSED) ===================== -->
+    <TALLYMESSAGE xmlns:UDF="TallyUDF"><STOCKGROUP NAME="Finished Goods"><NAME.LIST><NAME>Finished Goods</NAME></NAME.LIST><PARENT/></STOCKGROUP></TALLYMESSAGE>
+    <TALLYMESSAGE xmlns:UDF="TallyUDF"><GODOWN NAME="Main Location" RESERVEDNAME="Main Location"><NAME.LIST><NAME>Main Location</NAME></NAME.LIST><PARENT/></GODOWN></TALLYMESSAGE>
+
+    <!-- ===================== COST CATEGORY (NOT imported) + COST CENTRE (imported flat) ===================== -->
+    <TALLYMESSAGE xmlns:UDF="TallyUDF"><COSTCATEGORY NAME="Primary Cost Category"><NAME.LIST><NAME>Primary Cost Category</NAME></NAME.LIST><ALLOCATEREVENUE>Yes</ALLOCATEREVENUE></COSTCATEGORY></TALLYMESSAGE>
+    <TALLYMESSAGE xmlns:UDF="TallyUDF"><COSTCENTRE NAME="North Region"><NAME.LIST><NAME>North Region</NAME></NAME.LIST><CATEGORY>Primary Cost Category</CATEGORY><PARENT/></COSTCENTRE></TALLYMESSAGE>
+
+    <!-- ===================== A STOCK CATEGORY (NOT imported — proves the "not imported" report) ===================== -->
+    <TALLYMESSAGE xmlns:UDF="TallyUDF"><STOCKCATEGORY NAME="Imported Range"><NAME.LIST><NAME>Imported Range</NAME></NAME.LIST><PARENT/></STOCKCATEGORY></TALLYMESSAGE>
+
+    <!-- ===================== LEDGERS ===================== -->
+    <!-- Cash is a Tally-predefined ledger: REUSE the reserved id, but carry its opening (Dr 31,000). -->
+    <TALLYMESSAGE xmlns:UDF="TallyUDF">
+     <LEDGER NAME="Cash" RESERVEDNAME="Cash">
+      <NAME.LIST><NAME>Cash</NAME></NAME.LIST>
+      <PARENT>Cash-in-Hand</PARENT>
+      <OPENINGBALANCE>-31000.00</OPENINGBALANCE>
+     </LEDGER>
+    </TALLYMESSAGE>
+    <!-- Owner's capital — the Credit opening. -->
+    <TALLYMESSAGE xmlns:UDF="TallyUDF">
+     <LEDGER NAME="Rajan Capital A/c">
+      <NAME.LIST><NAME>Rajan Capital A/c</NAME></NAME.LIST>
+      <PARENT>Capital Account</PARENT>
+      <OPENINGBALANCE>51000.00</OPENINGBALANCE>
+     </LEDGER>
+    </TALLYMESSAGE>
+    <!-- Customer — the Debit opening; carries GST registration + state + PAN. -->
+    <TALLYMESSAGE xmlns:UDF="TallyUDF">
+     <LEDGER NAME="ABC Retail">
+      <NAME.LIST><NAME>ABC Retail</NAME></NAME.LIST>
+      <PARENT>Sundry Debtors</PARENT>
+      <OPENINGBALANCE>-20000.00</OPENINGBALANCE>
+      <COUNTRYNAME>India</COUNTRYNAME>
+      <LEDSTATENAME>Maharashtra</LEDSTATENAME>
+      <GSTREGISTRATIONTYPE>Regular</GSTREGISTRATIONTYPE>
+      <PARTYGSTIN>27AAACA1111A1Z1</PARTYGSTIN>
+      <INCOMETAXNUMBER>AAACA1111A</INCOMETAXNUMBER>
+      <ISBILLWISEON>No</ISBILLWISEON>
+     </LEDGER>
+    </TALLYMESSAGE>
+    <!-- Supplier — bill-by-bill ON (its lines carry bill references). -->
+    <TALLYMESSAGE xmlns:UDF="TallyUDF">
+     <LEDGER NAME="Modern Traders">
+      <NAME.LIST><NAME>Modern Traders</NAME></NAME.LIST>
+      <PARENT>Sundry Creditors</PARENT>
+      <OPENINGBALANCE>0</OPENINGBALANCE>
+      <COUNTRYNAME>India</COUNTRYNAME>
+      <LEDSTATENAME>Gujarat</LEDSTATENAME>
+      <ISBILLWISEON>Yes</ISBILLWISEON>
+     </LEDGER>
+    </TALLYMESSAGE>
+    <!-- Sales nominal under the custom two-level group North Sales ▸ Sales Division. -->
+    <TALLYMESSAGE xmlns:UDF="TallyUDF">
+     <LEDGER NAME="Trade Sales">
+      <NAME.LIST><NAME>Trade Sales</NAME></NAME.LIST>
+      <PARENT>North Sales</PARENT>
+     </LEDGER>
+    </TALLYMESSAGE>
+    <!-- Purchase nominal — cost centres applicable (its lines carry cost allocations). -->
+    <TALLYMESSAGE xmlns:UDF="TallyUDF">
+     <LEDGER NAME="Trade Purchases">
+      <NAME.LIST><NAME>Trade Purchases</NAME></NAME.LIST>
+      <PARENT>Cost of Goods</PARENT>
+      <ISCOSTCENTRESON>Yes</ISCOSTCENTRESON>
+     </LEDGER>
+    </TALLYMESSAGE>
+
+    <!-- ===================== STOCK ITEMS ===================== -->
+    <!-- Widget: opening 40 Nos @ 25 = 1,000 held at Main Location. -->
+    <TALLYMESSAGE xmlns:UDF="TallyUDF">
+     <STOCKITEM NAME="Widget">
+      <NAME.LIST><NAME>Widget</NAME></NAME.LIST>
+      <PARENT>Finished Goods</PARENT>
+      <BASEUNITS>Nos</BASEUNITS>
+      <OPENINGBALANCE>40 Nos</OPENINGBALANCE>
+      <OPENINGRATE>25.00/Nos</OPENINGRATE>
+      <OPENINGVALUE>1000.00</OPENINGVALUE>
+      <BATCHALLOCATIONS.LIST>
+       <GODOWNNAME>Main Location</GODOWNNAME>
+       <OPENINGBALANCE>40 Nos</OPENINGBALANCE>
+       <OPENINGVALUE>1000.00</OPENINGVALUE>
+      </BATCHALLOCATIONS.LIST>
+     </STOCKITEM>
+    </TALLYMESSAGE>
+    <!-- Gadget: no opening; a second unit (Kg, 3 decimals). -->
+    <TALLYMESSAGE xmlns:UDF="TallyUDF">
+     <STOCKITEM NAME="Gadget">
+      <NAME.LIST><NAME>Gadget</NAME></NAME.LIST>
+      <PARENT>Finished Goods</PARENT>
+      <BASEUNITS>Kg</BASEUNITS>
+      <OPENINGBALANCE>0</OPENINGBALANCE>
+     </STOCKITEM>
+    </TALLYMESSAGE>
+
+    <!-- ============================================================================= -->
+    <!-- ===============================  VOUCHERS  =================================== -->
+    <!-- ========== emitted OUT OF DATE ORDER on purpose (see header note) ============ -->
+
+    <!-- (1 in file) JOURNAL — 06 Apr: direct cost booked to Purchases (e.g. inward freight),
+         cost-centre allocated to North Region; supplier leg bill-referenced. No stock. -->
+    <TALLYMESSAGE xmlns:UDF="TallyUDF">
+     <VOUCHER VCHTYPE="Journal" ACTION="Create">
+      <DATE>20260406</DATE>
+      <VOUCHERTYPENAME>Journal</VOUCHERTYPENAME>
+      <VOUCHERNUMBER>1</VOUCHERNUMBER>
+      <NARRATION>Inward freight charged to purchases (North Region)</NARRATION>
+      <ALLLEDGERENTRIES.LIST>
+       <LEDGERNAME>Trade Purchases</LEDGERNAME>
+       <ISDEEMEDPOSITIVE>Yes</ISDEEMEDPOSITIVE>
+       <AMOUNT>-1000.00</AMOUNT>
+       <CATEGORYALLOCATIONS.LIST>
+        <CATEGORY>Primary Cost Category</CATEGORY>
+        <COSTCENTREALLOCATIONS.LIST>
+         <NAME>North Region</NAME>
+         <AMOUNT>-1000.00</AMOUNT>
+        </COSTCENTREALLOCATIONS.LIST>
+       </CATEGORYALLOCATIONS.LIST>
+      </ALLLEDGERENTRIES.LIST>
+      <ALLLEDGERENTRIES.LIST>
+       <LEDGERNAME>Modern Traders</LEDGERNAME>
+       <ISDEEMEDPOSITIVE>No</ISDEEMEDPOSITIVE>
+       <AMOUNT>1000.00</AMOUNT>
+       <BILLALLOCATIONS.LIST>
+        <NAME>PB-101</NAME>
+        <BILLTYPE>New Ref</BILLTYPE>
+        <AMOUNT>1000.00</AMOUNT>
+       </BILLALLOCATIONS.LIST>
+      </ALLLEDGERENTRIES.LIST>
+     </VOUCHER>
+    </TALLYMESSAGE>
+
+    <!-- (2 in file) SALES — 05 Apr: item invoice, sell 30 Widget @ 90 to ABC Retail.
+         Revenue leg nested in ACCOUNTINGALLOCATIONS (invoice view). Cost is NOT in the
+         file — ZeroBook locks it from the running weighted average AFTER the Purchase. -->
+    <TALLYMESSAGE xmlns:UDF="TallyUDF">
+     <VOUCHER VCHTYPE="Sales" ACTION="Create" OBJVIEW="Invoice Voucher View">
+      <DATE>20260405</DATE>
+      <VOUCHERTYPENAME>Sales</VOUCHERTYPENAME>
+      <VOUCHERNUMBER>1</VOUCHERNUMBER>
+      <REFERENCE>INV-2026-001</REFERENCE>
+      <PARTYLEDGERNAME>ABC Retail</PARTYLEDGERNAME>
+      <NARRATION>Sold 30 Widget @ 90</NARRATION>
+      <ALLLEDGERENTRIES.LIST>
+       <LEDGERNAME>ABC Retail</LEDGERNAME>
+       <ISDEEMEDPOSITIVE>Yes</ISDEEMEDPOSITIVE>
+       <AMOUNT>-2700.00</AMOUNT>
+      </ALLLEDGERENTRIES.LIST>
+      <ALLINVENTORYENTRIES.LIST>
+       <STOCKITEMNAME>Widget</STOCKITEMNAME>
+       <ISDEEMEDPOSITIVE>No</ISDEEMEDPOSITIVE>
+       <RATE>90.00/Nos</RATE>
+       <AMOUNT>2700.00</AMOUNT>
+       <ACTUALQTY>30 Nos</ACTUALQTY>
+       <BILLEDQTY>30 Nos</BILLEDQTY>
+       <ACCOUNTINGALLOCATIONS.LIST>
+        <LEDGERNAME>Trade Sales</LEDGERNAME>
+        <ISDEEMEDPOSITIVE>No</ISDEEMEDPOSITIVE>
+        <AMOUNT>2700.00</AMOUNT>
+       </ACCOUNTINGALLOCATIONS.LIST>
+       <BATCHALLOCATIONS.LIST>
+        <GODOWNNAME>Main Location</GODOWNNAME>
+        <AMOUNT>2700.00</AMOUNT>
+        <ACTUALQTY>30 Nos</ACTUALQTY>
+        <BILLEDQTY>30 Nos</BILLEDQTY>
+       </BATCHALLOCATIONS.LIST>
+      </ALLINVENTORYENTRIES.LIST>
+     </VOUCHER>
+    </TALLYMESSAGE>
+
+    <!-- (3 in file) PAYMENT — 02 Apr: advance of 5,000 to Modern Traders, from Cash. -->
+    <TALLYMESSAGE xmlns:UDF="TallyUDF">
+     <VOUCHER VCHTYPE="Payment" ACTION="Create">
+      <DATE>20260402</DATE>
+      <VOUCHERTYPENAME>Payment</VOUCHERTYPENAME>
+      <VOUCHERNUMBER>1</VOUCHERNUMBER>
+      <NARRATION>Advance paid to Modern Traders</NARRATION>
+      <ALLLEDGERENTRIES.LIST>
+       <LEDGERNAME>Modern Traders</LEDGERNAME>
+       <ISDEEMEDPOSITIVE>Yes</ISDEEMEDPOSITIVE>
+       <AMOUNT>-5000.00</AMOUNT>
+       <BILLALLOCATIONS.LIST>
+        <NAME>ADV-1</NAME>
+        <BILLTYPE>Advance</BILLTYPE>
+        <AMOUNT>-5000.00</AMOUNT>
+       </BILLALLOCATIONS.LIST>
+      </ALLLEDGERENTRIES.LIST>
+      <ALLLEDGERENTRIES.LIST>
+       <LEDGERNAME>Cash</LEDGERNAME>
+       <ISDEEMEDPOSITIVE>No</ISDEEMEDPOSITIVE>
+       <AMOUNT>5000.00</AMOUNT>
+      </ALLLEDGERENTRIES.LIST>
+     </VOUCHER>
+    </TALLYMESSAGE>
+
+    <!-- (4 in file) PURCHASE — 03 Apr: item invoice, buy 60 Widget @ 50 from Modern Traders.
+         Purchase leg nested in ACCOUNTINGALLOCATIONS, cost-centre allocated; supplier
+         bill-referenced. This is what raises the running average to 40 before the Sale. -->
+    <TALLYMESSAGE xmlns:UDF="TallyUDF">
+     <VOUCHER VCHTYPE="Purchase" ACTION="Create" OBJVIEW="Invoice Voucher View">
+      <DATE>20260403</DATE>
+      <VOUCHERTYPENAME>Purchase</VOUCHERTYPENAME>
+      <VOUCHERNUMBER>1</VOUCHERNUMBER>
+      <REFERENCE>BILL-88</REFERENCE>
+      <PARTYLEDGERNAME>Modern Traders</PARTYLEDGERNAME>
+      <NARRATION>Bought 60 Widget @ 50</NARRATION>
+      <ALLLEDGERENTRIES.LIST>
+       <LEDGERNAME>Modern Traders</LEDGERNAME>
+       <ISDEEMEDPOSITIVE>No</ISDEEMEDPOSITIVE>
+       <AMOUNT>3000.00</AMOUNT>
+       <BILLALLOCATIONS.LIST>
+        <NAME>PB-100</NAME>
+        <BILLTYPE>New Ref</BILLTYPE>
+        <AMOUNT>3000.00</AMOUNT>
+       </BILLALLOCATIONS.LIST>
+      </ALLLEDGERENTRIES.LIST>
+      <ALLINVENTORYENTRIES.LIST>
+       <STOCKITEMNAME>Widget</STOCKITEMNAME>
+       <ISDEEMEDPOSITIVE>Yes</ISDEEMEDPOSITIVE>
+       <RATE>50.00/Nos</RATE>
+       <AMOUNT>-3000.00</AMOUNT>
+       <ACTUALQTY>60 Nos</ACTUALQTY>
+       <BILLEDQTY>60 Nos</BILLEDQTY>
+       <ACCOUNTINGALLOCATIONS.LIST>
+        <LEDGERNAME>Trade Purchases</LEDGERNAME>
+        <ISDEEMEDPOSITIVE>Yes</ISDEEMEDPOSITIVE>
+        <AMOUNT>-3000.00</AMOUNT>
+        <CATEGORYALLOCATIONS.LIST>
+         <CATEGORY>Primary Cost Category</CATEGORY>
+         <COSTCENTREALLOCATIONS.LIST>
+          <NAME>North Region</NAME>
+          <AMOUNT>-3000.00</AMOUNT>
+         </COSTCENTREALLOCATIONS.LIST>
+        </CATEGORYALLOCATIONS.LIST>
+       </ACCOUNTINGALLOCATIONS.LIST>
+       <BATCHALLOCATIONS.LIST>
+        <GODOWNNAME>Main Location</GODOWNNAME>
+        <AMOUNT>-3000.00</AMOUNT>
+        <ACTUALQTY>60 Nos</ACTUALQTY>
+        <BILLEDQTY>60 Nos</BILLEDQTY>
+       </BATCHALLOCATIONS.LIST>
+      </ALLINVENTORYENTRIES.LIST>
+     </VOUCHER>
+    </TALLYMESSAGE>
+
+   </REQUESTDATA>
+  </IMPORTDATA>
+ </BODY>
+</ENVELOPE>

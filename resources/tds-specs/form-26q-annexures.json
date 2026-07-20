@@ -1,0 +1,280 @@
+{
+ "state_codes": {
+  "ANDAMAN AND NICOBAR ISLANDS": "01",
+  "ANDHRA PRADESH": "02",
+  "ARUNACHAL PRADESH": "03",
+  "ASSAM": "04",
+  "BIHAR": "05",
+  "CHANDIGARH": "06",
+  "DADRA & NAGAR HAVELI AND DAMAN & DIU": "07",
+  "DELHI": "09",
+  "GOA": "10",
+  "GUJARAT": "11",
+  "HARYANA": "12",
+  "HIMACHAL PRADESH": "13",
+  "JAMMU & KASHMIR": "14",
+  "KARNATAKA": "15",
+  "KERALA": "16",
+  "LAKSHWADEEP": "17",
+  "MADHYA PRADESH": "18",
+  "MAHARASHTRA": "19",
+  "MANIPUR": "20",
+  "MEGHALAYA": "21",
+  "MIZORAM": "22",
+  "NAGALAND": "23",
+  "ODISHA": "24",
+  "PONDICHERRY": "25",
+  "PUNJAB": "26",
+  "RAJASTHAN": "27",
+  "SIKKIM": "28",
+  "TAMIL NADU": "29",
+  "TRIPURA": "30",
+  "UTTAR PRADESH": "31",
+  "WEST BENGAL": "32",
+  "CHHATTISGARH": "33",
+  "UTTARAKHAND": "34",
+  "JHARKHAND": "35",
+  "TELANGANA": "36",
+  "LADAKH": "37"
+ },
+ "section_codes": [
+  {
+   "code": "1004",
+   "section": "392(7)",
+   "nature": "Any payment of accumulated balance due to an employee"
+  },
+  {
+   "code": "1005",
+   "section": "393(1) [Table: Sl. No. 1(i)]",
+   "nature": "Commission or brokerage - insurance"
+  },
+  {
+   "code": "1006",
+   "section": "393(1) [Table: Sl. No. 1(ii)]",
+   "nature": "Commission or Brokerage - others"
+  },
+  {
+   "code": "1008",
+   "section": "393(1) [Table: Sl. No. 2(ii).D(a)]",
+   "nature": "Rent on machinery etc.- specified person"
+  },
+  {
+   "code": "1009",
+   "section": "393(1) [Table: Sl. No. 2(ii).D(b)]",
+   "nature": "Rent other than machinery etc.- specified person"
+  },
+  {
+   "code": "1011",
+   "section": "393(1) [Table: Sl. No. 3(ii)]",
+   "nature": "Payment on any consideration, not being consideration in kind, under the agreeme"
+  },
+  {
+   "code": "1012",
+   "section": "393(1) [Table: Sl. No. 3(iii)]",
+   "nature": "Payment of Compensation on Acquisition of Certain Immovable Property"
+  },
+  {
+   "code": "1013",
+   "section": "393(1) [Table: Sl. No. 4(i)]",
+   "nature": "Income payable to a resident assessee in respect of Units of a specified Mutual "
+  },
+  {
+   "code": "1014",
+   "section": "393(1) [Table: Sl. No.  4(ii)]",
+   "nature": "Certain income in the form of interest from units of a business trust to a resid"
+  },
+  {
+   "code": "1015",
+   "section": "393(1) [Table: Sl. No.  4(ii)]",
+   "nature": "Certain income in the form of dividend from units of a business trust to a resid"
+  },
+  {
+   "code": "1016",
+   "section": "393(1) [Table: Sl. No.  4(ii)]",
+   "nature": "Certain income in the form of Renting from units of a business trust being a rea"
+  },
+  {
+   "code": "1017",
+   "section": "393(1) [Table: Sl. No.  4(iii)]",
+   "nature": "Any income, other than that proportion of income which is exempt under Schedule "
+  },
+  {
+   "code": "1018",
+   "section": "393(1) [Table: Sl. No.  4(iv)]",
+   "nature": "Any income, in respect of an investment in a securitisation trust specified in s"
+  },
+  {
+   "code": "1019",
+   "section": "393(1) [Table: Sl. No. 5(i)]",
+   "nature": "Any income by way of Interest on securities"
+  },
+  {
+   "code": "1020",
+   "section": "393(1) [Table: Sl. No. 5(ii).D(a)]",
+   "nature": "Any income by way of interest other than interest on securities, in case of dedu"
+  },
+  {
+   "code": "1021",
+   "section": "393(1) [Table: Sl. No. 5(ii).D(b)]",
+   "nature": "Any income by way of interest other than interest on securities, in case of dedu"
+  },
+  {
+   "code": "1022",
+   "section": "393(1) [Table: Sl. No. 5(iii)]",
+   "nature": "Any income being interest other than interest on securities"
+  },
+  {
+   "code": "1023",
+   "section": "393(1) [Table: Sl. No. 6(i).D(a)]",
+   "nature": "Any sum for carrying out any work (including supply of labour for carrying out a"
+  },
+  {
+   "code": "1024",
+   "section": "393(1) [Table: Sl. No. 6(i).D(b)]",
+   "nature": "Any sum for carrying out any work (including supply of labour for carrying out a"
+  },
+  {
+   "code": "1026",
+   "section": "393(1) [Table: Sl. No. 6(iii).D(a)]",
+   "nature": "Any sum by way of\u2013\u2013 (a) fees for technical services (not being a professional se"
+  },
+  {
+   "code": "1027",
+   "section": "393(1) [Table: Sl. No. 6(iii).D(b)]",
+   "nature": "Any sum by way of\u2013\u2013 (a) fees for professional services; or (b) any sum referred "
+  },
+  {
+   "code": "1028",
+   "section": "393(1) [Table: Sl. No. 6(iii).D(b)]",
+   "nature": "Any sum by way of remuneration or fees or commission by whatever name called, ot"
+  },
+  {
+   "code": "1029",
+   "section": "393(1) [Table: Sl. No. 7]",
+   "nature": "Any dividends (including on preference shares) declared."
+  },
+  {
+   "code": "1030",
+   "section": "393(1) [Table: Sl. No. 8(i)]",
+   "nature": "Any sum under a life insurance policy, including the sum allocated as bonus on s"
+  },
+  {
+   "code": "1031",
+   "section": "393(1) [Table: Sl. No.  8(ii)]",
+   "nature": "Any sum for purchase of any goods"
+  },
+  {
+   "code": "1033",
+   "section": "393(1) [Table: Sl. No.  8(iv)]",
+   "nature": "Any benefit or perquisite, whether convertible into money or not, arising from b"
+  },
+  {
+   "code": "1034",
+   "section": "393(1) [Table: Sl. No.  8(iv)] Note 6",
+   "nature": "Benefits or perquisites of business or profession where such benefit is provided"
+  },
+  {
+   "code": "1035",
+   "section": "393(1) [Table: Sl. No.  8(v)]",
+   "nature": "Sale of goods or provision of services by an e-commerce participant, facilitated"
+  },
+  {
+   "code": "1037",
+   "section": "393(1) [Table: Sl. No.  8(vi)]",
+   "nature": "Any sum by way of consideration for transfer of a virtual digital asset by other"
+  },
+  {
+   "code": "1038",
+   "section": "393(1) [Table: Sl. No.  8(vi)] Note 6",
+   "nature": "Any sum by way of consideration, whether in cash or in kind or partly in cash an"
+  },
+  {
+   "code": "1058",
+   "section": "393(3) [Table: Sl. No. 1]",
+   "nature": "Any income by way of winnings (other than winnings from Sl. No. 2 of the table a"
+  },
+  {
+   "code": "1059",
+   "section": "393(3) [Table: Sl. No. 1] Note 2",
+   "nature": "Any income by way of winnings (other than winnings from Sl. No. 2 of the table a"
+  },
+  {
+   "code": "1060",
+   "section": "393(3) [Table: Sl. No. 2]",
+   "nature": "Any income by way of winnings from online game."
+  },
+  {
+   "code": "1061",
+   "section": "393(3) [Table: Sl. No. 2] Note 2",
+   "nature": "Any income by way of winnings from online games, is made in kind or cash is not "
+  },
+  {
+   "code": "1062",
+   "section": "393(3) [Table: Sl. No. 3]",
+   "nature": "Any income by way of winnings from any horse race."
+  },
+  {
+   "code": "1063",
+   "section": "393(3) [Table: Sl. No. 4]",
+   "nature": "Any income, credited or paid to a person, who is or has been stocking, distribut"
+  },
+  {
+   "code": "1064",
+   "section": "393(3) [Table: Sl. No.  5.D(a)]",
+   "nature": "Payment of certain amounts in cash by bank/ post office / co-operative society t"
+  },
+  {
+   "code": "1065",
+   "section": "393(3) [Table: Sl. No.  5.D(b)]",
+   "nature": "Payment of certain amounts in cash by bank/ post office / co-operative society t"
+  },
+  {
+   "code": "1066",
+   "section": "393(3) [Table: Sl. No. 6]",
+   "nature": "Any amount referred to in section 80CCA(2)(a) of the Income-tax Act, 1961 (43 of"
+  },
+  {
+   "code": "1067",
+   "section": "393(3) [Table: Sl. No.  7]",
+   "nature": "Any sum in the nature of salary, remuneration, commission, bonus or interest pai"
+  }
+ ],
+ "deductor_types": {
+  "A": "Central Government",
+  "S": "State Government",
+  "D": "Statutory body (Central Govt.)",
+  "E": "Statutory body (State Govt.)",
+  "G": "Autonomous body (Central Govt.)",
+  "H": "Autonomous body (State Govt.)",
+  "L": "Local Authority (Central Govt.)",
+  "N": "Local Authority (State Govt.)",
+  "K": "Company",
+  "M": "Branch / Division of Company",
+  "P": "Association of Person (AOP)",
+  "T": "Association of Person (Trust)",
+  "J": "Artificial Juridical Person",
+  "B": "Body of Individuals",
+  "Q": "Individual/HUF",
+  "F": "Firm"
+ },
+ "nondeduction_flags": {
+  "A": "Flag A - \u201cLower deduction\u201d or \u201cno deduction\u201d is on account of a certificate under section 395(1)",
+  "B": "No deduction is on account of declaration under section 393(6)",
+  "C": "Deduction is on higher rate under section 397(2) on account of non-furnishing of PAN",
+  "D": "No deduction or lower deduction is on account of payment made to a person or class of person on account of notification ",
+  "E": "No deduction is on account of payment being made to a person referred to in Board Circular No. 3 of 2002 dated 28th June",
+  "N": "No deduction is on account of payment made to a person referred to in section 393(4) [Table: Sl. No. 18] of the Act or o",
+  "O": "No deduction as per the provisions of section 393(4) [Table: Sl. No. 5]",
+  "P": "No deduction is on account of payment of dividend made to a business trust referred to in section 393(4) [Table: Sl. No.",
+  "Q": "No deduction is on account of payment made to an entity referred to in section 393(4) Table: [Sl. No. 7(c)(v)]",
+  "S": "No deduction is in view of the tax being deductible or collectible under any provision of the Act w.r.t. transaction ref",
+  "T": "No deduction is on account of deductee/payee being transporter. PAN of deductee/payee is mandatory {section 393(4) [Tabl",
+  "Y": "No deduction is on account of payment below threshold limit as specified in the Act",
+  "Z": "No deduction or lower deduction is on account of payment in view of notification issued under section 400(1) of the Act"
+ },
+ "minor_heads": {
+  "200": "TDS payable by taxpayer",
+  "400": "TDS regular assessment (Raised by I. T, Dept.)",
+  "100": "Advance Tax"
+ }
+}

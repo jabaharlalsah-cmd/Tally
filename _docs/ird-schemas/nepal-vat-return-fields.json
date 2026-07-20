@@ -1,0 +1,118 @@
+{
+  "_meta": {
+    "form_id": "अनुसूची-१०",
+    "form_id_en": "Schedule 10",
+    "form_title_np": "मूल्य अभिवृद्धि कर विवरण फाराम",
+    "form_title_en": "Value Added Tax Return Form",
+    "legal_basis_np": "नियम २६ को उपनियम (१) सँग सम्बन्धित",
+    "legal_basis_en": "Related to Rule 26, sub-rule (1)",
+    "issuer_np": "नेपाल सरकार / अर्थ मन्त्रालय / आन्तरिक राजस्व विभाग",
+    "issuer_en": "Government of Nepal / Ministry of Finance / Inland Revenue Department",
+    "artifact": "मूल्य अभिवृद्धि कर नियमावली, २०५३ (VAT Rules, 2053) — Schedule 10, pages 70-73",
+    "artifact_file": "_docs/ird-schemas/vat-rules-2053-schedule10.pdf",
+    "artifact_source_url": "https://giwmscdnone.gov.np/media/pdf_upload/6.%20मूल्य%20अभिवृद्धि%20कर%20नियमावली,%20२०५३_he8d94n.pdf",
+    "artifact_corroboration": "Nepal Law Commission repository (watermark 'नेपाल कानून आयोग' / www.lawcommission.gov.np visible on every rendered page). The IRD taxpayer portal's E-VAT Return Entry screen carries the identical header (अनुसूची-१०, नियम २६ को उपनियम (१), मूल्य अभिवृद्धि कर विवरण फारम).",
+    "read_by": "Pages 70, 71, 72 and 73 were rendered and read directly. Every box number, Devanagari label, and — critically — which of the three value columns is enterable (white) vs blocked (shaded) was taken from the rendered form, not from any secondary description.",
+    "amendments_printed_on_form": [
+      "p.70 footnote (*): नेपाल राजपत्रमा मिति २०७३।७।२४ मा प्रकाशित सूचनाद्वारा हेरफेर गरिएको — the form header was amended by Gazette notice of 2073/07/24 BS.",
+      "p.72 footnote (⌀), attached to box 9: मिति २०७७।०६।१९ को नेपाल राजपत्रमा प्रकाशित सूचनाद्वारा संशोधित — box 9 was amended by Gazette notice of 2077/06/19 BS."
+    ],
+    "language": "Every field label on the form is Nepali (Devanagari). The only English token anywhere on the form is 'USER ID' in the signature/office block (p.73).",
+    "filing_channel": "IRD taxpayer portal WEB-FORM ENTRY ONLY. IRD publishes no upload schema/template for the VAT return itself, and no XML/JSON/CSV return-file upload path exists. Verified from IRD's own 'VAT return help file' (taxpayerportal.ird.gov.np/Help/) — whose documented flow is E-VAT Return Entry → submission number (70000000****) → manual data entry → Save → validate → Submit — and independently re-checked by two adversarial searches which failed to find any contradicting primary source. The sales/purchase REGISTER (अनुसूची-९ / अनुसूची-८) is a SEPARATE Excel upload for taxpayers on IRD's mandatory-upload list; its column schema could NOT be verified and is therefore NOT implemented by ZeroBook.",
+    "rounding_instruction_np": "यदि यस अवधिमा कारोवार नगरेको भए तलको महलमा शुन्य राखेर विवरणमा हस्ताक्षर गर्नुहोस् । रु.१ भन्दा घटि भएमा पैसालाई रु.१ मा मिलान गरी विवरण भर्नुहोला ।",
+    "rounding_instruction_en": "If no transaction took place in this period, put zero in the columns below and sign the return. If [an amount] is less than Re. 1, adjust the paisa to Re. 1 when filling the return.",
+    "rounding_instruction_page": 71,
+    "rounding_implementation": "Amounts are reported in WHOLE RUPEES. A non-zero amount that would round to 0 is reported as 1 (or -1 when negative), per the sentence above. A genuinely zero amount stays 0.",
+    "period_model": {
+      "form_fields_np": ["कर अवधि", "वर्ष"],
+      "selection": "The month is chosen by ticking one cell of a grid (जुन महिनाको हो त्यसमा (√) चिन्ह लगाउनुहोस्).",
+      "monthly_np": ["साउन", "भदौ", "असोज", "कात्तिक", "मंसिर", "पुष", "माघ", "फागुन", "चैत्र", "बैशाख", "जेठ", "असार"],
+      "monthly_en": ["Shrawan", "Bhadra", "Asoj", "Kartik", "Mangsir", "Poush", "Magh", "Falgun", "Chaitra", "Baishakh", "Jestha", "Ashadh"],
+      "bimonthly_np": ["साउन, भदौ", "असोज, कात्तिक", "मंसिर, पुष", "माघ, फागुन", "चैत्र, बैशाख", "जेठ, असार"],
+      "fourmonthly_np": ["साउनदेखि कात्तिकसम्म", "मंसिरदेखि फागुनसम्म", "चैत्रदेखि असारसम्म"],
+      "calendar": "Bikram Sambat. The grid lists the months in FISCAL order (Shrawan → Ashadh), not BS calendar order (Baishakh = BS month 1, so Shrawan = BS month 4).",
+      "serialization_caveat": "The form prescribes NO serialized period string, and the portal's live period field is behind taxpayer login. ZeroBook therefore identifies a period as an explicit BS calendar year + BS month number (e.g. 2082-04 = Shrawan 2082) and never emits an invented portal format string.",
+      "page": 70
+    },
+    "not_tracked_by_zerobook": [
+      "1.2 निर्यात (Export) — ZeroBook does not classify a sale as an export; reported as 0.",
+      "1.3 छुट विक्री (Exempt sales) — no exempt-supply flag exists on a ledger or stock item; reported as 0.",
+      "2.2 कर लाग्ने पैठारी (Taxable import) — imports are not distinguished from domestic purchases; the whole taxable purchase lands in 2.1 and 2.2 is 0.",
+      "2.3 छुट खरिद / 2.4 छुट पैठारी (Exempt purchase / import) — not classified; reported as 0.",
+      "3.1 अन्य थपघट (Other adjustments) — bad-debt relief, scrapped-asset VAT etc. are not modelled; reported as 0.",
+      "6 गत महिनाको मिलान गर्न बाँकी क्रेडिट (Carry-forward credit) — ZeroBook does not mirror the IRD credit ledger, and whether prior excess credit was carried forward or refunded is a taxpayer decision. Supplied as an explicit input, default 0.",
+      "8/9/10 कर फिर्ता माग / आधार / जम्मा भुक्तानी + भौचर नं. — refund claim, its basis, and the payment voucher are taxpayer actions taken on the portal; reported as 0 / unticked / blank.",
+      "11.4 क्रेडिट एडभाइस संख्या / 11.5 डेविट एडभाइस संख्या — ZeroBook has no 'advice' document type; reported as 0.",
+      "नाम / ठेगाना / टेलिफोन नं. / मोबाइल नं. — no per-tenant business name, address or phone is stored in the tenant database (company_features holds only company_pan). Emitted as null and flagged."
+    ]
+  },
+
+  "columns": [
+    { "key": "value",  "np": "कारोवार मूल्य",                  "en": "Transaction value", "page": 71 },
+    { "key": "credit", "np": "खरिदमा तिरेको कर क्रेडिट",       "en": "Tax credit paid on purchase (input VAT)", "page": 71 },
+    { "key": "debit",  "np": "विक्रीमा संकलन गरेको कर डेविट",  "en": "Tax collected on sale (output VAT)", "page": 71 }
+  ],
+
+  "header": [
+    { "key": "tax_period",  "np": "कर अवधि",              "en": "Tax period", "page": 70 },
+    { "key": "year",        "np": "वर्ष",                  "en": "Year (BS)", "page": 70 },
+    { "key": "pan",         "np": "करदाता दर्ता नम्बर",    "en": "Taxpayer registration number (PAN)", "page": 70, "note": "Nine boxes on the form — the Nepal PAN is 9 digits and is the VAT registration number." },
+    { "key": "name",        "np": "नाम",                   "en": "Name", "page": 70 },
+    { "key": "address",     "np": "ठेगाना",                "en": "Address", "page": 70 },
+    { "key": "telephone",   "np": "टेलिफोन नं.",           "en": "Telephone no.", "page": 71 },
+    { "key": "mobile",      "np": "मोबाइल नं.",            "en": "Mobile no.", "page": 71 }
+  ],
+
+  "boxes": [
+    { "box": "1",   "np": "विक्री",            "en": "Sales",              "type": "section", "cells": [],                     "page": 71 },
+    { "box": "1.1", "np": "कर लाग्ने विक्री",   "en": "Taxable sales",      "type": "row",     "cells": ["value", "debit"],    "page": 71 },
+    { "box": "1.2", "np": "निर्यात",            "en": "Export",             "type": "row",     "cells": ["value"],             "page": 71 },
+    { "box": "1.3", "np": "छुट विक्री",         "en": "Exempt sales",       "type": "row",     "cells": ["value"],             "page": 71 },
+
+    { "box": "2",   "np": "खरिद।पैठारी",       "en": "Purchase / Import",  "type": "section", "cells": [],                     "page": 71 },
+    { "box": "2.1", "np": "कर लाग्ने खरिद",     "en": "Taxable purchase",   "type": "row",     "cells": ["value", "credit"],   "page": 71 },
+    { "box": "2.2", "np": "कर लाग्ने पैठारी",   "en": "Taxable import",     "type": "row",     "cells": ["value", "credit"],   "page": 71 },
+    { "box": "2.3", "np": "छुट खरिद",           "en": "Exempt purchase",    "type": "row",     "cells": ["value"],             "page": 71 },
+    { "box": "2.4", "np": "छुट पैठारी",         "en": "Exempt import",      "type": "row",     "cells": ["value"],             "page": 71 },
+
+    { "box": "3",   "np": "अन्य",               "en": "Other",              "type": "section", "cells": [],                     "page": 71 },
+    { "box": "3.1", "np": "अन्य थपघट",          "en": "Other adjustments",  "type": "row",     "cells": ["credit", "debit"],   "page": 71 },
+
+    { "box": "4",   "np": "जम्मा",              "en": "Total",              "type": "total",   "cells": ["credit", "debit"],   "page": 71 },
+
+    { "box": "5",   "np": "डेविट—क्रेडिट",      "en": "Debit − Credit",     "type": "signed",  "cells": ["amount"],            "page": 71, "formula": "box4.debit - box4.credit", "sign_note": "(+ वा (—))" },
+    { "box": "6",   "np": "गत महिनाको मिलान गर्न बाँकी क्रेडिट", "en": "Credit remaining to be adjusted from last month", "type": "input", "cells": ["amount"], "page": 72 },
+    { "box": "7",   "np": "कुल तिर्नु पर्ने कर रु. (५—६)", "en": "Total tax payable Rs. (5 − 6)", "type": "signed", "cells": ["amount"], "page": 72, "formula": "box5 - box6", "sign_note": "(+ वा (—))" },
+    { "box": "8",   "np": "कर फिर्ता माग गरिएको रकम", "en": "Refund amount claimed", "type": "input", "cells": ["amount"], "page": 72 },
+    {
+      "box": "9", "np": "कर फिर्ता मागको आधार", "en": "Basis of refund claim", "type": "tick_one", "page": 72,
+      "instruction_np": "कुनै एक चिन्ह (√) लगाउनुहोस्",
+      "options": [
+        { "key": "unadjusted_four_months",   "np": "लगातार चार महिनासम्म मिलान गर्दा पनि मिलान नभएको",                  "en": "Not adjusted even after four consecutive months" },
+        { "key": "regular_exporter",         "np": "नियमित निर्यातकर्ता",                                                "en": "Regular exporter" },
+        { "key": "excess_deposit_four_months","np": "लगातार चार महिनासम्म मिलान नभएको बढी दाखिला मूल्य अभिवृद्धि कर",   "en": "Excess VAT deposited, unadjusted for four consecutive months" },
+        { "key": "other",                    "np": "अन्य",                                                              "en": "Other" }
+      ]
+    },
+    { "box": "10",  "np": "जम्मा भुक्तानी रु.", "en": "Total payment Rs.", "type": "input", "cells": ["amount"], "page": 72,
+      "companion": { "key": "voucher_no", "np": "भौचर नं.", "en": "Voucher no." } },
+    {
+      "box": "11", "np": "कर अवधिमा प्रयोग गरिएका कागजातहरुको विवरण", "en": "Details of documents used in the tax period", "type": "counts", "page": 72,
+      "rows": [
+        { "key": "purchase_invoices", "np": "कुल खरिद बिजक संख्या",   "en": "Total purchase invoice count" },
+        { "key": "credit_notes",      "np": "क्रेडिट नोट संख्या",      "en": "Credit note count" },
+        { "key": "debit_notes",       "np": "डेविट नोट संख्या",        "en": "Debit note count" },
+        { "key": "credit_advices",    "np": "क्रेडिट एडभाइस संख्या",   "en": "Credit advice count" },
+        { "key": "debit_advices",     "np": "डेविट एडभाइस संख्या",     "en": "Debit advice count" },
+        { "key": "sales_invoices",    "np": "विक्री बिजक जम्मा संख्या", "en": "Total sales invoice count" }
+      ]
+    }
+  ],
+
+  "declaration": {
+    "np": "यस कर विवरणमा उल्लेख गरिएको जानकारी सत्य र पूरा भएको व्यहोरा प्रमाणित गर्दछु।",
+    "en": "I certify that the information given in this tax return is true and complete.",
+    "page": 73,
+    "note": "The declaration block (करदाताको USER ID / नाम, थर / हस्ताक्षर / पद / मिति) and the 'कार्यालय प्रयोजनको लागि मात्र' (office use only) block are signature/office fields. They are not part of the computed return data and ZeroBook does not populate them."
+  }
+}
