@@ -129,6 +129,37 @@ twice.
 
 ---
 
+## Tie-breaker rule (owner, 2026-07-20)
+
+> **"If there is any confusion go with as per the TallyPrime."**
+
+Whenever a detail is ambiguous — a key, a field order, a menu letter, a report
+grouping, a drill-down path — the answer is **whatever TallyPrime 7.x does**. This
+outranks convenience, outranks what ZeroBook happens to do today, and outranks a
+tidier-looking alternative.
+
+Order of authority, highest first:
+
+1. **TallyPrime 7.x actual behaviour.**
+2. `New Account Software/_docs/keyboard-shortcuts.md` and `_docs/menu-navigation-map.md`
+   — the approved transcription of that behaviour, and the client-signed-off arrangement.
+3. ZeroBook's existing implementation.
+
+Only depart from TallyPrime where the web genuinely cannot follow (browser-reserved
+keys), and then document the fallback. Where TallyPrime has no opinion because the
+feature does not exist there — ZeroBook's SaaS/API/subscription screens, Nepal VAT,
+consolidation — follow the nearest Tally convention and note the decision.
+
+### Known consequence to settle in Phase 3
+
+TallyPrime's Masters section is **Create (C) · Alter (A) · Chart of Accounts (H)**.
+Phase 2 assigned `C` to Companies because Create/Alter do not exist in ZeroBook yet.
+When Phase 3 builds them, **C and A must go back to Create and Alter**, and the
+ZeroBook-only Utilities entries (Companies, Subscription) take letters TallyPrime does
+not claim. Reserved for Tally at the top level: `C A H V D K Y T B P R M S`.
+
+---
+
 ## Working rules
 
 - Commit after every phase. Never leave the app broken between phases.
@@ -136,6 +167,53 @@ twice.
 - The full `prove-*` battery must pass at the end of every phase — `bash _docs/battery.sh <log>`.
 - Any schema change ships a Laravel migration **and** a phpMyAdmin-ready `.sql` in `_docs/sql/`.
 - Ambiguity in Tally behaviour or the shortcut map goes to the owner, not to a guess.
+
+---
+
+## Phase 2 record — CLOSED
+
+Gateway rearranged to the approved four sections (Masters / Transactions / Utilities /
+Reports), ZeroBook styling untouched. **34/34 proofs, 43 unit tests, 46 browser tests
+(Chromium + WebKit) green.**
+
+Beyond the arrangement, it fixed:
+
+- **Two Gateway entries were unreachable by keyboard.** `C` was claimed by both
+  Subscription and Calculator, `D` by both Data & Privacy and Date & Period, `0` by
+  Budgets/Ratios/Scenarios. The registry is last-wins, so the earlier entry lost silently.
+- **13 of 40 rows advertised a hot letter that wasn't in their label**, so nothing was
+  highlighted while the page told users to "press an item's highlighted letter".
+- **A Nepal VAT company was shown GST Returns** — the statutory entries consulted no flag.
+- **A developer screen (`/dev/keyboard-harness`) was reachable by any signed-in customer**
+  in production and listed on the Gateway. Now local/testing only.
+- Stale shipped copy: *"Masters · Vouchers · Reports arrive in later phases."*
+
+New `inventory` F11 switch — the one optional module without one. The migration
+**backfills it ON** for any company that already has stock items or movements; defaulting
+existing users to off would hide live data behind a vanished menu entry. Godown presence
+is deliberately not a signal (every company is seeded one).
+
+### A bug I introduced and what it taught
+
+Memoising the flag lookup (to avoid a dozen queries per menu render) served **stale
+flags**: `prove-ratios` set a flag and re-read the menu in the same process and saw the
+old value. That was not a test artefact — the F11 screen would have shown the same
+staleness. Fixed at the model layer (`CompanyFeature::booted()` drops the memo on write),
+and the memo is keyed on **database + company id**, not company id alone, for the reason
+`ActiveCompany` already documents: one process can walk several tenants and every
+tenant's first company is id 1.
+
+**My own new test also caught me** — I had given Companies `Z` and Subscription `Y`,
+neither letter appearing in those words, reproducing exactly the silent-degradation bug
+the old menu had. The e2e suite now enforces both properties (unique letter, letter
+present in label) on the Gateway and the reports tree.
+
+### Deferred deliberately
+
+The Tally top menu bar (`K:Company Y:Data Z:Exchange | G:Go To O:Import E:Export M:Share
+P:Print`) is **not built yet**: six of its nine actions don't exist in ZeroBook. Export and
+Print land in Phase 5, Data in Phase 6. A bar of dead buttons looks finished and is worse
+than none.
 
 ---
 

@@ -28,4 +28,20 @@ class GatewayController extends Controller
             'sections' => Shell::reportsMenu(),
         ]);
     }
+
+    /**
+     * Gateway ▸ Masters ▸ Create / Alter — TallyPrime's "List of Masters".
+     * One screen, two modes; Esc returns to the Gateway.
+     */
+    public function masterChooser(string $mode)
+    {
+        abort_unless(in_array($mode, ['create', 'alter'], true), 404);
+
+        return view('master-chooser', [
+            'zbConfig' => Shell::config(),
+            'zbNav'    => Shell::nav(),
+            'sections' => Shell::masterChooser($mode),
+            'mode'     => $mode,
+        ]);
+    }
 }

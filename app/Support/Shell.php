@@ -284,12 +284,14 @@ class Shell
             [
                 'key' => 'masters',
                 'label' => 'Masters',
+                // TallyPrime's Masters section is exactly Create · Alter · Chart of
+                // Accounts. The individual masters are reached THROUGH those, not
+                // listed alongside them, so Inventory Info / Cost Centres /
+                // Currencies / TDS Sections moved into the Create-Alter chooser.
                 'items' => self::only([
+                    self::item('C', 'Create', 'Add a new master', route('masters.create')),
+                    self::item('A', 'Alter', 'Change an existing master', route('masters.alter')),
                     self::item('H', 'Chart of Accounts', 'Groups & Ledgers', route('masters.index')),
-                    self::feature('inventory') ? self::item('I', 'Inventory Info', 'Stock items · groups · units · godowns', route('inventory.index')) : null,
-                    self::feature('cost_centres') ? self::item('O', 'Cost Centres', 'Analytical allocation masters', route('masters.cost-centres')) : null,
-                    self::feature('multi_currency') ? self::item('U', 'Currencies', 'Foreign currencies & exchange rates', route('masters.currencies')) : null,
-                    self::feature('tds') ? self::item('E', 'TDS Sections', 'Rate table by section', route('masters.tds-sections')) : null,
                 ]),
             ],
             [
@@ -303,10 +305,13 @@ class Shell
             [
                 'key' => 'utilities',
                 'label' => 'Utilities',
+                // C and A now belong to Create and Alter, as in TallyPrime. These
+                // ZeroBook-only entries take letters TallyPrime does not claim
+                // (reserved at this level: C A H V D K Y T B P R M S).
                 'items' => self::only([
-                    self::item('C', 'Companies', 'Create · rename · deactivate · switch with F3', route('companies')),
+                    self::item('O', 'Companies', 'Create · rename · deactivate · switch with F3', route('companies')),
                     self::item('F', 'Features', 'Company feature switches · F11', route('features')),
-                    self::item('N', 'Subscription', 'Plan · record a payment · renew', route('subscription')),
+                    self::item('U', 'Subscription', 'Plan · record a payment · renew', route('subscription')),
                     self::item('T', 'Data & Privacy', 'Download all your data · close account', route('account.data')),
                 ]),
             ],
@@ -322,6 +327,49 @@ class Shell
                     self::item('M', 'Display More Reports', 'Account books · statements · analytical', route('reports.more')),
                 ]),
             ],
+        ]);
+    }
+
+    /**
+     * Gateway ▸ Masters ▸ Create / Alter — TallyPrime's "List of Masters" chooser.
+     *
+     * Same screen for both modes; only where each row points differs. Create goes
+     * straight to the master's create form, Alter to its list — because in this
+     * app, as in Tally, the list IS the alter surface: pick a master, Enter alters
+     * it. Both are deep links past each workspace's own menu, using the
+     * ?mode= parameter those workspaces already accept.
+     *
+     * TallyPrime splits this into Accounting Masters and Inventory Masters, and
+     * shows the inventory half only when inventory is on — which is exactly the
+     * F11 gating already in place here.
+     *
+     * Voucher Type is deliberately absent until the Voucher Type master exists:
+     * voucher types are still a PHP constant plus a MySQL enum, so there is
+     * nothing to create or alter yet. Listing it now would be a dead row.
+     */
+    public static function masterChooser(string $mode): array
+    {
+        $m = $mode === 'alter' ? 'alter' : 'create';
+        $to = fn (string $route) => route($route, ['mode' => $m]);
+
+        $accounting = self::only([
+            self::item('G', 'Group', 'Chart-of-accounts group', $to('masters.groups')),
+            self::item('L', 'Ledger', 'Account under a group', $to('masters.ledgers')),
+            self::feature('multi_currency') ? self::item('U', 'Currency', 'Foreign currency & rates', $to('masters.currencies')) : null,
+            self::feature('cost_centres') ? self::item('C', 'Cost Centre', 'Analytical allocation', $to('masters.cost-centres')) : null,
+            self::feature('tds') ? self::item('T', 'TDS Section', 'Rate table by section', $to('masters.tds-sections')) : null,
+        ]);
+
+        $inventory = self::feature('inventory') ? self::only([
+            self::item('S', 'Stock Group', 'Group of stock items', $to('inventory.stock-groups')),
+            self::item('I', 'Stock Item', 'A stocked product', $to('inventory.stock-items')),
+            self::item('N', 'Unit', 'Unit of measure', $to('inventory.units')),
+            self::item('D', 'Godown', 'Storage location', $to('inventory.godowns')),
+        ]) : [];
+
+        return self::only([
+            ['key' => 'accounting', 'label' => 'Accounting Masters', 'items' => $accounting],
+            $inventory ? ['key' => 'inventory', 'label' => 'Inventory Masters', 'items' => $inventory] : null,
         ]);
     }
 

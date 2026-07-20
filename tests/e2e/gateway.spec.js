@@ -132,6 +132,81 @@ test.describe('Gateway arrangement', () => {
         expect(new Set(letters).size).toBe(letters.length);
     });
 
+    test('Masters is Create / Alter / Chart of Accounts, as in TallyPrime', async ({ page }) => {
+        await gateway(page);
+        const items = await page.evaluate(() =>
+            (window.Alpine.$data(document.getElementById('zb-gateway')).items || []).map(
+                (i) => `${i.letter}|${i.label}`
+            )
+        );
+        expect(items).toContain('C|Create');
+        expect(items).toContain('A|Alter');
+        expect(items).toContain('H|Chart of Accounts');
+        // The individual masters are reached THROUGH those, not listed beside them.
+        expect(items).not.toContain('I|Inventory Info');
+        expect(items).not.toContain('U|Currencies');
+    });
+
+    test('C opens the Create chooser and Esc returns to the Gateway', async ({ page }) => {
+        await gateway(page);
+        await page.keyboard.press('c');
+        await page.waitForURL(/masters\/create/, { timeout: 10_000 });
+        const sections = await page.locator('.zb-menu-section').allTextContents();
+        expect(sections.map((s) => s.trim())).toContain('Accounting Masters');
+
+        await page.keyboard.press('Escape');
+        await page.waitForURL(/\/app$/, { timeout: 10_000 });
+    });
+
+    test('A opens the Alter chooser', async ({ page }) => {
+        await gateway(page);
+        await page.keyboard.press('a');
+        await page.waitForURL(/masters\/alter/, { timeout: 10_000 });
+        await expect(page.locator('.zb-menu-item').first()).toBeVisible();
+    });
+
+    test('the chooser deep-links past the workspace menu into the right mode', async ({ page }) => {
+        await login(page);
+        await page.goto('/masters/create');
+        await page.waitForFunction(() => window.Alpine?.store?.('zb'));
+        // L is Ledger. Create mode must land on the create form, not the hub menu.
+        await page.keyboard.press('l');
+        await page.waitForURL(/masters\/ledgers\?mode=create/, { timeout: 10_000 });
+        // Assert what the operator actually sees: the create form, focused and
+        // ready — not the workspace's own hub menu.
+        await expect(page.locator('form[data-zb-form="ledger"]')).toBeVisible();
+        await expect(page.locator('#ws-menu')).toBeHidden();
+        await expect(page.locator('#l-name')).toBeFocused();
+    });
+
+    test('the Alter chooser deep-links to the list, not the create form', async ({ page }) => {
+        await login(page);
+        await page.goto('/masters/alter');
+        await page.waitForFunction(() => window.Alpine?.store?.('zb'));
+        await page.keyboard.press('l');
+        await page.waitForURL(/masters\/ledgers\?mode=alter/, { timeout: 10_000 });
+        // In Tally the list IS the alter surface: pick a master, Enter alters it.
+        await expect(page.locator('.zb-ws-browse')).toBeVisible();
+        await expect(page.locator('form[data-zb-form="ledger"]')).toBeHidden();
+    });
+
+    test('chooser hot letters are unique and present in their labels', async ({ page }) => {
+        await login(page); // once — the session carries across both modes
+        for (const mode of ['create', 'alter']) {
+            await page.goto(`/masters/${mode}`);
+            await page.waitForFunction(() => window.Alpine?.store?.('zb'));
+            const items = await page.evaluate(
+                () => window.Alpine.$data(document.getElementById('zb-master-chooser')).items || []
+            );
+            const letters = items.map((i) => i.letter);
+            expect(new Set(letters).size, `${mode}: duplicate letters`).toBe(letters.length);
+            const bad = items
+                .filter((i) => !i.label.toLowerCase().includes(i.letter.toLowerCase()))
+                .map((i) => `${i.letter}:${i.label}`);
+            expect(bad, `${mode}: letter not in label`).toEqual([]);
+        }
+    });
+
     test('arrow navigation skips section headings', async ({ page }) => {
         await gateway(page);
         // Sections are rows in the same list; the highlight must never land on one.

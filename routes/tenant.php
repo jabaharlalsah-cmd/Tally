@@ -206,6 +206,13 @@ Route::middleware([
         // Reports tree (Gateway ▸ M).
         Route::get('/reports/more', [GatewayController::class, 'reports'])->name('reports.more');
 
+        // NAS parity Phase 3 — TallyPrime's "List of Masters" chooser
+        // (Gateway ▸ Masters ▸ Create / Alter).
+        Route::get('/masters/create', [GatewayController::class, 'masterChooser'])
+            ->defaults('mode', 'create')->name('masters.create');
+        Route::get('/masters/alter', [GatewayController::class, 'masterChooser'])
+            ->defaults('mode', 'alter')->name('masters.alter');
+
         // The keyboard harness is a DEVELOPER verification screen. It was reachable
         // by any signed-in customer in production and listed on the Gateway; it is
         // now confined to local/testing. The route is still NAMED in every
