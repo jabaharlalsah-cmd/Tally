@@ -63,10 +63,22 @@ test.describe('Ledger master arrangement', () => {
         const chain = await enterChain(page, 'form[data-zb-form="ledger"]');
 
         await page.fill('#l-name', 'E2E Order Probe');
-        // Walk the whole chain; the amount field must be the one before Dr/Cr.
-        for (let i = 0; i < chain.length - 2; i++) {
+
+        // Wait for focus to actually MOVE after each Enter rather than firing a
+        // fixed number of presses back to back. Livewire re-renders between
+        // fields, and a press that lands mid-render is swallowed — which made
+        // this test fail only when both browser projects ran together, i.e. the
+        // worst kind of flake: green in isolation, red under load.
+        const focusedId = () => page.evaluate(() => document.activeElement?.id || '');
+        for (let i = 0; i < chain.length + 4; i++) {
+            const before = await focusedId();
+            if (before === 'l-opening') break;
             await page.keyboard.press('Enter');
+            await expect
+                .poll(focusedId, { timeout: 3000 })
+                .not.toBe(before);
         }
+
         await expect(page.locator('#l-opening')).toBeFocused();
     });
 
