@@ -126,6 +126,8 @@ Route::middleware([
 
         // Phase 2 — Masters
         Route::get('/masters', [MastersController::class, 'index'])->name('masters.index');
+        // NAS parity Phase 3 — the chart of accounts as one tree.
+        Route::get('/masters/list-of-accounts', [MastersController::class, 'listOfAccounts'])->name('masters.list-of-accounts');
         Route::get('/masters/groups', [MastersController::class, 'groups'])->name('masters.groups');
         Route::get('/masters/ledgers', [MastersController::class, 'ledgers'])->name('masters.ledgers');
         Route::get('/masters/cost-centres', [MastersController::class, 'costCentres'])->name('masters.cost-centres');

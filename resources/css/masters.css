@@ -421,3 +421,75 @@
 .zb-manage-gear:focus-visible {
     color: var(--evergreen);
 }
+
+/* ---- List of Accounts tree ---- */
+.zb-loa {
+    max-width: 900px;
+}
+.zb-loa-tree {
+    max-height: 64vh;
+    overflow-y: auto;
+    font-size: 0.88rem;
+}
+.zb-loa-row {
+    display: flex;
+    align-items: baseline;
+    gap: 0.4rem;
+    padding: 0.22rem 0.6rem;
+    cursor: pointer;
+    border-radius: 6px;
+    color: var(--ink);
+    user-select: none;
+}
+.zb-loa-row.is-active {
+    background: var(--evergreen);
+    color: #fff;
+}
+.zb-loa-caret {
+    flex: 0 0 auto;
+    width: 0.85rem;
+    color: var(--faint);
+    font-size: 0.7rem;
+}
+.zb-loa-row.is-active .zb-loa-caret {
+    color: rgba(255, 255, 255, 0.85);
+}
+.zb-loa-label {
+    flex: 0 1 auto;
+}
+.zb-loa-row.is-nature .zb-loa-label {
+    font-family: var(--font-display);
+    font-weight: 600;
+    color: var(--evergreen-700);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    font-size: 0.74rem;
+}
+.zb-loa-row.is-nature.is-active .zb-loa-label {
+    color: #fff;
+}
+.zb-loa-row.is-ledger .zb-loa-label {
+    color: var(--muted);
+}
+.zb-loa-row.is-active.is-ledger .zb-loa-label {
+    color: #fff;
+}
+.zb-loa-row.is-retired .zb-loa-label {
+    text-decoration: line-through;
+    color: var(--faint);
+}
+.zb-loa-tags {
+    flex: 0 0 auto;
+    display: flex;
+    gap: 0.25rem;
+}
+.zb-loa-sub {
+    margin-left: auto;
+    padding-left: 1rem;
+    color: var(--faint);
+    font-size: 0.76rem;
+    white-space: nowrap;
+}
+.zb-loa-row.is-active .zb-loa-sub {
+    color: rgba(255, 255, 255, 0.82);
+}

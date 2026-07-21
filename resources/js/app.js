@@ -10,6 +10,7 @@ import { registerComponents } from './engine/components.js';
 import { registerHarness } from './harness.js';
 import { registerMastersStore } from './masters/store.js';
 import { registerSelect } from './masters/select.js';
+import { registerListOfAccounts } from './masters/listofaccounts.js';
 import { registerWorkspace } from './masters/workspace.js';
 import { registerCostCentre } from './masters/costcentre.js';
 import { registerTdsSections } from './masters/tdssection.js';
@@ -32,6 +33,7 @@ document.addEventListener('alpine:init', () => {
     registerMastersStore(Alpine);
     registerSelect(Alpine);
     registerWorkspace(Alpine);
+    registerListOfAccounts(Alpine);
     registerCostCentre(Alpine);
     registerTdsSections(Alpine); // Phase 10A — the TDS rate table master
     registerInventory(Alpine);

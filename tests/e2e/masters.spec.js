@@ -161,23 +161,31 @@ test.describe('Retire / restore a master', () => {
 
         expect(await inPicker()).toBe(true);
 
-        // Retire it through the real Livewire action.
-        const retired = await page.evaluate(async (id) => {
-            const el = document.querySelector('.zb-ws');
-            return await window.Alpine.$data(el).$wire.saveActiveState(id, false);
-        }, target.id);
-        expect(retired.ok).toBe(true);
+        const setActive = (on) =>
+            page.evaluate(
+                async ([id, active]) => {
+                    const el = document.querySelector('.zb-ws');
+                    return await window.Alpine.$data(el).$wire.saveActiveState(id, active);
+                },
+                [target.id, on]
+            );
 
-        // Reload so the picker payload is rebuilt server-side.
-        await page.goto('/masters/ledgers?mode=display');
-        await page.waitForFunction(() => window.Alpine?.store?.('zb'));
-        expect(await inPicker()).toBe(false);
+        // try/finally: this mutates shared demo data, and a mid-test failure
+        // that left a ledger retired went on to make LATER tests skip themselves
+        // for "no non-reserved ledger available" — one failure quietly
+        // disabling its neighbours.
+        try {
+            const retired = await setActive(false);
+            expect(retired.ok).toBe(true);
 
-        // Restore, and confirm it returns.
-        await page.evaluate(async (id) => {
-            const el = document.querySelector('.zb-ws');
-            return await window.Alpine.$data(el).$wire.saveActiveState(id, true);
-        }, target.id);
+            // Reload so the picker payload is rebuilt server-side.
+            await page.goto('/masters/ledgers?mode=display');
+            await page.waitForFunction(() => window.Alpine?.store?.('zb'));
+            expect(await inPicker()).toBe(false);
+        } finally {
+            await setActive(true);
+        }
+
         await page.goto('/masters/ledgers?mode=display');
         await page.waitForFunction(() => window.Alpine?.store?.('zb'));
         expect(await inPicker()).toBe(true);
@@ -254,5 +262,118 @@ test.describe('Manage gear beside master dropdowns', () => {
         // Navigating away from here would destroy the modal AND the ledger
         // behind it, so the gear is deliberately absent.
         await expect(modal.locator('.zb-manage-gear')).toHaveCount(0);
+    });
+});
+
+test.describe('List of Accounts', () => {
+    /**
+     * Idempotent: safe to call again mid-test. Logging in twice fails, because
+     * the second /login redirects straight to the gateway and there is no email
+     * field to fill.
+     */
+    async function openTree(page) {
+        if (!/\/app|\/masters|\/reports|\/vouchers/.test(page.url())) {
+            await login(page);
+        }
+        await page.goto('/masters/list-of-accounts');
+        await page.waitForFunction(() => window.Alpine?.store?.('zb'));
+        await expect(page.locator('.zb-loa-row').first()).toBeVisible();
+    }
+
+    test('groups the chart of accounts by nature, as TallyPrime does', async ({ page }) => {
+        await openTree(page);
+        const natures = await page.locator('.zb-loa-row.is-nature .zb-loa-label').allTextContents();
+        expect(natures.map((s) => s.trim().toUpperCase())).toEqual([
+            'ASSETS',
+            'LIABILITIES',
+            'INCOME',
+            'EXPENSES',
+        ]);
+    });
+
+    test('arrow keys expand and collapse the tree', async ({ page }) => {
+        await openTree(page);
+        const rowCount = () => page.locator('.zb-loa-row').count();
+        const before = await rowCount();
+
+        // Move onto the first group under Assets and open it.
+        await page.keyboard.press('ArrowDown');
+        await page.keyboard.press('ArrowRight');
+        await expect.poll(rowCount).toBeGreaterThan(before);
+
+        await page.keyboard.press('ArrowLeft');
+        await expect.poll(rowCount).toBe(before);
+    });
+
+    test('a reserved group is tagged, and nothing is wrongly tagged retired', async ({ page }) => {
+        await openTree(page);
+        // The seeded chart is all reserved and all active.
+        expect(await page.locator('.zb-loa-row .zb-reserved-tag:visible').count()).toBeGreaterThan(0);
+        expect(await page.locator('.zb-loa-row .zb-retired-tag:visible').count()).toBe(0);
+        // A nature heading is not a master, so it carries no tag.
+        await expect(
+            page.locator('.zb-loa-row.is-nature').first().locator('.zb-reserved-tag')
+        ).toBeHidden();
+    });
+
+    test('Enter on a group opens it for alteration', async ({ page }) => {
+        await openTree(page);
+        await page.keyboard.press('ArrowDown'); // first group under Assets
+        await page.keyboard.press('Enter');
+        await page.waitForURL(/masters\/groups\?mode=alter/, { timeout: 10_000 });
+    });
+
+    test('Esc returns to the Chart of Accounts hub', async ({ page }) => {
+        await openTree(page);
+        await page.keyboard.press('Escape');
+        await page.waitForURL(/\/masters$/, { timeout: 10_000 });
+    });
+
+    test('retired masters are hidden but their count is always stated', async ({ page }) => {
+        await openTree(page);
+        // Retire a ledger, then confirm the tree says so rather than just
+        // quietly dropping it — a silently filtered list is how someone
+        // concludes their data has vanished.
+        const target = await page.evaluate(() => {
+            const l = (window.Alpine.store('masters').ledgers || []).find(
+                (x) => !x.is_reserved && x.is_active !== false
+            );
+            return l ? l.id : null;
+        });
+        test.skip(!target, 'no non-reserved ledger available');
+
+        const setActive = async (active) => {
+            await page.goto('/masters/ledgers?mode=display');
+            await page.waitForFunction(() => window.Alpine?.store?.('zb'));
+            await page.evaluate(
+                async ([id, on]) => {
+                    await window.Alpine.$data(document.querySelector('.zb-ws')).$wire.saveActiveState(id, on);
+                },
+                [target, active]
+            );
+        };
+
+        // try/finally, because this test MUTATES SHARED DATA. An earlier version
+        // restored only on the happy path; when it failed midway it left ledgers
+        // retired in the demo company, which then made later runs skip
+        // themselves for "no non-reserved ledger available" — a test failure
+        // masquerading as a missing fixture.
+        try {
+            await setActive(false);
+
+            await openTree(page);
+            await expect(page.locator('.zb-ws-hint')).toContainText(/retired/i);
+            expect(await page.locator('.zb-loa-row .zb-retired-tag:visible').count()).toBe(0);
+
+            // Alt+I switches them on. Asserted on the hint rather than on
+            // visible tags: a retired ledger inside a COLLAPSED group is not
+            // rendered either way, so counting tags would test the tree's
+            // expansion state rather than the filter.
+            await expect(page.locator('.zb-ws-hint')).toContainText(/hidden/i);
+            await page.keyboard.press('Alt+i');
+            await expect(page.locator('.zb-ws-hint')).toContainText(/shown/i);
+        } finally {
+            await setActive(true);
+        }
     });
 });
