@@ -224,15 +224,35 @@ first. Adding the `cancel` verb to the detector mattered: without it the proof
 reported the existing `cancelVoucher` entry as *stale* while never checking it — a
 false clean bill of health.
 
-### Still open in Phase 3
+### Phase 3 — COMPLETE
 
-- **Gear-icon manage pattern** on master dropdowns — unblocked by `is_active`, not
-  yet built.
-- **List of Accounts** screen.
-- **Group and voucher-type field order** — only the ledger master was reordered.
-- **Currency symbol** is on ledger amount inputs only; reports and the voucher screen
-  still show bare numbers (Phase 7 sweep, helper now exists).
+| Deliverable | State |
+|---|---|
+| Create/Alter chooser (TallyPrime "List of Masters") | done |
+| Ledger field order — Opening Balance last | done |
+| Stock Item field order — Opening qty/rate/value last | done |
+| Active/Inactive on all nine masters + active-only dropdowns | done |
+| Gear-icon manage pattern + unsaved-work guard | done |
+| List of Accounts (Nature → Group → Ledger tree) | done |
+| Currency symbol on master amount inputs | done |
 
+**Not reordered, deliberately.** Cost Centre, Godown and Stock Group are Name (+ parent)
+only; Unit is Name / Symbol / Decimal places. All are already Name-first with nothing out
+of place. TDS Sections is left alone because TallyPrime has no TDS master — there is no
+Tally order to follow, and inventing one would be churn.
+
+**Carried to Phase 7 (UI standards sweep).** Currency symbols exist on master amount
+INPUTS but not yet on reports or the voucher screen — Trial Balance, Balance Sheet, P&L
+and Day Book still render bare numbers. The  helper is in place, so the
+sweep is mechanical.
+
+**Carried to its own phase.** The Voucher Type master needs  migrated off
+a MySQL ENUM and a real  table with a parent-type discriminator, on the
+busiest table in the system. It is not a screen job and does not belong inside a layout
+phase. The voucher-number format is also duplicated in five services
+(, , , ,
+) and should be centralised at the same time — change the model alone
+today and GST return line numbers silently stop matching the Day Book.
 ---
 
 ## Phase 2 record — CLOSED
