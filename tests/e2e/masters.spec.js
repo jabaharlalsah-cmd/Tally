@@ -377,3 +377,55 @@ test.describe('List of Accounts', () => {
         }
     });
 });
+
+test.describe('Stock Item master arrangement', () => {
+    test.beforeAll(async () => {
+        // The demo company keeps inventory off; these screens need it on.
+    });
+
+    test('Opening qty/rate/value come last, as on the ledger', async ({ page }) => {
+        await login(page);
+        await page.goto('/features');
+        await page.waitForFunction(() => window.Alpine?.store?.('zb'));
+        const wasOn = await page.evaluate(() => !!window.ZB_FEATURES?.inventory);
+        if (!wasOn) {
+            await page.evaluate(async () => {
+                const el = document.querySelector('[x-data]');
+                await window.Alpine.$data(el).$wire.set('inventory', true);
+                await window.Alpine.$data(el).$wire.save();
+            });
+        }
+
+        try {
+            await page.goto('/inventory/stock-items?mode=create');
+            await page.waitForFunction(() => window.Alpine?.store?.('zb'));
+            await expect(page.locator('form[data-zb-form="stockitem"]')).toBeVisible();
+
+            const chain = await enterChain(page, 'form[data-zb-form="stockitem"]');
+            expect(chain[0]).toBe('Name');
+            // Identity and classification first, the number last — TallyPrime's
+            // order, and the same shape the ledger master uses.
+            const opening = chain.indexOf('Opening qty');
+            expect(opening).toBeGreaterThan(1);
+            expect(chain.indexOf('Opening rate')).toBe(opening + 1);
+            expect(chain.indexOf('Opening value')).toBe(opening + 2);
+            expect(chain.indexOf('Costing method')).toBeLessThan(opening);
+
+            // Rate and value are money and carry the symbol; qty is a count and
+            // deliberately does not.
+            expect(
+                await page.locator('form[data-zb-form="stockitem"] .zb-amt-prefix:visible').count()
+            ).toBe(2);
+        } finally {
+            if (!wasOn) {
+                await page.goto('/features');
+                await page.waitForFunction(() => window.Alpine?.store?.('zb'));
+                await page.evaluate(async () => {
+                    const el = document.querySelector('[x-data]');
+                    await window.Alpine.$data(el).$wire.set('inventory', false);
+                    await window.Alpine.$data(el).$wire.save();
+                });
+            }
+        }
+    });
+});

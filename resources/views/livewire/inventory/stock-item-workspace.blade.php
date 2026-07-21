@@ -46,25 +46,6 @@
             <x-master-select id="si-unit" source="units" model="unit_id" model-label="unit_label" create-type="unit" :allow-primary="false" label="Unit" placeholder="Unit (Alt+C to create)" /></div>
         @error('unit_id') <div class="zb-field-error">{{ $message }}</div> @enderror
 
-        <div class="zb-subhead">Opening Balance</div>
-        <div class="zb-form-row zb-opening-triple">
-            <label>Qty × Rate = Value</label>
-            <div class="zb-opening-fields">
-                <input id="si-oqty" type="text" inputmode="decimal" class="form-control zb-field" data-zb-field data-zb-label="Opening qty"
-                       wire:model="opening_qty" @input="recomputeOpeningValue('#si-oqty', '#si-orate', '#si-oval')" placeholder="Qty">
-                <span class="zb-opening-x">×</span>
-                <input id="si-orate" type="text" inputmode="decimal" class="form-control zb-field" data-zb-field data-zb-label="Opening rate"
-                       wire:model="opening_rate" @input="recomputeOpeningValue('#si-oqty', '#si-orate', '#si-oval')" placeholder="Rate">
-                <span class="zb-opening-x">=</span>
-                <input id="si-oval" type="text" inputmode="decimal" class="form-control zb-field" data-zb-field data-zb-label="Opening value"
-                       wire:model="opening_value" @input="markValueTouched()" placeholder="Value">
-            </div>
-        </div>
-        @error('opening_qty') <div class="zb-field-error">{{ $message }}</div> @enderror
-        @error('opening_value') <div class="zb-field-error">{{ $message }}</div> @enderror
-
-        <div class="zb-form-row"><label>Opening Godown</label>
-            <x-master-select id="si-godown" source="godowns" model="opening_godown_id" model-label="opening_godown_label" :allow-primary="false" label="Godown" placeholder="Godown" /></div>
 
         {{-- F11-gated tax details — mirrors the LEDGER form exactly (Phase 5E).
              The item's OWN gst_rate/hsn_sac columns, relabelled by the active regime. --}}
@@ -94,6 +75,31 @@
             <input id="si-reorder" type="text" inputmode="decimal" class="form-control zb-field" data-zb-field data-zb-label="Reorder level" wire:model="reorder_level" placeholder="optional"></div>
 
         <p class="zb-invoice-note">Item-level tax is stored now and consumed by the tax engine in Phase 6B.</p>
+        {{-- Opening Balance LAST, as in TallyPrime: identity and
+             classification first, the number last. Mirrors the ledger
+             master, so the two feel like one app. --}}
+        <div class="zb-subhead">Opening Balance</div>
+        <div class="zb-form-row zb-opening-triple">
+            <label>Qty × Rate = Value</label>
+            <div class="zb-opening-fields">
+                <input id="si-oqty" type="text" inputmode="decimal" class="form-control zb-field" data-zb-field data-zb-label="Opening qty"
+                       wire:model="opening_qty" @input="recomputeOpeningValue('#si-oqty', '#si-orate', '#si-oval')" placeholder="Qty">
+                <span class="zb-opening-x">×</span>
+                <span class="zb-amt-prefix">{{ baseSymbol() }}</span>
+                <input id="si-orate" type="text" inputmode="decimal" class="form-control zb-field" data-zb-field data-zb-label="Opening rate"
+                       wire:model="opening_rate" @input="recomputeOpeningValue('#si-oqty', '#si-orate', '#si-oval')" placeholder="Rate">
+                <span class="zb-opening-x">=</span>
+                <span class="zb-amt-prefix">{{ baseSymbol() }}</span>
+                <input id="si-oval" type="text" inputmode="decimal" class="form-control zb-field" data-zb-field data-zb-label="Opening value"
+                       wire:model="opening_value" @input="markValueTouched()" placeholder="Value">
+            </div>
+        </div>
+        @error('opening_qty') <div class="zb-field-error">{{ $message }}</div> @enderror
+        @error('opening_value') <div class="zb-field-error">{{ $message }}</div> @enderror
+
+        <div class="zb-form-row"><label>Opening Godown</label>
+            <x-master-select id="si-godown" source="godowns" model="opening_godown_id" model-label="opening_godown_label" :allow-primary="false" label="Godown" placeholder="Godown" /></div>
+
         <p class="text-muted zb-ws-hint"><span class="zb-kbd">Enter</span> next &middot; <span class="zb-kbd">Alt+C</span> create group/unit inline &middot; <span class="zb-kbd">Ctrl+A</span> accept &middot; <span class="zb-kbd">Esc</span> back</p>
     </form>
 
@@ -169,22 +175,6 @@
             <x-master-select id="sia-unit" source="units" model="i_unit_id" model-label="i_unit_label" create-type="unit" :allow-primary="false" label="Unit" /></div>
         @error('i_unit_id') <div class="zb-field-error">{{ $message }}</div> @enderror
 
-        <div class="zb-subhead">Opening Balance</div>
-        <div class="zb-form-row zb-opening-triple">
-            <label>Qty × Rate = Value</label>
-            <div class="zb-opening-fields">
-                <input id="sia-oqty" type="text" inputmode="decimal" class="form-control zb-field" data-zb-field data-zb-label="Opening qty"
-                       wire:model="i_opening_qty" @input="recomputeAlterOpeningValue('#sia-oqty', '#sia-orate', '#sia-oval')">
-                <span class="zb-opening-x">×</span>
-                <input id="sia-orate" type="text" inputmode="decimal" class="form-control zb-field" data-zb-field data-zb-label="Opening rate"
-                       wire:model="i_opening_rate" @input="recomputeAlterOpeningValue('#sia-oqty', '#sia-orate', '#sia-oval')">
-                <span class="zb-opening-x">=</span>
-                <input id="sia-oval" type="text" inputmode="decimal" class="form-control zb-field" data-zb-field data-zb-label="Opening value"
-                       wire:model="i_opening_value" @input="markAlterValueTouched()">
-            </div>
-        </div>
-        <div class="zb-form-row"><label>Opening Godown</label>
-            <x-master-select id="sia-godown" source="godowns" model="i_opening_godown_id" model-label="i_opening_godown_label" :allow-primary="false" label="Godown" /></div>
 
         <div x-show="feature('gst') || feature('vat')" x-cloak>
             <div class="zb-subhead" x-text="feature('vat') ? 'VAT Details' : 'GST Details'">GST Details</div>
@@ -210,6 +200,27 @@
 
         <div class="zb-form-row"><label for="sia-reorder">Reorder level</label>
             <input id="sia-reorder" type="text" inputmode="decimal" class="form-control zb-field" data-zb-field data-zb-label="Reorder level" wire:model="i_reorder_level"></div>
+
+        {{-- Opening Balance LAST, matching the create form and the ledger
+             master. Altering an item must not feel unlike creating one. --}}
+        <div class="zb-subhead">Opening Balance</div>
+        <div class="zb-form-row zb-opening-triple">
+            <label>Qty × Rate = Value</label>
+            <div class="zb-opening-fields">
+                <input id="sia-oqty" type="text" inputmode="decimal" class="form-control zb-field" data-zb-field data-zb-label="Opening qty"
+                       wire:model="i_opening_qty" @input="recomputeAlterOpeningValue('#sia-oqty', '#sia-orate', '#sia-oval')">
+                <span class="zb-opening-x">×</span>
+                <span class="zb-amt-prefix">{{ baseSymbol() }}</span>
+                <input id="sia-orate" type="text" inputmode="decimal" class="form-control zb-field" data-zb-field data-zb-label="Opening rate"
+                       wire:model="i_opening_rate" @input="recomputeAlterOpeningValue('#sia-oqty', '#sia-orate', '#sia-oval')">
+                <span class="zb-opening-x">=</span>
+                <span class="zb-amt-prefix">{{ baseSymbol() }}</span>
+                <input id="sia-oval" type="text" inputmode="decimal" class="form-control zb-field" data-zb-field data-zb-label="Opening value"
+                       wire:model="i_opening_value" @input="markAlterValueTouched()">
+            </div>
+        </div>
+        <div class="zb-form-row"><label>Opening Godown</label>
+            <x-master-select id="sia-godown" source="godowns" model="i_opening_godown_id" model-label="i_opening_godown_label" :allow-primary="false" label="Godown" /></div>
 
         <p class="text-muted zb-ws-hint"><span class="zb-kbd">Ctrl+A</span> accept &middot; <span class="zb-kbd">Esc</span> back</p>
     </form>
