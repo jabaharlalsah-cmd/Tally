@@ -65,6 +65,7 @@ class Ledger extends Model
     {
         return [
             'id' => $this->id,
+            'is_active' => (bool) ($this->is_active ?? true),
             'name' => $this->name,
             'alias' => $this->alias,
             'group_id' => $this->group_id,

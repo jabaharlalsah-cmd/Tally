@@ -86,6 +86,7 @@ class StockItem extends Model
     {
         return [
             'id' => $this->id,
+            'is_active' => (bool) ($this->is_active ?? true),
             'name' => $this->name,
             'alias' => $this->alias,
             'stock_group_id' => $this->stock_group_id,

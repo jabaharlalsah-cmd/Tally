@@ -3,6 +3,7 @@
 namespace App\Livewire;
 
 use App\Livewire\Concerns\GuardsActiveCompany;
+use App\Livewire\Concerns\TogglesMasterActive;
 use App\Livewire\Concerns\CreatesGroups;
 use App\Models\AccountGroup;
 use App\Models\Ledger;
@@ -14,6 +15,7 @@ use Livewire\Component;
 class GroupWorkspace extends Component
 {
     use GuardsActiveCompany;
+    use TogglesMasterActive;
     use CreatesGroups;
 
     // Single create
@@ -240,5 +242,11 @@ class GroupWorkspace extends Component
     public function render()
     {
         return view('livewire.group-workspace');
+    }
+
+    /** The model TogglesMasterActive retires and restores. */
+    protected function masterModelClass(): string
+    {
+        return \App\Models\AccountGroup::class;
     }
 }

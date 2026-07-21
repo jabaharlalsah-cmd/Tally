@@ -51,6 +51,7 @@ class Godown extends Model
     {
         return [
             'id' => $this->id,
+            'is_active' => (bool) ($this->is_active ?? true),
             'name' => $this->name,
             'parent_id' => $this->parent_id,
             'path' => $this->pathLabel(),

@@ -46,6 +46,7 @@ class Currency extends Model
     {
         return [
             'id' => $this->id,
+            'is_active' => (bool) ($this->is_active ?? true),
             'code' => $this->code,
             'symbol' => $this->symbol,
             'name' => $this->name,

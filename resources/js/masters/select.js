@@ -87,6 +87,18 @@ export function zbSelect(cfg) {
 
         get baseList() {
             let list = this.$store.masters[this.cfg.source] || [];
+
+            // Dropdowns offer ACTIVE masters only (Dibi Tech master-data rule).
+            // A retired ledger must stay readable on the vouchers that already
+            // reference it, but must not be offered for new ones.
+            //
+            // The currently selected id is kept even when inactive: altering an
+            // old voucher whose ledger has since been retired must not silently
+            // blank that field, which would look like data loss and would change
+            // the entry on save. Records seeded before is_active existed have no
+            // such key, so `!== false` treats missing as active.
+            list = list.filter((x) => x.is_active !== false || x.id === this.selId);
+
             // excludeModel (a live Livewire prop) takes precedence over the
             // static excludeId, so Alter re-parenting excludes self+subtree
             // reactively after the record loads.

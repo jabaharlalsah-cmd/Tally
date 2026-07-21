@@ -66,6 +66,9 @@ class TenantWriteGuard extends ComponentHook
         // session. Named 'cancel' rather than 'delete', which is how it escaped
         // the original hand-maintained list.
         'cancel',
+        // Retire / restore a master (Concerns\TogglesMasterActive). Persists
+        // is_active, so a suspended tenant must not reach it.
+        'saveActiveState',
     ];
 
     public function call($method, $params, $returnEarly, $metadata = null, $componentContext = null)

@@ -146,6 +146,7 @@ class TdsSection extends Model
     {
         return [
             'id' => $this->id,
+            'is_active' => (bool) ($this->is_active ?? true),
             // `name` is what the shared zbSelect picker searches and displays.
             'name' => $this->displayLabel(),
             'code' => $this->code,

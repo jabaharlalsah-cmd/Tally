@@ -24,6 +24,7 @@ class Unit extends Model
     {
         return [
             'id' => $this->id,
+            'is_active' => (bool) ($this->is_active ?? true),
             'name' => $this->name,
             'symbol' => $this->symbol,
             'decimal_places' => (int) $this->decimal_places,
