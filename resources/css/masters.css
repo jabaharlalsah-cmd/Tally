@@ -108,7 +108,20 @@
 /* opening balance + Dr/Cr */
 .zb-opening {
     display: flex;
+    align-items: center;
     gap: 0.5rem;
+}
+
+/* Currency prefix on an amount field — the Dibi Tech rule that every amount
+   shown or entered carries its symbol. Reads the company's own base currency,
+   so an NPR tenant sees Rs and not a hardcoded rupee sign. */
+.zb-amt-prefix {
+    flex: 0 0 auto;
+    min-width: 1.1rem;
+    text-align: right;
+    color: var(--muted);
+    font-size: 0.86rem;
+    user-select: none;
 }
 .zb-opening-amt {
     flex: 1;

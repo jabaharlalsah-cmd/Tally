@@ -23,3 +23,34 @@ if (! function_exists('activeCompany')) {
         return ActiveCompany::company();
     }
 }
+
+if (! function_exists('baseSymbol')) {
+    /**
+     * The active company's base-currency symbol, for the Dibi Tech rule that
+     * every amount shown or entered carries its currency symbol.
+     *
+     * Reads the company's OWN base currency rather than assuming ₹: ZeroBook
+     * runs Nepali (NPR) tenants too, and hardcoding ₹ would misreport their
+     * books. Falls back to ₹ only when no base currency is set yet.
+     *
+     * Memoised per (database × company) for the same reason Shell's feature memo
+     * is: one process can walk several tenants and every tenant's first company
+     * is id 1.
+     */
+    function baseSymbol(): string
+    {
+        static $memo = [];
+
+        $company = ActiveCompany::id();
+        if ($company === null) {
+            return '₹';
+        }
+
+        $key = \Illuminate\Support\Facades\DB::connection()->getDatabaseName().'#'.$company;
+        if (! array_key_exists($key, $memo)) {
+            $memo[$key] = \App\Models\Currency::base()?->symbol ?: '₹';
+        }
+
+        return $memo[$key];
+    }
+}

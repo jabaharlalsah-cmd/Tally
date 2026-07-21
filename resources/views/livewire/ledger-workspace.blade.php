@@ -60,22 +60,29 @@
         </div>
         @error('group_id') <div class="zb-field-error">{{ $message }}</div> @enderror
 
-        <div class="zb-form-row">
-            <label for="l-opening">Opening Balance</label>
-            <div class="zb-opening">
-                <input id="l-opening" type="text" inputmode="decimal" class="form-control zb-field zb-opening-amt"
-                       data-zb-field data-zb-label="Opening balance" wire:model="opening_balance" placeholder="0.00">
-                <select class="form-select zb-field zb-opening-side" data-zb-field data-zb-label="Dr/Cr"
-                        wire:model="opening_balance_type">
-                    <option value="Dr">Dr</option>
-                    <option value="Cr">Cr</option>
-                </select>
-            </div>
-        </div>
-        @error('opening_balance') <div class="zb-field-error">{{ $message }}</div> @enderror
-        @error('opening_balance_type') <div class="zb-field-error">{{ $message }}</div> @enderror
+        {{-- TallyPrime asks the behaviour questions immediately after Under, before
+             any address or tax detail, because they change what the rest of the
+             form and every later voucher on this ledger will ask for. --}}
 
-        <div class="zb-subhead">Mailing &amp; Registration <span class="text-muted">(optional)</span></div>
+        {{-- F11-gated: only shown when "Maintain bill-by-bill" feature is on --}}
+        <div class="zb-form-row" x-show="feature('bill_by_bill')" x-cloak>
+            <label for="l-billbybill">Maintain balances bill-by-bill?</label>
+            <select id="l-billbybill" class="form-select zb-field" data-zb-field data-zb-label="Bill-by-bill" wire:model="maintain_bill_by_bill">
+                <option value="0">No</option>
+                <option value="1">Yes</option>
+            </select>
+        </div>
+
+        {{-- F11-gated: only shown when "Cost centres" feature is on (Phase 5D) --}}
+        <div class="zb-form-row" x-show="feature('cost_centres')" x-cloak>
+            <label for="l-costcentre">Cost centres applicable?</label>
+            <select id="l-costcentre" class="form-select zb-field" data-zb-field data-zb-label="Cost centres" wire:model="cost_centres_applicable">
+                <option value="0">No</option>
+                <option value="1">Yes</option>
+            </select>
+        </div>
+
+        <div class="zb-subhead">Mailing Details <span class="text-muted">(optional)</span></div>
         <div class="zb-form-row">
             <label for="l-mailname">Mailing name</label>
             <input id="l-mailname" class="form-control zb-field" data-zb-field data-zb-label="Mailing name" wire:model="mailing_name" autocomplete="off">
@@ -135,24 +142,6 @@
             </div>
         </div>
 
-        {{-- F11-gated: only shown when "Maintain bill-by-bill" feature is on --}}
-        <div class="zb-form-row" x-show="feature('bill_by_bill')" x-cloak>
-            <label for="l-billbybill">Maintain balances bill-by-bill?</label>
-            <select id="l-billbybill" class="form-select zb-field" data-zb-field data-zb-label="Bill-by-bill" wire:model="maintain_bill_by_bill">
-                <option value="0">No</option>
-                <option value="1">Yes</option>
-            </select>
-        </div>
-
-        {{-- F11-gated: only shown when "Cost centres" feature is on (Phase 5D) --}}
-        <div class="zb-form-row" x-show="feature('cost_centres')" x-cloak>
-            <label for="l-costcentre">Cost centres applicable?</label>
-            <select id="l-costcentre" class="form-select zb-field" data-zb-field data-zb-label="Cost centres" wire:model="cost_centres_applicable">
-                <option value="0">No</option>
-                <option value="1">Yes</option>
-            </select>
-        </div>
-
         {{-- F11-gated: TDS deductee tagging (Phase 10A). Tag the vendors you withhold tax
              from — a Payment to them then offers the deduction, defaulted to this section.
              Clearing the PAN is what makes Section 206AA bite (20%, or 5% under 194Q). --}}
@@ -202,6 +191,25 @@
             @error('linked_company_id') <div class="zb-field-error">{{ $message }}</div> @enderror
             <p class="text-muted zb-ws-hint">A linked party marks every voucher on it as INTER-COMPANY (tagged for consolidation). Only party-tracking ledgers (Debtors/Creditors/Loans) can be linked.</p>
         @endif
+
+        {{-- Opening Balance is LAST, as in TallyPrime: identity and behaviour first,
+             the number last. It is also the field that ends the Enter chain, so
+             Enter here accepts the ledger — which is why Tally puts it here. --}}
+        <div class="zb-form-row">
+            <label for="l-opening">Opening Balance</label>
+            <div class="zb-opening">
+                <span class="zb-amt-prefix">{{ baseSymbol() }}</span>
+                <input id="l-opening" type="text" inputmode="decimal" class="form-control zb-field zb-opening-amt"
+                       data-zb-field data-zb-label="Opening balance" wire:model="opening_balance" placeholder="0.00">
+                <select class="form-select zb-field zb-opening-side" data-zb-field data-zb-label="Dr/Cr"
+                        wire:model="opening_balance_type">
+                    <option value="Dr">Dr</option>
+                    <option value="Cr">Cr</option>
+                </select>
+            </div>
+        </div>
+        @error('opening_balance') <div class="zb-field-error">{{ $message }}</div> @enderror
+        @error('opening_balance_type') <div class="zb-field-error">{{ $message }}</div> @enderror
 
         <p class="text-muted zb-ws-hint">
             <span class="zb-kbd">Enter</span> next &middot; <span class="zb-kbd">Ctrl+A</span> accept &middot;
@@ -328,20 +336,26 @@
         </div>
         @error('l_group_id') <div class="zb-field-error">{{ $message }}</div> @enderror
 
-        <div class="zb-form-row">
-            <label for="la-opening">Opening Balance</label>
-            <div class="zb-opening">
-                <input id="la-opening" type="text" inputmode="decimal" class="form-control zb-field zb-opening-amt"
-                       data-zb-field data-zb-label="Opening balance" wire:model="l_opening" placeholder="0.00">
-                <select class="form-select zb-field zb-opening-side" data-zb-field data-zb-label="Dr/Cr" wire:model="l_type">
-                    <option value="Dr">Dr</option>
-                    <option value="Cr">Cr</option>
-                </select>
-            </div>
+        {{-- Behaviour questions immediately after Under, then Opening Balance last —
+             the same TallyPrime order the create form uses. The two must not
+             diverge, or altering a ledger would feel unlike creating one. --}}
+        <div class="zb-form-row" x-show="feature('bill_by_bill')" x-cloak>
+            <label for="la-billbybill">Maintain balances bill-by-bill?</label>
+            <select id="la-billbybill" class="form-select zb-field" data-zb-field data-zb-label="Bill-by-bill" wire:model="l_maintain_bill_by_bill">
+                <option value="0">No</option>
+                <option value="1">Yes</option>
+            </select>
         </div>
-        @error('l_opening') <div class="zb-field-error">{{ $message }}</div> @enderror
 
-        <div class="zb-subhead">Mailing &amp; Registration <span class="text-muted">(optional)</span></div>
+        <div class="zb-form-row" x-show="feature('cost_centres')" x-cloak>
+            <label for="la-costcentre">Cost centres applicable?</label>
+            <select id="la-costcentre" class="form-select zb-field" data-zb-field data-zb-label="Cost centres" wire:model="l_cost_centres_applicable">
+                <option value="0">No</option>
+                <option value="1">Yes</option>
+            </select>
+        </div>
+
+        <div class="zb-subhead">Mailing Details <span class="text-muted">(optional)</span></div>
         <div class="zb-form-row"><label for="la-mailname">Mailing name</label>
             <input id="la-mailname" class="form-control zb-field" data-zb-field data-zb-label="Mailing name" wire:model="l_mailing_name" autocomplete="off"></div>
         <div class="zb-form-row"><label for="la-address">Address</label>
@@ -373,22 +387,6 @@
                     <option value="Unregistered">Unregistered</option>
                     <option value="Consumer">Consumer</option>
                 </select></div>
-        </div>
-
-        {{-- F11-gated feature toggles (Phase 5C / 5D) --}}
-        <div class="zb-form-row" x-show="feature('bill_by_bill')" x-cloak>
-            <label for="la-billbybill">Maintain balances bill-by-bill?</label>
-            <select id="la-billbybill" class="form-select zb-field" data-zb-field data-zb-label="Bill-by-bill" wire:model="l_maintain_bill_by_bill">
-                <option value="0">No</option>
-                <option value="1">Yes</option>
-            </select>
-        </div>
-        <div class="zb-form-row" x-show="feature('cost_centres')" x-cloak>
-            <label for="la-costcentre">Cost centres applicable?</label>
-            <select id="la-costcentre" class="form-select zb-field" data-zb-field data-zb-label="Cost centres" wire:model="l_cost_centres_applicable">
-                <option value="0">No</option>
-                <option value="1">Yes</option>
-            </select>
         </div>
 
         {{-- F11-gated: TDS deductee tagging (Phase 10A). --}}
@@ -452,6 +450,21 @@
                 </div>
             @endif
         @endif
+
+        {{-- Opening Balance last, as in TallyPrime — identity first, number last. --}}
+        <div class="zb-form-row">
+            <label for="la-opening">Opening Balance</label>
+            <div class="zb-opening">
+                <span class="zb-amt-prefix">{{ baseSymbol() }}</span>
+                <input id="la-opening" type="text" inputmode="decimal" class="form-control zb-field zb-opening-amt"
+                       data-zb-field data-zb-label="Opening balance" wire:model="l_opening" placeholder="0.00">
+                <select class="form-select zb-field zb-opening-side" data-zb-field data-zb-label="Dr/Cr" wire:model="l_type">
+                    <option value="Dr">Dr</option>
+                    <option value="Cr">Cr</option>
+                </select>
+            </div>
+        </div>
+        @error('l_opening') <div class="zb-field-error">{{ $message }}</div> @enderror
 
         <p class="text-muted zb-ws-hint">
             <span class="zb-kbd">Ctrl+A</span> accept &middot; <span class="zb-kbd">Esc</span> back

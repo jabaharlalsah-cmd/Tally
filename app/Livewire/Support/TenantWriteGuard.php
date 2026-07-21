@@ -51,6 +51,21 @@ class TenantWriteGuard extends ComponentHook
         'createGroup', 'addMember', 'removeMember', 'deleteGroup',
         // Forex revaluation posting (Phase 11)
         'postRevaluation',
+        // Found unguarded by zerobook:prove-write-guard (NAS parity Phase 3).
+        // Every one of these persists, and every one was reachable by a
+        // suspended tenant and by a view-only impersonation session:
+        'promote',           // Scenarios — writes provisional vouchers into the REAL books
+        'createReciprocal',  // Ledgers — creates a mirror ledger in a linked company
+        'create',            // API keys · Scenarios
+        'remove',            // Budgets · Scenarios — deletes the record
+        'toggleActive',      // Webhooks — persists is_active
+        'deleteWebhook',     // Webhooks
+        // DayBook::cancel DELETES a voucher (DB::transaction + cascade to
+        // entries and lots). It is the most destructive action in the app and
+        // was reachable by a suspended tenant and by a view-only impersonation
+        // session. Named 'cancel' rather than 'delete', which is how it escaped
+        // the original hand-maintained list.
+        'cancel',
     ];
 
     public function call($method, $params, $returnEarly, $metadata = null, $componentContext = null)
