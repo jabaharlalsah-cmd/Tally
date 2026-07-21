@@ -170,6 +170,71 @@ not claim. Reserved for Tally at the top level: `C A H V D K Y T B P R M S`.
 
 ---
 
+## Divergences from the approved build — SPOT-CHECK THESE AGAINST A LIVE TALLY
+
+Each follows the owner's rule that ambiguity resolves to TallyPrime, and each
+therefore differs from what the client signed off on. They are cheap to reverse if
+a real TallyPrime install disagrees — the arrangement is data, not logic.
+
+| # | Screen | Approved build does | ZeroBook now does | Why |
+|---|---|---|---|---|
+| 1 | Ledger master | Opening Balance 4th, right after Under | Opening Balance **last** | TallyPrime asks identity → behaviour → address/tax → number. Enter on the amount accepts the ledger. |
+| 2 | Ledger master | bill-by-bill late, after tax details | bill-by-bill + cost centres **immediately after Under** | They change what the rest of the form and every later voucher asks for, so Tally asks them first. |
+| 3 | Gateway ▸ Masters | Create · Alter · Chart of Accounts | same | matches — no divergence |
+| 4 | Gateway ▸ Utilities | n/a (no such section) | Companies `O`, Subscription `U` | TallyPrime has no equivalent screens; letters chosen from outside Tally's reserved set. |
+
+**I have not verified these against a running TallyPrime 7.x** — they come from
+knowledge of the product, not an install on this machine. The approved build's own
+brief says to "validate the final set against a live TallyPrime 7.x installation
+before sign-off", and that applies here too.
+
+---
+
+## Phase 3 record
+
+**Phase 3a — Create/Alter chooser and the Active flag.** Gateway ▸ Masters is now
+exactly Create · Alter · Chart of Accounts; the individual masters moved into the
+chooser, taking the top level from 37 entries (pre-Phase 2) to 13. `C` and `A`
+returned to Create/Alter per the tie-breaker rule. `is_active` added to all nine
+master tables — the gear-icon manage pattern and "Active items only" dropdowns were
+*structurally impossible* before, since only `companies` had the flag. Default TRUE
+here (opposite to the `inventory` flag) because every existing master is in use.
+
+**Phase 3b — ledger field order, currency symbol, and a security fix.**
+
+### The security fix is the important part
+
+`TenantWriteGuard` stops suspended tenants and view-only impersonation sessions from
+writing. It runs off a **hand-maintained allowlist of method names**, and had drifted.
+`zerobook:prove-write-guard` now reflects over every Livewire component and fails when
+a write-shaped method is neither allowlisted nor explicitly exempted with a reason.
+
+First run found **15 unguarded methods; seven genuinely persist**:
+
+| Method | What it does |
+|---|---|
+| `DayBook::cancel` | **DELETES a voucher** — transaction + cascade to entries and lots. Escaped the list by being named *cancel*, not *delete*. |
+| `ScenarioManager::promote` | writes provisional vouchers into the **real books**, irreversibly |
+| `LedgerWorkspace::createReciprocal` | creates a ledger in a **linked company** |
+| `create` / `remove` | API keys, Scenarios, Budgets |
+| `toggleActive` / `deleteWebhook` | Webhooks |
+
+All now guarded. The other eight are exempt with written reasons, each body read
+first. Adding the `cancel` verb to the detector mattered: without it the proof
+reported the existing `cancelVoucher` entry as *stale* while never checking it — a
+false clean bill of health.
+
+### Still open in Phase 3
+
+- **Gear-icon manage pattern** on master dropdowns — unblocked by `is_active`, not
+  yet built.
+- **List of Accounts** screen.
+- **Group and voucher-type field order** — only the ledger master was reordered.
+- **Currency symbol** is on ledger amount inputs only; reports and the voucher screen
+  still show bare numbers (Phase 7 sweep, helper now exists).
+
+---
+
 ## Phase 2 record — CLOSED
 
 Gateway rearranged to the approved four sections (Masters / Transactions / Utilities /
