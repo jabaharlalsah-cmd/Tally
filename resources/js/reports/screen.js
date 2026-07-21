@@ -20,6 +20,11 @@ export function reportScreen(cfg) {
             const first = this.navRows()[0];
             this.activeKey = first ? first.key : null;
 
+            // Coming back from a drill-down? Land on the line we left, expanded
+            // as we left it — TallyPrime's behaviour. Consumed on read, so
+            // entering the report fresh from the menu starts at the top.
+            this.restoreView();
+
             this.$store.zb.pushContext({
                 name: 'report',
                 label: cfg.title || 'Report',
@@ -133,8 +138,87 @@ export function reportScreen(cfg) {
             if (r.kind === 'group') {
                 if (r.collapsible) this.toggleExpand(r.key);
             } else if ((r.kind === 'ledger' || r.kind === 'item') && r.ledger_id) {
-                window.location.href = this.drillUrl(r.ledger_id);
+                // Remember where we were before leaving, so Esc from the drilled
+                // report lands back on THIS row (see restoreView).
+                const url = this.drillUrl(r.ledger_id);
+                this.rememberView(url.split('?')[0]);
+                window.location.href = url;
             }
+        },
+
+        /**
+         * The report's view state, stashed across a drill-down.
+         *
+         * Drilling is a full page navigation, so the cursor, the expanded groups
+         * and the Detailed toggle are all lost on the way back. In TallyPrime
+         * coming back up a level returns you to exactly the line you left —
+         * without that, every Esc on a long Trial Balance dumps the operator at
+         * row one and they have to find their place again.
+         *
+         * sessionStorage, not localStorage: this is one journey's state, and it
+         * should not survive the tab.
+         */
+        viewKey() {
+            return 'zb.report:' + window.location.pathname;
+        },
+
+        rememberView(drillPath) {
+            try {
+                window.sessionStorage.setItem(
+                    this.viewKey(),
+                    JSON.stringify({
+                        activeKey: this.activeKey,
+                        detailed: this.detailed,
+                        expanded: this.expanded,
+                        // Where we drilled TO. The position is only restored when
+                        // we come back FROM there, so re-entering the report from
+                        // the menu starts fresh — Tally remembers your place
+                        // within a drill, not across a whole session.
+                        drillPath,
+                    })
+                );
+            } catch (_) {
+                /* private mode — the cursor simply won't be restored */
+            }
+        },
+
+        /**
+         * Restore and CONSUME the stashed state. Consuming matters: entering the
+         * report fresh from the menu should start at the top, not resurrect a
+         * cursor from an earlier visit.
+         */
+        restoreView() {
+            let saved = null;
+            try {
+                const raw = window.sessionStorage.getItem(this.viewKey());
+                if (raw) {
+                    saved = JSON.parse(raw);
+                    window.sessionStorage.removeItem(this.viewKey());
+                }
+            } catch (_) {
+                return false;
+            }
+            if (!saved) return false;
+
+            // Only restore when we have come back FROM the drill target. Arriving
+            // fresh from the menu should start at the top; the stash is already
+            // consumed above, so a stale one can never linger.
+            const ref = document.referrer || '';
+            if (saved.drillPath && ref.indexOf(saved.drillPath) === -1) return false;
+
+            if (saved.expanded) this.expanded = saved.expanded;
+            if (saved.detailed) this.detailed = true;
+            // Only accept a row that still exists — the period may have changed,
+            // or the ledger may have been retired, while we were away.
+            if (saved.activeKey && this.rowsByKey[saved.activeKey]) {
+                this.activeKey = saved.activeKey;
+                this.$nextTick(() => {
+                    const el = document.querySelector('[data-key="' + this.activeKey + '"]');
+                    if (el && el.scrollIntoView) el.scrollIntoView({ block: 'nearest' });
+                });
+            }
+
+            return true;
         },
         drillUrl(ledgerId) {
             let u = cfg.drillUrl.replace('__id__', ledgerId);
