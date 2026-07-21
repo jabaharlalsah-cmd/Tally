@@ -6,6 +6,8 @@
    Reuses the Phase 2 masters cache + zbSelect picker (event sink) for ledgers.
    ========================================================================= */
 
+import { registerDirty } from '../engine/keys.js';
+
 export function voucherScreen(cfg) {
     return {
         cfg,
@@ -284,6 +286,11 @@ export function voucherScreen(cfg) {
             window.addEventListener('zb:combo-pick', this._onPick);
             window.addEventListener('zb:combo-create', this._onCreate);
 
+            // Unsaved-work guard. The voucher screen had NO protection of any
+            // kind: a reload, a tab close, Esc, or an F4-F9 type switch all
+            // discarded an in-progress voucher silently. See hasUnsavedWork().
+            this._offDirty = registerDirty('voucher', () => this.hasUnsavedWork());
+
             this.pushContext();
             this.$nextTick(() => this.focusStartField());
         },
@@ -291,6 +298,54 @@ export function voucherScreen(cfg) {
             window.removeEventListener('zb:combo-pick', this._onPick);
             window.removeEventListener('zb:combo-create', this._onCreate);
             if (window.ZB_VOUCHER === this) window.ZB_VOUCHER = null;
+            if (this._offDirty) this._offDirty();
+        },
+
+        /**
+         * Has the operator typed anything into this voucher yet?
+         *
+         * Keyed on event.isTrusted — true only for events the browser raised
+         * from a real key press or click, false for anything a framework
+         * dispatches. The masters screens learned this the hard way: probes
+         * based on "a field is non-empty" or "values differ from a snapshot"
+         * both warned on forms nobody had touched, because Livewire hydrates
+         * fields after render and several ship with defaults. A warning that
+         * cries wolf is worse than none — it teaches people to click through
+         * the one that matters.
+         */
+        hasUnsavedWork() {
+            return !!this._touched;
+        },
+
+        /** Bound to input/change on the voucher root (see the blade). */
+        noteUserInput(e) {
+            if (e && e.isTrusted) this._touched = true;
+        },
+
+        /** Called after a successful save, and after a deliberate discard. */
+        markVoucherPristine() {
+            this._touched = false;
+        },
+
+        /**
+         * Tally's Quit gate: leaving a voucher that has been typed into asks
+         * first. Used by Esc and by anything else that abandons the screen.
+         */
+        confirmDiscard(what, onYes) {
+            if (!this.hasUnsavedWork()) {
+                onYes();
+
+                return;
+            }
+            this.closePickers();
+            this.$store.zb.askAccept({
+                title: 'Quit?',
+                body: what + ' — this voucher has not been saved. Quit and lose it?',
+                onYes: () => {
+                    this.markVoucherPristine();
+                    onYes();
+                },
+            });
         },
 
         typeLabel() {
@@ -340,7 +395,13 @@ export function voucherScreen(cfg) {
                 ],
                 onEsc: () => {
                     if (this.confirmingCancel) return;
-                    window.location.href = this.editId ? cfg.dayBookUrl : cfg.gatewayUrl;
+                    // Tally asks before abandoning a voucher that has been typed
+                    // into. This used to navigate away unconditionally, so Esc
+                    // silently destroyed a half-entered voucher.
+                    const back = this.editId ? cfg.dayBookUrl : cfg.gatewayUrl;
+                    this.confirmDiscard('Leaving this screen', () => {
+                        window.location.href = back;
+                    });
                 },
             });
         },
@@ -2020,6 +2081,22 @@ export function voucherScreen(cfg) {
                 this.flashMsg('Voucher type is fixed while altering', 'warn');
                 return;
             }
+            // Switching type calls resetLines() and clears the narration, so on a
+            // voucher that has been typed into it is a discard — and it used to
+            // happen silently. A mistyped F8 on a half-entered Payment threw the
+            // work away with no prompt.
+            if (this.hasUnsavedWork()) {
+                this.confirmDiscard('Switching to ' + (this.types[t] ? this.types[t].label : t), () =>
+                    this.applyTypeSwitch(t)
+                );
+
+                return;
+            }
+            this.applyTypeSwitch(t);
+        },
+
+        /** The type switch itself, once any discard has been agreed to. */
+        applyTypeSwitch(t) {
             this.closePickers(); // a line's picker may be open; don't orphan its context
             this.type = t;
             this.number = this.nextNumbers[t];
@@ -2644,6 +2721,7 @@ export function voucherScreen(cfg) {
                     await window.zbDesktop.postVoucher(payload);
                     this.flashMsg('✔ Queued offline · syncs when online (' + window.zbDesktop.pendingCount() + ' pending)', 'ok');
                     this.$store.zb.note('Queued offline', 'commit');
+                    this.markVoucherPristine();
                     if (this.editId) { window.location.href = cfg.dayBookUrl; return; }
                     this.closePickers();
                     this.number = (parseInt(this.number, 10) || 0) + 1; // provisional local number
@@ -2661,6 +2739,9 @@ export function voucherScreen(cfg) {
                 }
                 this.flashMsg('✔ ' + res.voucher.display_number + ' posted · Alt+P to print', 'ok');
                 this.$store.zb.note('Posted ' + res.voucher.display_number, 'commit');
+                // Saved — the screen no longer holds unsaved work, so continuous
+                // entry does not prompt on the next Esc or type switch.
+                this.markVoucherPristine();
                 // remember it so Alt+P can print the just-accepted voucher
                 this.lastPostedId = res.voucher.id;
                 this.lastPostedNumber = res.voucher.display_number;

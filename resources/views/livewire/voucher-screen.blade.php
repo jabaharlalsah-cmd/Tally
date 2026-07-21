@@ -1,5 +1,8 @@
 @php($__boot = $this->bootData())
 <div class="zb-voucher"
+     {{-- Real user typing arms the unsaved-work guard; framework-dispatched
+          events do not (isTrusted). See hasUnsavedWork() in vouchers/screen.js. --}}
+     @input="noteUserInput($event)" @change="noteUserInput($event)"
      :class="{ 'zb-ws-scenario': scenariosEnabled && !!scenarioId }"
      x-data="voucherScreen(Object.assign(@js($__boot), {
         dayBookUrl: @js(route('daybook')),
