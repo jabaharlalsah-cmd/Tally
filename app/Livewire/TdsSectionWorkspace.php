@@ -3,6 +3,7 @@
 namespace App\Livewire;
 
 use App\Livewire\Concerns\GuardsActiveCompany;
+use App\Livewire\Concerns\TogglesMasterActive;
 use App\Models\TdsDeduction;
 use App\Models\TdsSection;
 use App\Models\Voucher;
@@ -25,6 +26,7 @@ use Livewire\Component;
 class TdsSectionWorkspace extends Component
 {
     use GuardsActiveCompany;
+    use TogglesMasterActive;
 
     // Create
     public string $code = '';
@@ -224,5 +226,11 @@ class TdsSectionWorkspace extends Component
     public function render()
     {
         return view('livewire.tds-section-workspace');
+    }
+
+    /** The model TogglesMasterActive retires and restores. */
+    protected function masterModelClass(): string
+    {
+        return \App\Models\TdsSection::class;
     }
 }

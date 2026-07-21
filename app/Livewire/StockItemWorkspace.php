@@ -3,6 +3,7 @@
 namespace App\Livewire;
 
 use App\Livewire\Concerns\GuardsActiveCompany;
+use App\Livewire\Concerns\TogglesMasterActive;
 use App\Livewire\Concerns\CreatesStockGroups;
 use App\Livewire\Concerns\CreatesUnits;
 use App\Models\Godown;
@@ -24,6 +25,7 @@ use Livewire\Component;
 class StockItemWorkspace extends Component
 {
     use GuardsActiveCompany;
+    use TogglesMasterActive;
     use CreatesStockGroups;
     use CreatesUnits;
 
@@ -277,5 +279,11 @@ class StockItemWorkspace extends Component
     public function render()
     {
         return view('livewire.inventory.stock-item-workspace');
+    }
+
+    /** The model TogglesMasterActive retires and restores. */
+    protected function masterModelClass(): string
+    {
+        return \App\Models\StockItem::class;
     }
 }

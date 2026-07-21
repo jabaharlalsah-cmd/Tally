@@ -279,10 +279,11 @@
                     <template x-for="(l, i) in list" :key="l.id">
                         <li class="zb-list-item" :class="{ 'is-active': i === listActive }"
                             @click="listActive = i; mode === 'alter' ? openAlter(l) : null" @mousemove="listActive = i">
-                            <span x-text="l.name"></span>
+                            <span x-text="l.name" :class="{ 'is-retired': l.is_active === false }"></span>
                             <span class="zb-list-sub">
                                 <span x-text="l.group || '⌂ Primary'"></span>
                                 <span class="zb-reserved-tag" x-show="l.is_reserved">reserved</span>
+                                <span class="zb-retired-tag" x-show="l.is_active === false" x-cloak>retired</span>
                             </span>
                         </li>
                     </template>
@@ -295,10 +296,23 @@
                         <dt>Opening</dt><dd x-text="(current?.opening_balance ? current.opening_balance.toLocaleString() : '0') + ' ' + (current?.opening_balance_type || '')"></dd>
                         <dt>Alias</dt><dd x-text="current?.alias || '—'"></dd>
                         <dt>Reserved</dt><dd x-text="current?.is_reserved ? 'Yes (non-deletable)' : 'No'"></dd>
+                        <dt>Status</dt>
+                        <dd>
+                            <span x-text="current?.is_active === false ? 'Retired' : 'Active'"></span>
+                            {{-- A ledger with vouchers behind it can never be deleted without
+                                 orphaning them, so retiring is the only way to get it out of
+                                 the pickers. Reserved ledgers stay active always. --}}
+                            <button type="button" class="zb-linkbutton zb-retire-btn"
+                                    x-show="current && !current.is_reserved" x-cloak
+                                    @click="toggleActive(current)"
+                                    x-text="current?.is_active === false ? 'Restore' : 'Retire'"></button>
+                        </dd>
                     </dl>
                     <p class="text-muted" style="font-size:.76rem">
                         <template x-if="mode === 'alter'"><span><span class="zb-kbd">Enter</span> alter &middot; </span></template>
-                        <span class="zb-kbd">Alt+D</span> delete &middot; <span class="zb-kbd">Esc</span> back
+                        <span class="zb-kbd">Alt+D</span> delete &middot;
+                        <span class="zb-kbd">Alt+A</span> retire/restore &middot;
+                        <span class="zb-kbd">Esc</span> back
                     </p>
                 </div>
             </div>

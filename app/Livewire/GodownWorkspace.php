@@ -3,6 +3,7 @@
 namespace App\Livewire;
 
 use App\Livewire\Concerns\GuardsActiveCompany;
+use App\Livewire\Concerns\TogglesMasterActive;
 use App\Models\Godown;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
@@ -17,6 +18,7 @@ use Livewire\Component;
 class GodownWorkspace extends Component
 {
     use GuardsActiveCompany;
+    use TogglesMasterActive;
 
     // Single create
     public string $name = '';
@@ -178,5 +180,11 @@ class GodownWorkspace extends Component
     public function render()
     {
         return view('livewire.inventory.godown-workspace');
+    }
+
+    /** The model TogglesMasterActive retires and restores. */
+    protected function masterModelClass(): string
+    {
+        return \App\Models\Godown::class;
     }
 }

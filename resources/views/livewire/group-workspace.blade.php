@@ -140,10 +140,11 @@
                     <template x-for="(g, i) in list" :key="g.id">
                         <li class="zb-list-item" :class="{ 'is-active': i === listActive }"
                             @click="listActive = i; mode === 'alter' ? openAlter(g) : null" @mousemove="listActive = i">
-                            <span x-text="g.name"></span>
+                            <span x-text="g.name" :class="{ 'is-retired': g.is_active === false }"></span>
                             <span class="zb-list-sub">
                                 <span x-text="g.nature"></span>
                                 <span class="zb-reserved-tag" x-show="g.is_reserved">reserved</span>
+                                <span class="zb-retired-tag" x-show="g.is_active === false" x-cloak>retired</span>
                             </span>
                         </li>
                     </template>
@@ -157,10 +158,23 @@
                         <dt>Alias</dt><dd x-text="current?.alias || '—'"></dd>
                         <dt>Path</dt><dd x-text="current?.path"></dd>
                         <dt>Reserved</dt><dd x-text="current?.is_reserved ? 'Yes (non-deletable)' : 'No'"></dd>
+                        <dt>Status</dt>
+                        <dd>
+                            <span x-text="current?.is_active === false ? 'Retired' : 'Active'"></span>
+                            {{-- A group with ledgers or sub-groups under it can never be
+                                 deleted, so retiring is the only way to take it out of the
+                                 pickers. Reserved groups stay active always. --}}
+                            <button type="button" class="zb-linkbutton zb-retire-btn"
+                                    x-show="current && !current.is_reserved" x-cloak
+                                    @click="toggleActive(current)"
+                                    x-text="current?.is_active === false ? 'Restore' : 'Retire'"></button>
+                        </dd>
                     </dl>
                     <p class="text-muted" style="font-size:.76rem">
                         <template x-if="mode === 'alter'"><span><span class="zb-kbd">Enter</span> alter &middot; </span></template>
-                        <span class="zb-kbd">Alt+D</span> delete &middot; <span class="zb-kbd">Esc</span> back
+                        <span class="zb-kbd">Alt+D</span> delete &middot;
+                        <span class="zb-kbd">Alt+A</span> retire/restore &middot;
+                        <span class="zb-kbd">Esc</span> back
                     </p>
                 </div>
             </div>

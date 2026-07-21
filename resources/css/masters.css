@@ -368,3 +368,37 @@
     border-radius: 6px;
     padding: 0.4rem 0.65rem;
 }
+
+/* ---- retired (inactive) master ----
+   A master with history cannot be deleted without orphaning its vouchers, so it
+   is retired instead: still readable where it is already used, no longer offered
+   in pickers. Muted rather than alarming — retiring is routine housekeeping, and
+   fully reversible. */
+.zb-retired-tag {
+    display: inline-block;
+    font-size: 0.62rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    font-weight: 700;
+    color: var(--faint);
+    background: rgba(139, 154, 146, 0.14);
+    border: 1px solid rgba(139, 154, 146, 0.45);
+    border-radius: 5px;
+    padding: 0 0.3rem;
+    margin-left: 0.35rem;
+}
+.zb-list-item .is-retired {
+    color: var(--faint);
+    text-decoration: line-through;
+    text-decoration-thickness: 1px;
+}
+.zb-list-item.is-active .is-retired {
+    color: rgba(255, 255, 255, 0.75);
+}
+.zb-retire-btn {
+    margin-left: 0.5rem;
+    color: var(--evergreen);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    font-size: 0.74rem;
+}

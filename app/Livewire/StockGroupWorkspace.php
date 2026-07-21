@@ -3,6 +3,7 @@
 namespace App\Livewire;
 
 use App\Livewire\Concerns\GuardsActiveCompany;
+use App\Livewire\Concerns\TogglesMasterActive;
 use App\Livewire\Concerns\CreatesStockGroups;
 use App\Models\StockGroup;
 use Illuminate\Support\Facades\DB;
@@ -19,6 +20,7 @@ use Livewire\Component;
 class StockGroupWorkspace extends Component
 {
     use GuardsActiveCompany;
+    use TogglesMasterActive;
     use CreatesStockGroups;
 
     // Single create
@@ -180,5 +182,11 @@ class StockGroupWorkspace extends Component
     public function render()
     {
         return view('livewire.inventory.stock-group-workspace');
+    }
+
+    /** The model TogglesMasterActive retires and restores. */
+    protected function masterModelClass(): string
+    {
+        return \App\Models\StockGroup::class;
     }
 }

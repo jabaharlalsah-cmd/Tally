@@ -3,6 +3,7 @@
 namespace App\Livewire;
 
 use App\Livewire\Concerns\GuardsActiveCompany;
+use App\Livewire\Concerns\TogglesMasterActive;
 use App\Livewire\Concerns\CreatesUnits;
 use App\Models\Unit;
 use Illuminate\Support\Facades\DB;
@@ -18,6 +19,7 @@ use Livewire\Component;
 class UnitWorkspace extends Component
 {
     use GuardsActiveCompany;
+    use TogglesMasterActive;
     use CreatesUnits;
 
     // Single create
@@ -165,5 +167,11 @@ class UnitWorkspace extends Component
     public function render()
     {
         return view('livewire.inventory.unit-workspace');
+    }
+
+    /** The model TogglesMasterActive retires and restores. */
+    protected function masterModelClass(): string
+    {
+        return \App\Models\Unit::class;
     }
 }

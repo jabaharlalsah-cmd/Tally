@@ -3,6 +3,7 @@
 namespace App\Livewire;
 
 use App\Livewire\Concerns\GuardsActiveCompany;
+use App\Livewire\Concerns\TogglesMasterActive;
 use App\Models\Currency;
 use App\Models\ExchangeRate;
 use App\Services\ExchangeRateService;
@@ -19,6 +20,7 @@ use Livewire\Component;
 class CurrencyMaster extends Component
 {
     use GuardsActiveCompany;
+    use TogglesMasterActive;
 
     // New currency form.
     public string $code = '';
@@ -117,5 +119,11 @@ class CurrencyMaster extends Component
             'nonBase' => Currency::where('is_base', false)->orderBy('code')->get(),
             'history' => $history,
         ]);
+    }
+
+    /** The model TogglesMasterActive retires and restores. */
+    protected function masterModelClass(): string
+    {
+        return \App\Models\Currency::class;
     }
 }

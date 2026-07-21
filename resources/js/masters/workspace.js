@@ -166,6 +166,11 @@ export function makeWorkspace(cfg) {
                             run: () => (m === 'alter' ? this.openAlter(this.current) : null),
                         },
                         { key: 'alt+d', label: 'Delete', run: () => this.askDelete(this.current) },
+                        {
+                            key: 'alt+a',
+                            label: 'Retire / Restore',
+                            run: () => this.toggleActive(this.current),
+                        },
                     ],
                     onPop: () => (this.mode = 'menu'),
                 });
@@ -282,6 +287,40 @@ export function makeWorkspace(cfg) {
         },
 
         /* ---- delete (with keyboard confirm) ---- */
+        /**
+         * Retire / restore a master (Alt+A, or the button in the detail pane).
+         *
+         * Retiring is the answer to "this ledger is dead but I can't delete it":
+         * a master with vouchers behind it can never be deleted without orphaning
+         * them, so Tally retires it instead — it stays readable on its existing
+         * vouchers and stops being offered for new ones.
+         *
+         * No confirm prompt, unlike delete: this is fully reversible, and making
+         * the user confirm a reversible action trains them to dismiss prompts.
+         */
+        async toggleActive(item) {
+            if (!item) return;
+            const next = item.is_active === false; // currently retired → restore
+            try {
+                const res = await this.$wire.saveActiveState(item.id, next);
+                if (res && res.ok) {
+                    // Update the client cache in place so every open picker and
+                    // the list reflect it without a round-trip.
+                    item.is_active = res.is_active;
+                    const cached = (this.$store.masters[cfg.source || cfg.kind + 's'] || []).find(
+                        (x) => x.id === item.id
+                    );
+                    if (cached) cached.is_active = res.is_active;
+                    this.flashMsg((next ? '✔ Restored ' : '✔ Retired ') + item.name);
+                    this.$store.zb.note((next ? 'Restored ' : 'Retired ') + cfg.kind + ': ' + item.name, 'commit');
+                } else {
+                    this.flashMsg((res && res.message) || 'Could not change active state.', 'warn');
+                }
+            } catch (e) {
+                this.flashMsg('Could not change active state.', 'warn');
+            }
+        },
+
         askDelete(item) {
             if (!item) return;
             if (item.is_reserved) {

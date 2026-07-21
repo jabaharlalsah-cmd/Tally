@@ -3,6 +3,7 @@
 namespace App\Livewire;
 
 use App\Livewire\Concerns\GuardsActiveCompany;
+use App\Livewire\Concerns\TogglesMasterActive;
 use App\Models\CostCentre;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
@@ -18,6 +19,7 @@ use Livewire\Component;
 class CostCentreWorkspace extends Component
 {
     use GuardsActiveCompany;
+    use TogglesMasterActive;
 
     // Single create
     public string $name = '';
@@ -183,5 +185,11 @@ class CostCentreWorkspace extends Component
     public function render()
     {
         return view('livewire.cost-centre-workspace');
+    }
+
+    /** The model TogglesMasterActive retires and restores. */
+    protected function masterModelClass(): string
+    {
+        return \App\Models\CostCentre::class;
     }
 }

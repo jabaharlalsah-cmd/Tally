@@ -125,3 +125,68 @@ test.describe('Ledger master arrangement', () => {
         expect(stranded).toEqual([]);
     });
 });
+
+test.describe('Retire / restore a master', () => {
+    test('a retired ledger disappears from pickers, and comes back on restore', async ({ page }) => {
+        await login(page);
+
+        // Find a non-reserved ledger — reserved ones cannot be retired.
+        await page.goto('/masters/ledgers?mode=display');
+        await page.waitForFunction(() => window.Alpine?.store?.('zb'));
+        const target = await page.evaluate(() => {
+            const items = window.Alpine.store('masters').ledgers || [];
+            const l = items.find((x) => !x.is_reserved && x.is_active !== false);
+            return l ? { id: l.id, name: l.name } : null;
+        });
+        test.skip(!target, 'no non-reserved ledger in this company');
+
+        const inPicker = () =>
+            page.evaluate((name) => {
+                const items = window.Alpine.store('masters').ledgers || [];
+                const l = items.find((x) => x.name === name);
+                return l ? l.is_active !== false : null;
+            }, target.name);
+
+        expect(await inPicker()).toBe(true);
+
+        // Retire it through the real Livewire action.
+        const retired = await page.evaluate(async (id) => {
+            const el = document.querySelector('.zb-ws');
+            return await window.Alpine.$data(el).$wire.saveActiveState(id, false);
+        }, target.id);
+        expect(retired.ok).toBe(true);
+
+        // Reload so the picker payload is rebuilt server-side.
+        await page.goto('/masters/ledgers?mode=display');
+        await page.waitForFunction(() => window.Alpine?.store?.('zb'));
+        expect(await inPicker()).toBe(false);
+
+        // Restore, and confirm it returns.
+        await page.evaluate(async (id) => {
+            const el = document.querySelector('.zb-ws');
+            return await window.Alpine.$data(el).$wire.saveActiveState(id, true);
+        }, target.id);
+        await page.goto('/masters/ledgers?mode=display');
+        await page.waitForFunction(() => window.Alpine?.store?.('zb'));
+        expect(await inPicker()).toBe(true);
+    });
+
+    test('a reserved ledger refuses to be retired', async ({ page }) => {
+        await login(page);
+        await page.goto('/masters/ledgers?mode=display');
+        await page.waitForFunction(() => window.Alpine?.store?.('zb'));
+        const reserved = await page.evaluate(() => {
+            const items = window.Alpine.store('masters').ledgers || [];
+            const l = items.find((x) => x.is_reserved);
+            return l ? l.id : null;
+        });
+        test.skip(!reserved, 'no reserved ledger seeded');
+
+        const res = await page.evaluate(async (id) => {
+            const el = document.querySelector('.zb-ws');
+            return await window.Alpine.$data(el).$wire.saveActiveState(id, false);
+        }, reserved);
+        expect(res.ok).toBe(false);
+        expect(res.message).toContain('Reserved');
+    });
+});
