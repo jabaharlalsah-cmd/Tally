@@ -6,7 +6,7 @@
    Reuses the Phase 2 masters cache + zbSelect picker (event sink) for ledgers.
    ========================================================================= */
 
-import { registerDirty } from '../engine/keys.js';
+import { registerDirty, workingDate } from '../engine/keys.js';
 
 export function voucherScreen(cfg) {
     return {
@@ -79,7 +79,12 @@ export function voucherScreen(cfg) {
         number: 0,
         nextNumbers: Object.assign({}, cfg.nextNumbers),
         fyLabel: cfg.fyLabel,
-        date: cfg.edit ? cfg.edit.date : cfg.today,
+        // A NEW voucher opens on the working date if one has been set with F2,
+        // as in Tally; otherwise on today. Altering always keeps the voucher's
+        // own date — the working date must never rewrite a saved entry.
+        // The server re-validates the date against the financial year on accept,
+        // so a stale session value cannot post outside the open period.
+        date: cfg.edit ? cfg.edit.date : (workingDate() || cfg.today),
         narration: cfg.edit ? cfg.edit.narration || '' : '',
         // Phase 15C — the provisional-scenario tag ('' = a real voucher). Sticky across
         // consecutive new entries so a run of what-if vouchers lands in the same scenario.

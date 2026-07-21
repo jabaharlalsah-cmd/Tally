@@ -505,3 +505,18 @@ export function prettyHint(key, opts) {
     // Mac convention prints modifier symbols with no separator: ⌘A, ⌥⇧F6.
     return mac ? parts.join('') : parts.join('+');
 }
+
+/**
+ * Tally's working date (yyyy-mm-dd), or null when none is set.
+ *
+ * Lives here beside the other session-scoped engine state so screens can read
+ * it without reaching into the Alpine store — the voucher controller needs it
+ * during data() construction, before $store is available.
+ */
+export function workingDate() {
+    try {
+        return window.sessionStorage.getItem('zb.workingDate') || null;
+    } catch (_) {
+        return null;
+    }
+}

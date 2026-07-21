@@ -779,6 +779,36 @@ export function zbStore() {
             return groups;
         },
 
+        /**
+         * Tally's working date — the date a NEW voucher opens on.
+         *
+         * Kept in sessionStorage rather than on the store alone, because setting
+         * it on the Gateway and then opening a voucher is a full page
+         * navigation: an in-memory value would not survive the trip, which is
+         * exactly how F2 came to look like it worked while changing nothing.
+         *
+         * Session-scoped on purpose. A working date is a "for the next few
+         * entries" thing; carrying yesterday's choice into tomorrow's session
+         * would post vouchers to the wrong date without anyone asking for it.
+         */
+        setWorkingDate(iso) {
+            if (!iso) return;
+            try {
+                window.sessionStorage.setItem('zb.workingDate', iso);
+            } catch (_) {
+                /* private mode — the date holds for this page only */
+            }
+        },
+
+        /** The working date (yyyy-mm-dd), or null when none has been set. */
+        workingDate() {
+            try {
+                return window.sessionStorage.getItem('zb.workingDate') || null;
+            } catch (_) {
+                return null;
+            }
+        },
+
         quitLabel() {
             void this.rev;
             return this.depth() > 0 ? 'Back' : 'Quit';

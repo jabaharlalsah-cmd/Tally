@@ -35,6 +35,11 @@ export function reportScreen(cfg) {
                     { key: 'enter', label: 'Drill down', allowInInput: true, run: () => { if (!this.onPeriodEnter()) this.enter(); } },
                     { key: 'alt+f1', label: this.detailed ? 'Condensed' : 'Detailed', run: () => this.toggleDetailed() },
                     { key: 'f2', label: 'Period', allowInInput: true, run: () => this.focusPeriod() },
+                    // Alt+F2 is Tally's period key. Registered here so it does NOT
+                    // fall through to the global handler, which only relabels the
+                    // top bar and leaves the report period untouched — a key that
+                    // looks like it worked and did nothing.
+                    { key: 'alt+f2', label: 'Period', allowInInput: true, run: () => this.focusPeriod() },
                 ],
                 onEsc: () => this.escape(),
             });
@@ -322,6 +327,11 @@ export function gstSummary(cfg) {
                     { key: 'arrowup', label: 'Previous', hint: '↑', run: () => this.move(-1) },
                     { key: 'enter', label: 'Drill down', allowInInput: true, run: () => { if (!this.onPeriodEnter()) this.drill(); } },
                     { key: 'f2', label: 'Period', allowInInput: true, run: () => this.focusPeriod() },
+                    // Alt+F2 is Tally's period key. Registered here so it does NOT
+                    // fall through to the global handler, which only relabels the
+                    // top bar and leaves the report period untouched — a key that
+                    // looks like it worked and did nothing.
+                    { key: 'alt+f2', label: 'Period', allowInInput: true, run: () => this.focusPeriod() },
                 ],
                 onEsc: () => (window.location.href = cfg.gatewayUrl),
             });
@@ -487,6 +497,11 @@ export function costBreakup(cfg) {
                     { key: 'arrowup', label: 'Previous', hint: '↑', run: () => this.move(-1) },
                     { key: 'enter', label: 'Drill to voucher(s)', allowInInput: true, run: () => { if (!this.onPeriodEnter()) this.drill(); } },
                     { key: 'f2', label: 'Period', allowInInput: true, run: () => this.focusPeriod() },
+                    // Alt+F2 is Tally's period key. Registered here so it does NOT
+                    // fall through to the global handler, which only relabels the
+                    // top bar and leaves the report period untouched — a key that
+                    // looks like it worked and did nothing.
+                    { key: 'alt+f2', label: 'Period', allowInInput: true, run: () => this.focusPeriod() },
                 ],
                 onEsc: () => (window.location.href = cfg.gatewayUrl),
             });
@@ -572,6 +587,11 @@ export function tdsSummary(cfg) {
                     { key: 'arrowup', label: 'Previous', hint: '↑', run: () => this.move(-1) },
                     { key: 'enter', label: 'Drill to voucher(s)', allowInInput: true, run: () => { if (!this.onPeriodEnter()) this.drill(); } },
                     { key: 'f2', label: 'Period', allowInInput: true, run: () => this.focusPeriod() },
+                    // Alt+F2 is Tally's period key. Registered here so it does NOT
+                    // fall through to the global handler, which only relabels the
+                    // top bar and leaves the report period untouched — a key that
+                    // looks like it worked and did nothing.
+                    { key: 'alt+f2', label: 'Period', allowInInput: true, run: () => this.focusPeriod() },
                 ],
                 onEsc: () => (window.location.href = cfg.gatewayUrl),
             });
@@ -658,6 +678,11 @@ export function groupReport() {
                     // date fields; inField() then hands the key back to the field.
                     { key: 'enter', label: 'Expand', allowInInput: true, run: () => { if (!this.inField()) this.toggle(); } },
                     { key: 'f2', label: 'Period', allowInInput: true, run: () => { const el = document.querySelector('#gr-from'); if (el) el.focus(); } },
+                    // Alt+F2 is Tally's period key. Registered here so it does NOT
+                    // fall through to the global handler, which only relabels the
+                    // top bar and leaves the report period untouched — a key that
+                    // looks like it worked and did nothing.
+                    { key: 'alt+f2', label: 'Period', allowInInput: true, run: () => this.focusPeriod() },
                 ],
                 onEsc: () => (window.location.href = (window.ZB_CONFIG || {}).urls?.gateway || '/app'),
             });

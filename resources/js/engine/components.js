@@ -412,7 +412,16 @@ function zbPeriod() {
                 const t = this.fmt(this.to);
                 this.$store.zb.periodLabel = f + ' to ' + t;
                 this.$store.zb.dateLabel = t;
-                this.$store.zb.note('Period set: ' + this.$store.zb.periodLabel, 'flow');
+                // Persist the WORKING DATE so a new voucher actually opens on it.
+                //
+                // This used to write the two labels above and nothing else. The
+                // top bar dutifully confirmed the date you had just set, and then
+                // every new voucher ignored it and used today — which is worse
+                // than the key doing nothing at all, because the screen tells you
+                // it worked. F2 is Tally's working date and it is expected to
+                // carry into the next voucher.
+                this.$store.zb.setWorkingDate(this.to);
+                this.$store.zb.note('Working date: ' + t, 'flow');
             }
             this.close();
         },

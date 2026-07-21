@@ -130,3 +130,69 @@ test.describe('Report drill-down', () => {
         await expect.poll(() => reportEval(page, 'd.activeKey')).not.toBe(row);
     });
 });
+
+test.describe('F2 working date', () => {
+    test('the date set with F2 is what a NEW voucher opens on', async ({ page }) => {
+        await login(page);
+
+        // F2 anywhere opens Tally's date/period gate.
+        await page.keyboard.press('F2');
+        await expect.poll(() => page.evaluate(() => window.Alpine.store('zb').period.open)).toBe(true);
+
+        await page.evaluate(() => {
+            const el = Array.from(document.querySelectorAll('[x-data]')).find((e) => {
+                try {
+                    const d = window.Alpine.$data(e);
+                    return 'from' in d && 'to' in d && typeof d.apply === 'function';
+                } catch (_) {
+                    return false;
+                }
+            });
+            const d = window.Alpine.$data(el);
+            d.from = '2026-05-01';
+            d.to = '2026-05-15';
+            d.apply();
+        });
+
+        // It used to write only a top-bar label: the screen confirmed the date
+        // and every new voucher then ignored it and used today. Worse than the
+        // key doing nothing, because it looks like it worked.
+        await page.goto('/vouchers/create/payment');
+        await page.waitForFunction(() => window.ZB_VOUCHER);
+        await expect.poll(() => page.evaluate(() => window.ZB_VOUCHER.date)).toBe('2026-05-15');
+    });
+
+    test('ALTERING a voucher keeps its own date, not the working date', async ({ page }) => {
+        await login(page);
+        await page.evaluate(() => window.sessionStorage.setItem('zb.workingDate', '2026-05-15'));
+
+        // Open a saved voucher the way an operator does: Enter on a Day Book
+        // row. The rows are not anchors and the component reads the id from the
+        // DOM, so driving the real keystroke is both simpler and truer than
+        // reconstructing the URL.
+        await page.goto('/day-book');
+        await page.waitForFunction(() => window.Alpine?.store?.('zb'));
+        const rows = await page.locator('#daybook-list .zb-list-item, #daybook-list tr').count();
+        test.skip(rows === 0, 'no voucher to alter in this company');
+
+        await page.keyboard.press('Enter');
+        await page.waitForURL(/vouchers\/\d+\/alter/, { timeout: 10_000 });
+        await page.waitForFunction(() => window.ZB_VOUCHER);
+
+        // A saved voucher's date is its own. The working date must never
+        // silently rewrite an existing entry.
+        expect(await page.evaluate(() => window.ZB_VOUCHER.date)).not.toBe('2026-05-15');
+    });
+
+    test('Alt+F2 on a report focuses the period rather than doing nothing', async ({ page }) => {
+        await login(page);
+        await page.goto('/reports/trial-balance');
+        await page.waitForFunction(() => window.Alpine?.store?.('zb'));
+
+        await page.keyboard.press('Alt+F2');
+        // Previously this fell through to a global stub that only relabelled the
+        // top bar and left the report period untouched.
+        await expect(page.locator('#report-from')).toBeFocused();
+        expect(await page.evaluate(() => window.Alpine.store('zb').period.open)).toBe(false);
+    });
+});
