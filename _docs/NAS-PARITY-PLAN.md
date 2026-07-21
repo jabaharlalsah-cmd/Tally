@@ -224,6 +224,52 @@ first. Adding the `cancel` verb to the detector mattered: without it the proof
 reported the existing `cancelVoucher` entry as *stale* while never checking it — a
 false clean bill of health.
 
+## Phase 4 record — vouchers
+
+### 4a — the voucher screen was losing work three ways (fixed)
+
+The screen an operator lives in all day had no unsaved-work protection at all:
+
+| Path | What happened |
+|---|---|
+| Reload / tab close | no beforeunload anywhere |
+| Esc |  did an unconditional  |
+| F4–F9 type switch |  calls  and clears the narration |
+
+The third is the one that would bite hardest: a single keystroke, adjacent to keys used
+constantly, and nothing on screen indicated anything was lost. All three now route through
+. A CLEAN voucher is unaffected — Esc and F4–F9 stay instant, because a
+prompt on an untouched screen teaches people to click through the prompt that matters.
+
+### 4b — the arrangement already matches TallyPrime
+
+Surveyed before changing anything, and the accounting voucher path needs **no reordering**:
+
+| Element | ZeroBook | TallyPrime |
+|---|---|---|
+| Date | page header, above the form | top of the voucher |
+| Voucher number | display-only, in the header | display-only |
+| Party / Account | single-entry mode only ( first) | same — Account: appears in single-entry Payment/Receipt |
+| Dr/Cr · Ledger · Amount | the form body | same |
+| Totals | tfoot, immediately after the lines | same |
+| Narration | last field, after the totals | same |
+
+Enter chain: Day → Month → Year → Dr/Cr → Ledger → Amount → (auto-filled balancing line
+while out of balance) → Narration → Accept. That is Tally’s flow, including the balancing
+line being pre-filled with the difference.
+
+Verified in a browser rather than assumed: Backspace steps back through the date segments
+(dd ← mm ← yyyy), so the date field behaves as Tally’s does. An earlier survey called the
+blade’s date  handlers dead code — they are redundant, but the behaviour they
+describe works, handled by  in the controller. Left alone: no reason to touch
+working behaviour on the busiest screen.
+
+**Conclusion: no Phase 4 reordering work is warranted.** Manufacturing changes to a screen
+that already matches would be churn, and churn on the voucher screen is the most expensive
+kind.
+
+---
+
 ### Phase 3 — COMPLETE
 
 | Deliverable | State |
