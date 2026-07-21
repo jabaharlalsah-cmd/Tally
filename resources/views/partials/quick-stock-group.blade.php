@@ -18,7 +18,7 @@
             </div>
             <div class="zb-form-row">
                 <label>Under</label>
-                <x-master-select id="qsg-under" source="stockGroups" model="qsg_parent_id" model-label="qsg_parent_label" :allow-primary="false" label="Under" placeholder="Optional parent" />
+                <x-master-select :manage="false" id="qsg-under" source="stockGroups" model="qsg_parent_id" model-label="qsg_parent_label" :allow-primary="false" label="Under" placeholder="Optional parent" />
             </div>
             @error('qsg_parent_id') <div class="zb-field-error">{{ $message }}</div> @enderror
             <p class="text-muted" style="font-size:.76rem;margin-top:.4rem"><span class="zb-kbd">Ctrl+A</span> create &amp; return · <span class="zb-kbd">Esc</span> cancel</p>

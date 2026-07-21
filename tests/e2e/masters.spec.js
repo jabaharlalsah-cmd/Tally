@@ -190,3 +190,57 @@ test.describe('Retire / restore a master', () => {
         expect(res.message).toContain('Reserved');
     });
 });
+
+test.describe('Manage gear beside master dropdowns', () => {
+    test('the gear appears beside the Under picker and links to the group manager', async ({ page }) => {
+        await ledgerCreateForm(page);
+        const gear = page.locator('form[data-zb-form="ledger"] .zb-manage-gear').first();
+        await expect(gear).toBeVisible();
+        await expect(gear).toHaveAttribute('title', /Manage/);
+    });
+
+    test('the gear is NOT in the Enter chain', async ({ page }) => {
+        await ledgerCreateForm(page);
+        // It is a mouse affordance. If Enter walked onto it, every operator
+        // filling the form by keyboard would land on a button that navigates.
+        const tabindex = await page
+            .locator('form[data-zb-form="ledger"] .zb-manage-gear')
+            .first()
+            .getAttribute('tabindex');
+        expect(tabindex).toBe('-1');
+    });
+
+    test('clicking the gear on an EMPTY form navigates without prompting', async ({ page }) => {
+        await ledgerCreateForm(page);
+        await page.locator('form[data-zb-form="ledger"] .zb-manage-gear').first().click();
+        await page.waitForURL(/masters\/groups/, { timeout: 10_000 });
+    });
+
+    test('clicking the gear with unsaved input WARNS before discarding it', async ({ page }) => {
+        await ledgerCreateForm(page);
+        await page.fill('#l-name', 'Half typed ledger');
+
+        await page.locator('form[data-zb-form="ledger"] .zb-manage-gear').first().click();
+
+        // Tally's own Accept? gate, not a browser dialog.
+        const prompt = page.locator('.zb-accept, [x-show*="accept.open"]').first();
+        await expect(prompt).toBeVisible({ timeout: 5000 });
+        await expect(page.locator('body')).toContainText(/not been saved|discard/i);
+
+        // Still on the ledger screen — nothing lost yet.
+        expect(page.url()).toContain('/masters/ledgers');
+    });
+
+    test('quick-create modals carry no gear', async ({ page }) => {
+        await ledgerCreateForm(page);
+        // Alt+C on the Under picker opens the inline group create. The picker
+        // input carries no id — master-select renders it by class.
+        await page.locator('form[data-zb-form="ledger"] .zb-combo-input').first().click();
+        await page.keyboard.press('Alt+c');
+        const modal = page.locator('.zb-subscreen');
+        await expect(modal).toBeVisible({ timeout: 5000 });
+        // Navigating away from here would destroy the modal AND the ledger
+        // behind it, so the gear is deliberately absent.
+        await expect(modal.locator('.zb-manage-gear')).toHaveCount(0);
+    });
+});

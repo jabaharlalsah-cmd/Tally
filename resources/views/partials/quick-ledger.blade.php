@@ -23,7 +23,7 @@
 
             <div class="zb-form-row">
                 <label>Under</label>
-                <x-master-select id="qled-under" source="groups" model="ql_group_id" model-label="ql_group_label"
+                <x-master-select :manage="false" id="qled-under" source="groups" model="ql_group_id" model-label="ql_group_label"
                                  create-type="group" :allow-primary="false" label="Under"
                                  placeholder="Group (Alt+C to create a group)" />
             </div>

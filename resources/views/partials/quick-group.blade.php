@@ -23,7 +23,7 @@
 
             <div class="zb-form-row">
                 <label>Under</label>
-                <x-master-select id="qg-under" source="groups" model="qg_parent_id" model-label="qg_parent_label"
+                <x-master-select :manage="false" id="qg-under" source="groups" model="qg_parent_id" model-label="qg_parent_label"
                                  :create-type="null" :allow-primary="true" label="Under"
                                  placeholder="Parent group, or ⌂ Primary" />
             </div>

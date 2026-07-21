@@ -12,7 +12,28 @@
     'initialLabel' => '',
     'label' => 'Select',
     'placeholder' => 'Type to search…',
+    // Set manage="false" where leaving the screen would be destructive or
+    // nonsensical (inside a quick-create modal, for instance).
+    'manage' => true,
 ])
+@php
+    // Where each master is managed. The gear opens that screen in ALTER mode,
+    // which is the manage surface: list, pick, edit, retire, delete.
+    $manageRoutes = [
+        'groups'      => 'masters.groups',
+        'ledgers'     => 'masters.ledgers',
+        'costCentres' => 'masters.cost-centres',
+        'tdsSections' => 'masters.tds-sections',
+        'currencies'  => 'masters.currencies',
+        'units'       => 'inventory.units',
+        'godowns'     => 'inventory.godowns',
+        'stockGroups' => 'inventory.stock-groups',
+        'stockItems'  => 'inventory.stock-items',
+    ];
+    $manageRoute = $manage && isset($manageRoutes[$source])
+        ? route($manageRoutes[$source], ['mode' => 'alter'])
+        : null;
+@endphp
 {{-- Reusable Tally-style searchable picker. Must live inside a [data-zb-form].
      Filters the client-side masters cache — zero network while typing. --}}
 <div class="zb-combo"
@@ -59,3 +80,24 @@
         </template>
     </div>
 </div>
+
+@if ($manageRoute)
+    {{-- Manage this master list. Sits in the form grid beside the field rather
+         than floating, so it lines up down the column.
+
+         It routes through $store.zb.leaveTo(), which warns before discarding a
+         half-filled form — the gear is the one control on these screens that
+         can lose unsaved work in a single click. The guard lives on the store,
+         not on one screen's controller, because this component renders on nine
+         different workspaces.
+
+         tabindex=-1 keeps it out of the Enter chain: this is a mouse
+         affordance, and the keyboard path to the same place is the Gateway
+         (A → the master). --}}
+    <button type="button" class="zb-manage-gear" tabindex="-1"
+            title="Manage {{ $label }} list"
+            aria-label="Manage {{ $label }} list"
+            @click="$store.zb.leaveTo(@js($manageRoute))">
+        <i class="ti ti-settings"></i>
+    </button>
+@endif

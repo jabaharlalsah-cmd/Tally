@@ -19,14 +19,14 @@
 
             <div class="zb-form-row">
                 <label>Under (Stock Group)</label>
-                <x-master-select id="qsi-under" source="stockGroups" model="qsi_group_id" model-label="qsi_group_label"
+                <x-master-select :manage="false" id="qsi-under" source="stockGroups" model="qsi_group_id" model-label="qsi_group_label"
                                  :create-type="null" :allow-primary="false" label="Under"
                                  placeholder="Stock group (optional)" />
             </div>
 
             <div class="zb-form-row">
                 <label>Unit</label>
-                <x-master-select id="qsi-unit" source="units" model="qsi_unit_id" model-label="qsi_unit_label"
+                <x-master-select :manage="false" id="qsi-unit" source="units" model="qsi_unit_id" model-label="qsi_unit_label"
                                  :create-type="null" :allow-primary="false" label="Unit"
                                  placeholder="Unit of measure (optional)" />
             </div>

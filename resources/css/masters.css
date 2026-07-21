@@ -402,3 +402,22 @@
     text-underline-offset: 2px;
     font-size: 0.74rem;
 }
+
+/* ---- manage gear beside a master dropdown ----
+   Opens that master's own management screen (list / edit / retire / delete).
+   Deliberately quiet: it is a secondary affordance next to the field the user
+   actually came to fill in, and it only earns attention on hover. */
+.zb-manage-gear {
+    background: none;
+    border: 0;
+    padding: 0 0 0 0.45rem;
+    margin: 0;
+    color: var(--faint);
+    cursor: pointer;
+    line-height: 1;
+    font-size: 0.95rem;
+}
+.zb-manage-gear:hover,
+.zb-manage-gear:focus-visible {
+    color: var(--evergreen);
+}

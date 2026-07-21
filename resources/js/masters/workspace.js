@@ -1,3 +1,4 @@
+import { registerDirty } from '../engine/keys.js';
 import { ensureElementVisible } from '../engine/scroll.js';
 
 /* =========================================================================
@@ -55,15 +56,71 @@ export function makeWorkspace(cfg) {
                 onEsc: () => (window.location.href = cfg.hubUrl),
             });
 
+            // Unsaved-work guard (engine/keys.js). Registered here rather than
+            // globally so only screens that can actually hold unsaved input arm
+            // it — an inert probe would disable bfcache for the whole app.
+            //
+            // It is deliberately wired to NAVIGATION only, never to Esc: ~23
+            // screens have an onEsc that assumes stepping back is unconditional,
+            // and prompting there would change behaviour everywhere. Closing the
+            // tab, reloading, or following the gear are the paths that silently
+            // destroy work, and those are what this covers.
+            this._offDirty = registerDirty('master.' + cfg.kind, () => this.hasUnsavedWork());
+
             // deep-link ?mode=create|multi|display|alter
             const m = new URLSearchParams(window.location.search).get('mode');
             if (m && ['create', 'multi', 'display', 'alter'].includes(m)) {
                 this.$nextTick(() => this.enterMode(m));
             }
         },
+
+        /** The visible form for the mode currently on screen. */
+        activeForm() {
+            if (!['create', 'multi', 'alter-form'].includes(this.mode)) return null;
+            const forms = this.$el ? this.$el.querySelectorAll('[data-zb-form]') : [];
+
+            return Array.from(forms).find((f) => f.offsetParent !== null) || null;
+        },
+
+        /**
+         * Clear the dirty flag. Called on entering a form mode and after each
+         * successful save.
+         */
+        markFormPristine() {
+            this._touched = false;
+        },
+
+        /**
+         * Is there input that would be lost by leaving the page?
+         *
+         * Keyed on whether the USER typed, not on what the DOM contains. Two
+         * earlier attempts were wrong and both failed the same way — warning on
+         * a form nobody had touched:
+         *   - "any field is non-empty": Country ships pre-filled "India".
+         *   - "values differ from a snapshot": Livewire hydrates the picker
+         *     inputs after the snapshot is taken, so they always differed.
+         *
+         * event.isTrusted is the honest signal — true only for events the
+         * browser generated from a real key press or click, false for anything
+         * a framework dispatches. A warning that cries wolf on an untouched
+         * screen is worse than none: it teaches people to click through the one
+         * that matters.
+         */
+        hasUnsavedWork() {
+            return !!this._touched && !!this.activeForm();
+        },
+
+        /** Bound to input/change on the workspace root (see the blade). */
+        noteUserInput(e) {
+            if (e && e.isTrusted) this._touched = true;
+        },
         destroy() {
             window.removeEventListener('zb:combo-create', this._onComboCreate);
+            // Drop the probe, or a torn-down screen keeps arming the unload
+            // prompt for the rest of the session.
+            if (this._offDirty) this._offDirty();
         },
+
 
         menuActions() {
             const acts = [
@@ -133,6 +190,9 @@ export function makeWorkspace(cfg) {
             this.mode = m;
             this.listActive = 0;
             this.listQuery = '';
+            // Snapshot the form as first shown, so pre-filled defaults
+            // (Country "India", Dr/Cr) do not read as unsaved work.
+            this.markFormPristine();
             if (m === 'create') {
                 this.$store.zb.pushContext({
                     name: 'master.create',
@@ -212,6 +272,7 @@ export function makeWorkspace(cfg) {
                 // lost, left focus on <body> — where every keystroke is swallowed and
                 // the screen looks frozen right after a successful save.
                 this.$nextTick(() => this.$store.zb._focusInto(cfg.createFirst));
+                this.markFormPristine();
             } catch (e) {
                 /* validation errors render inline via @error */
             }
@@ -264,6 +325,7 @@ export function makeWorkspace(cfg) {
             if (!item) return;
             await this.$wire.loadForAlter(item.id);
             this.mode = 'alter-form';
+            this.markFormPristine();
             this.$store.zb.pushContext({
                 name: 'master.alter-form',
                 label: 'Alter: ' + item.name,

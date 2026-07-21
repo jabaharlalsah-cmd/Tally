@@ -462,7 +462,9 @@
 /* --- Harness-specific ---------------------------------------------------- */
 .zb-form-row {
     display: grid;
-    grid-template-columns: 180px 1fr;
+    /* label | field | optional gear. The third track is auto, so rows without
+       a gear are unchanged and every gear still lines up down the column. */
+    grid-template-columns: 180px 1fr auto;
     align-items: center;
     gap: 0.75rem;
     padding: 0.35rem 0;

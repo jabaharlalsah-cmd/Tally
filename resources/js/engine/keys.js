@@ -383,9 +383,20 @@ export function isDirty() {
     return false;
 }
 
-/** Test hook — drops every registered probe. */
-export function __resetDirty() {
+/**
+ * Drop every probe, disarming the unload guard.
+ *
+ * Called immediately before a navigation the user has already confirmed —
+ * otherwise beforeunload fires a second, browser-native prompt on top of the
+ * one they just answered, which reads as the app refusing to let them leave.
+ */
+export function clearAllDirty() {
     dirtyProbes.clear();
+}
+
+/** Test hook — same thing, named for intent at the call site. */
+export function __resetDirty() {
+    clearAllDirty();
 }
 
 /* ---- runtime / reserved-key reporting ----------------------------------- */

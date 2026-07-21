@@ -1,5 +1,8 @@
 @php($__cache = $this->mastersCache())
 <div class="zb-ws"
+     {{-- Real user typing arms the unsaved-work guard; framework-dispatched
+          events do not (isTrusted). See hasUnsavedWork() in workspace.js. --}}
+     @input="noteUserInput($event)" @change="noteUserInput($event)"
      x-data="masterWorkspace({
         kind: 'ledger',
         title: 'Ledgers',

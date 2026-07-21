@@ -9,8 +9,10 @@
    ========================================================================= */
 
 import {
+    clearAllDirty,
     combo,
     isBareChar,
+    isDirty,
     isEditable,
     isReloadCombo,
     mayRepeat,
@@ -783,6 +785,41 @@ export function zbStore() {
         },
 
         /* ---- misc ------------------------------------------------------- */
+        /**
+         * Leave for another screen, warning first if that would discard unsaved
+         * input. The single safe exit used by the manage gear beside every
+         * master dropdown.
+         *
+         * It lives on the store rather than on one screen's controller because
+         * the gear renders on nine different workspaces. When it was a method on
+         * the Groups/Ledgers controller alone, the gear on Cost Centres, Units,
+         * Godowns and the stock masters silently fell through to a raw
+         * `location.href` — navigating away with no warning at all, which is the
+         * exact failure the gear was supposed to be careful about.
+         *
+         * Screens that can hold unsaved input register a probe (registerDirty);
+         * screens that cannot simply never report dirty, and this navigates
+         * straight away.
+         */
+        leaveTo(href) {
+            if (!href) return;
+            if (!isDirty()) {
+                window.location.href = href;
+
+                return;
+            }
+            this.askAccept({
+                title: 'Leave this screen?',
+                body: 'There is unsaved input on this screen. Leaving will discard it.',
+                onYes: () => {
+                    // Disarm first, or beforeunload fires a second, native
+                    // prompt on top of the one just answered.
+                    clearAllDirty();
+                    window.location.href = href;
+                },
+            });
+        },
+
         emit(name, detail) {
             window.dispatchEvent(new CustomEvent(name, { detail }));
         },
