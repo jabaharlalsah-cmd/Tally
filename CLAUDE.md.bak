@@ -1,0 +1,16 @@
+# tally
+
+Project notes for Claude Code.
+
+---
+
+## Standing rules for this project
+
+These apply to every task in this project, without being asked.
+
+- Follow the `project-folder-sync` skill on every task: **QA/QC first** — the new work must actually run, and nothing that already worked may be broken. Only after that check passes, commit.
+- Commit on a **work branch** only. Never commit to the live/deploy branch, never `git push`, never deploy. Merging to live is a manual step the owner does.
+- Follow the `dibitech-ui-coding-standards` skill for all UI and code style.
+- Deliver complete, ready-to-use files — never snippets or partial diffs.
+- When a database table or schema changes, provide a ready-to-run phpMyAdmin SQL script alongside the migration.
+- Explain everything in simple, plain language.

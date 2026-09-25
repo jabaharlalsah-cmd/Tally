@@ -5,8 +5,8 @@
 #   - the rest self-provision and run bare.
 # (Running the tenant-context ones bare fails with "This database has no companies table" —
 #  database.default is the CENTRAL connection, which has no companies table.)
-export PATH="/c/laragon/bin/php/php-8.3.30-Win32-vs16-x64:/c/laragon/bin/mysql/mysql-8.4.3-winx64/bin:$PATH"
-cd /c/laragon/www/tally || exit 1
+export PATH="/d/laragon/bin/php/php-8.3.30-Win32-vs16-x64:/d/laragon/bin/mysql/mysql-8.4.3-winx64/bin:$PATH"
+cd /d/laragon/www/tally || exit 1
 
 OUT="$1"
 SLUG=regr
